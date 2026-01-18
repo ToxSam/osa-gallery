@@ -13,6 +13,7 @@ import { AvatarViewer } from './AvatarViewer';
 import { AvatarHeader } from './AvatarHeader';
 import { useI18n } from '@/lib/i18n';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
+import { useRouter, usePathname } from 'next/navigation';
 
 // Utility function to format camelCase or PascalCase names with spaces
 const formatName = (name: string): string => {
@@ -22,6 +23,10 @@ const formatName = (name: string): string => {
 
 export const AvatarGallery: React.FC = () => {
   const { t } = useI18n();
+  const router = useRouter();
+  const pathname = usePathname();
+  const currentLocale = pathname?.split('/')[1] || 'en'; // Extract locale from path
+  
   const [avatars, setAvatars] = useState<Avatar[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,6 +45,22 @@ export const AvatarGallery: React.FC = () => {
     selectedFormat,
     handleFormatChange
   } = useAvatarSelection();
+
+  // Helper function to create URL-friendly slug from avatar name
+  const createSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  // Handler to update URL and select avatar (without page navigation)
+  const handleAvatarClick = (avatar: Avatar) => {
+    setCurrentAvatar(avatar);
+    const slug = createSlug(avatar.name);
+    // Update URL without navigation using shallow routing
+    window.history.pushState(null, '', `${pathname}?avatar=${slug}`);
+  };
 
   // Featured avatar names (handpicked)
   const featuredAvatarNames = [
@@ -90,10 +111,27 @@ export const AvatarGallery: React.FC = () => {
         setProjects(apiData.projects || []);
         
         if (apiData.avatars && apiData.avatars.length > 0) {
-          // Select a random avatar instead of the first one
-          const randomIndex = Math.floor(Math.random() * apiData.avatars.length);
-          setCurrentAvatar(apiData.avatars[randomIndex]);
-          console.log(`Selected random avatar: ${apiData.avatars[randomIndex].name}`);
+          // Check if there's an avatar in the URL
+          const params = new URLSearchParams(window.location.search);
+          const avatarSlug = params.get('avatar');
+          
+          if (avatarSlug) {
+            // Find and load avatar from URL
+            const avatar = apiData.avatars.find(a => createSlug(a.name) === avatarSlug);
+            if (avatar) {
+              setCurrentAvatar(avatar);
+              console.log(`Loaded avatar from URL: ${avatar.name}`);
+            } else {
+              // Avatar not found, select random one
+              const randomIndex = Math.floor(Math.random() * apiData.avatars.length);
+              setCurrentAvatar(apiData.avatars[randomIndex]);
+            }
+          } else {
+            // No avatar in URL, select a random one
+            const randomIndex = Math.floor(Math.random() * apiData.avatars.length);
+            setCurrentAvatar(apiData.avatars[randomIndex]);
+            console.log(`Selected random avatar: ${apiData.avatars[randomIndex].name}`);
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch avatars');
@@ -346,7 +384,7 @@ export const AvatarGallery: React.FC = () => {
                   style={{ gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}
                 >
                   {filteredAvatars.map(avatar => (
-                    <button 
+                    <button
                       key={avatar.id}
                       className={`
                         flex flex-col rounded-lg overflow-hidden cursor-pointer transition-all
@@ -355,7 +393,7 @@ export const AvatarGallery: React.FC = () => {
                           'hover:ring-2 hover:ring-gray-400 dark:hover:ring-gray-600'
                         }
                       `}
-                      onClick={() => setCurrentAvatar(avatar)}
+                      onClick={() => handleAvatarClick(avatar)}
                     >
                       {/* Thumbnail */}
                       <div className="aspect-square w-full bg-gray-100 dark:bg-gray-800">

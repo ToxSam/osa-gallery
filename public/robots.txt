@@ -1,0 +1,31 @@
+# Robots.txt for OpenSourceAvatars.com
+# Optimized for SEO - allowing all major search engines
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://opensourceavatars.com/sitemap.xml
+Sitemap: https://opensourceavatars.com/sitemap-avatars.xml
+
+# Block admin and API routes
+Disallow: /admin
+Disallow: /api/
+
+# Block upload directories
+Disallow: /uploads/
+
+# Allow crawling of avatar pages
+Allow: /en/avatars/
+Allow: /ja/avatars/
+Allow: /en/gallery
+Allow: /ja/gallery
+Allow: /en/resources
+Allow: /ja/resources
+Allow: /en/about
+Allow: /ja/about
+Allow: /en/vrminspector
+Allow: /ja/vrminspector
+
+# Crawl delay (optional, can be removed if not needed)
+# Crawl-delay: 1
