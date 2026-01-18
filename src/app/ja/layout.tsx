@@ -12,8 +12,29 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'オープンソースアバター',
-  description: 'オープンソースのVRMとGLBアバターコレクション'
+  title: 'Open Source Avatars - VR・ゲーム・メタバース向け無料3DアバターVRM',
+  description: 'VR、ゲーム、VTuber、メタバース向けの300種類以上の無料・高品質3D VRMアバターをダウンロード。CC0ライセンス - クレジット表記不要で自由に使用可能。',
+  openGraph: {
+    title: 'Open Source Avatars - 無料3D VRMアバター',
+    description: 'VR、ゲーム、VTuber、メタバース向けの300種類以上の無料・高品質3D VRMアバターをダウンロード。CC0ライセンス。',
+    url: 'https://opensourceavatars.com/ja',
+    type: 'website',
+    locale: 'ja_JP',
+    images: [
+      {
+        url: 'https://opensourceavatars.com/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Open Source Avatars - 無料3D VRMアバター',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Open Source Avatars - 無料3D VRMアバター',
+    description: '300種類以上の無料・高品質3D VRMアバターをダウンロード。CC0ライセンス。',
+    images: ['https://opensourceavatars.com/opengraph-image.png'],
+  },
 };
 
 const inter = Inter({

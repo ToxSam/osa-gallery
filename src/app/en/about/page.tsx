@@ -7,9 +7,44 @@ import { Twitter } from "lucide-react";
 import { AvatarHeader } from "@/components/avatar/AvatarHeader";
 import { Footer } from "@/components/Footer";
 import { useI18n } from '@/lib/i18n';
+import Head from 'next/head';
+import { useEffect } from 'react';
 
 export default function AboutPage() {
   const { t } = useI18n();
+
+  useEffect(() => {
+    // Update meta tags for About page
+    document.title = 'About - Open Source Avatars Project | Free VRM Avatars';
+    
+    const updateMetaTag = (property: string, content: string) => {
+      let meta = document.querySelector(`meta[property="${property}"]`) || 
+                 document.querySelector(`meta[name="${property}"]`);
+      if (!meta) {
+        meta = document.createElement('meta');
+        if (property.startsWith('og:') || property.startsWith('twitter:')) {
+          meta.setAttribute('property', property);
+        } else {
+          meta.setAttribute('name', property);
+        }
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', content);
+    };
+
+    const description = 'Learn about the Open Source Avatars project by ToxSam. A collection of 300+ CC0 licensed VRM avatars, free for any use including commercial projects.';
+    const ogImageUrl = '/api/og?type=default&title=About Open Source Avatars&description=Free CC0 VRM Avatar Collection by ToxSam';
+    
+    updateMetaTag('description', description);
+    updateMetaTag('og:title', 'About - Open Source Avatars Project');
+    updateMetaTag('og:description', description);
+    updateMetaTag('og:image', `https://opensourceavatars.com${ogImageUrl}`);
+    updateMetaTag('og:url', window.location.href);
+    updateMetaTag('twitter:card', 'summary_large_image');
+    updateMetaTag('twitter:title', 'About - Open Source Avatars Project');
+    updateMetaTag('twitter:description', description);
+    updateMetaTag('twitter:image', `https://opensourceavatars.com${ogImageUrl}`);
+  }, []);
 
   // Get the lists as arrays with returnObjects option
   const updatesList = t('about.updates.list', { returnObjects: true });

@@ -12,8 +12,28 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Open Source Avatars',
-  description: 'A collection of open source VRM and GLB avatars'
+  title: 'Open Source Avatars - Free 3D VRM Avatars for VR, Gaming & Metaverse',
+  description: 'Download 300+ free, high-quality 3D VRM avatars for VR, gaming, VTubing, and metaverse. CC0 licensed open-source avatars for any project. No attribution required.',
+  openGraph: {
+    title: 'Open Source Avatars - Free 3D VRM Avatars',
+    description: 'Download 300+ free, high-quality 3D VRM avatars for VR, gaming, VTubing, and metaverse. CC0 licensed.',
+    url: 'https://opensourceavatars.com/en',
+    type: 'website',
+    images: [
+      {
+        url: 'https://opensourceavatars.com/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Open Source Avatars - Free 3D VRM Avatars',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Open Source Avatars - Free 3D VRM Avatars',
+    description: 'Download 300+ free, high-quality 3D VRM avatars. CC0 licensed.',
+    images: ['https://opensourceavatars.com/opengraph-image.png'],
+  },
 };
 
 const inter = Inter({

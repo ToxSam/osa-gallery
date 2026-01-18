@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Github, Database, ExternalLink } from "lucide-react";
@@ -10,6 +10,39 @@ import { useI18n } from "@/lib/i18n";
 
 export default function ResourcesPage() {
   const { t, isLoading } = useI18n();
+  
+  useEffect(() => {
+    // Update meta tags for Resources page
+    document.title = 'Resources & Downloads - Open Source Avatars | VRM Avatar Collection';
+    
+    const updateMetaTag = (property: string, content: string) => {
+      let meta = document.querySelector(`meta[property="${property}"]`) || 
+                 document.querySelector(`meta[name="${property}"]`);
+      if (!meta) {
+        meta = document.createElement('meta');
+        if (property.startsWith('og:') || property.startsWith('twitter:')) {
+          meta.setAttribute('property', property);
+        } else {
+          meta.setAttribute('name', property);
+        }
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', content);
+    };
+
+    const description = 'Access all Open Source Avatars resources: batch downloads via ArDrive, GitHub repositories, VRM format documentation, and project philosophy. All avatars CC0 licensed.';
+    const ogImageUrl = '/api/og?type=default&title=Resources & Downloads&description=VRM Avatar Collection, Documentation & Philosophy';
+    
+    updateMetaTag('description', description);
+    updateMetaTag('og:title', 'Resources & Downloads - Open Source Avatars');
+    updateMetaTag('og:description', description);
+    updateMetaTag('og:image', `https://opensourceavatars.com${ogImageUrl}`);
+    updateMetaTag('og:url', window.location.href);
+    updateMetaTag('twitter:card', 'summary_large_image');
+    updateMetaTag('twitter:title', 'Resources & Downloads - Open Source Avatars');
+    updateMetaTag('twitter:description', description);
+    updateMetaTag('twitter:image', `https://opensourceavatars.com${ogImageUrl}`);
+  }, []);
   
   // Get the goals list with proper type casting
   const goals = t('resources.philosophy.goals.list', { returnObjects: true }) as any;
@@ -166,4 +199,4 @@ export default function ResourcesPage() {
       <Footer />
     </div>
   );
-} 
+}

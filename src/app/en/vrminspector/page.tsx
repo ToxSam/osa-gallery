@@ -5,7 +5,7 @@ import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import { AvatarHeader } from '@/components/avatar/AvatarHeader';
 import { Info, Smile, Image, Computer } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 
 // Dynamically import the VRMInspector component with no SSR
 const VRMInspector = dynamic(
@@ -16,6 +16,39 @@ const VRMInspector = dynamic(
 export default function VRMInspectorPage() {
   const { t } = useI18n();
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    // Update meta tags for VRM Inspector page
+    document.title = 'VRM Inspector - Analyze & Preview VRM Avatars | Open Source Avatars';
+    
+    const updateMetaTag = (property: string, content: string) => {
+      let meta = document.querySelector(`meta[property="${property}"]`) || 
+                 document.querySelector(`meta[name="${property}"]`);
+      if (!meta) {
+        meta = document.createElement('meta');
+        if (property.startsWith('og:') || property.startsWith('twitter:')) {
+          meta.setAttribute('property', property);
+        } else {
+          meta.setAttribute('name', property);
+        }
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', content);
+    };
+
+    const description = 'Free online VRM avatar inspector and analyzer tool. View metadata, test expressions, inspect materials, analyze textures, and validate VRM files. Perfect for VTubers and VR developers.';
+    const ogImageUrl = '/api/og?type=default&title=VRM Inspector Tool&description=Analyze, Preview & Inspect VRM Avatars Online';
+    
+    updateMetaTag('description', description);
+    updateMetaTag('og:title', 'VRM Inspector - Analyze & Preview VRM Avatars');
+    updateMetaTag('og:description', description);
+    updateMetaTag('og:image', `https://opensourceavatars.com${ogImageUrl}`);
+    updateMetaTag('og:url', window.location.href);
+    updateMetaTag('twitter:card', 'summary_large_image');
+    updateMetaTag('twitter:title', 'VRM Inspector - Analyze & Preview VRM Avatars');
+    updateMetaTag('twitter:description', description);
+    updateMetaTag('twitter:image', `https://opensourceavatars.com${ogImageUrl}`);
+  }, []);
 
   if (isMobile) {
     return (
@@ -107,4 +140,4 @@ export default function VRMInspectorPage() {
       <VRMInspector />
     </Suspense>
   );
-} 
+}
