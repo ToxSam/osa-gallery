@@ -87,6 +87,7 @@ export async function GET(req: NextRequest) {
         id: avatar.id,
         name: avatar.name,
         project: project?.name || 'Unknown Project',
+        projectId: avatar.projectId, // Include projectId for filtering
         description: avatar.description || '',
         createdAt: avatar.createdAt,
         thumbnailUrl: thumbnailUrl,
@@ -100,11 +101,27 @@ export async function GET(req: NextRequest) {
       };
     });
 
+    // Prepare projects data for frontend
+    const publicProjects = projects
+      .filter((project: GithubProject) => project.isPublic)
+      .map((project: GithubProject) => ({
+        id: project.id,
+        name: project.name,
+        description: project.description,
+        isPublic: project.isPublic,
+        createdAt: project.createdAt,
+        updatedAt: project.updatedAt,
+        avatarCount: transformedAvatars.filter((a: any) => a.projectId === project.id).length
+      }))
+      .sort((a: any, b: any) => a.name.localeCompare(b.name)); // Sort by name (R1, R2, R3)
+
     return NextResponse.json({ 
       avatars: transformedAvatars,
+      projects: publicProjects, // Include projects in response
       _debug: {
         timestamp: new Date().toISOString(),
         count: transformedAvatars.length,
+        projectCount: publicProjects.length,
         storage: 'github+arweave' // Indicate that we're using GitHub + Arweave
       }
     });

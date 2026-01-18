@@ -33,8 +33,8 @@ export const AvatarCard: React.FC<AvatarCardProps> = ({
 
   return (
     <Card
-      className={`cursor-pointer hover:border-gray-400 transition-colors
-        ${isActive ? 'border-gray-900' : ''}`}
+      className={`cursor-pointer hover:border-gray-900 transition-all
+        ${isActive ? 'border-black' : 'border-gray-200'}`}
       onClick={() => onClick(avatar)}
     >
       <CardContent className="flex items-center p-2 sm:p-3 gap-2 sm:gap-3">
@@ -52,7 +52,7 @@ export const AvatarCard: React.FC<AvatarCardProps> = ({
           />
         </div>
         <div className="min-w-0">
-          <h3 className="font-medium text-xs sm:text-sm text-gray-900 truncate">
+          <h3 className="font-semibold text-xs sm:text-sm text-gray-900 truncate">
             {avatar.name}
           </h3>
           <p className="text-xs text-gray-500">{avatar.project}</p>

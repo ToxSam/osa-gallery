@@ -19,7 +19,7 @@ export default function VRMInspectorPage() {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-cream">
         {/* Header - Higher z-index to stay on top */}
         <div className="relative z-50">
           <AvatarHeader 
@@ -31,7 +31,7 @@ export default function VRMInspectorPage() {
         </div>
 
         {/* Desktop Only Notice - Lower z-index */}
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-white bg-opacity-90 backdrop-blur-sm">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-cream bg-opacity-90 backdrop-blur-sm">
           <div className="max-w-md p-8 text-center">
             <Computer className="w-16 h-16 mx-auto mb-6 text-blue-600" />
             <h2 className="text-2xl font-bold mb-4">

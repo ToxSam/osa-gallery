@@ -28,7 +28,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivEl
     return (
       <div
         className={cn(
-          "bg-white p-6 rounded-lg shadow-lg w-full max-w-lg",
+          "bg-cream dark:bg-gray-900 p-6 rounded-lg shadow-lg w-full max-w-lg",
           className
         )}
         ref={ref}

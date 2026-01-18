@@ -68,7 +68,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ children, className }) =
       {isOpen && (
         <div 
           className={cn(
-            "fixed inset-0 top-[57px] z-50 bg-white overflow-y-auto animate-in slide-in-from-right-10",
+            "fixed inset-0 top-[57px] z-50 bg-cream overflow-y-auto animate-in slide-in-from-right-10",
             className
           )}
         >

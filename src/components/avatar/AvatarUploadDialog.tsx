@@ -32,7 +32,7 @@ export default function AvatarUploadDialog({ open, onClose, onSuccess }: AvatarU
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50" />
         <Dialog.Content 
-  className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-2xl bg-white rounded-lg shadow-lg focus:outline-none overflow-y-auto max-h-[90vh]"
+  className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-2xl bg-cream rounded-lg shadow-lg focus:outline-none overflow-y-auto max-h-[90vh]"
   aria-describedby="dialog-description"
 >
   <div className="p-6">

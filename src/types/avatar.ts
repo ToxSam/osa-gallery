@@ -26,6 +26,7 @@ export interface Avatar {
   id: string;
   name: string;
   project: string;
+  projectId: string; // Added project ID for filtering
   description: string;
   createdAt: string;
   thumbnailUrl: string | null;
@@ -38,9 +39,20 @@ export interface Avatar {
   metadata: Record<string, any>;
 }
 
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  isPublic: boolean;
+  createdAt: string;
+  updatedAt: string;
+  avatarCount?: number; // Will be computed from avatars
+}
+
 export interface ApiResponse {
   avatars: Avatar[];
-  pagination: {
+  projects?: Project[]; // Added projects to API response
+  pagination?: {
     total: number;
     limit: number;
     offset: number;
@@ -72,6 +84,9 @@ export interface AvatarViewerProps {
   metadata?: Record<string, any> | null;
   avatars?: Avatar[];
   onAvatarSelect?: (avatar: Avatar) => void;
+  projects?: Project[]; // Added projects
+  selectedProjectId?: string; // Added selected project ID
+  onProjectSelect?: (projectId: string) => void; // Added project select handler
 }
 
 export interface AvatarHeaderProps {

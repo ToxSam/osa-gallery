@@ -23,7 +23,7 @@ const Switch = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTML
         />
         <span
           className={cn(
-            "block w-10 h-6 rounded-full bg-gray-200 after:absolute after:top-1 after:left-1 after:bg-white after:border after:border-gray-300 after:rounded-full after:h-4 after:w-4 after:transition-all",
+            "block w-10 h-6 rounded-full bg-gray-200 after:absolute after:top-1 after:left-1 after:bg-cream after:border after:border-gray-300 after:rounded-full after:h-4 after:w-4 after:transition-all",
             checked ? "bg-primar y" : "bg-gray-300",
             checked ? "after:translate-x-4" : "after:translate-x-0",
             className

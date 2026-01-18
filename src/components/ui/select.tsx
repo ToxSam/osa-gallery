@@ -6,7 +6,7 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttrib
   ({ className, children, ...props }, ref) => {
     return (
       <button
-        className={cn("px-4 py-2 border rounded-md bg-white text-gray-700", className)}
+        className={cn("px-4 py-2 border rounded-md bg-cream dark:bg-gray-900 text-gray-700 dark:text-gray-300", className)}
         ref={ref}
         {...props}
       >
@@ -40,7 +40,7 @@ const SelectContent = React.forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivEl
   ({ className, children, ...props }, ref) => {
     return (
       <div
-        className={cn("bg-white shadow-lg rounded-md w-full", className)}
+        className={cn("bg-cream dark:bg-gray-900 shadow-lg rounded-md w-full", className)}
         ref={ref}
         {...props}
       >

@@ -1,68 +1,70 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Updated to warm neutral palette */
+    --background: 36 29% 91%; /* #EBE7E0 */
+    --foreground: 0 0% 15%; /* #262626 - gray-800 */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 15%;
  
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 15%;
  
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 0 0% 15%; /* gray-900 for light mode */
+    --primary-foreground: 0 0% 98%;
  
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 15%;
  
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
  
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 15%;
  
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 0 0% 83%; /* gray-300 */
+    --input: 0 0% 83%;
+    --ring: 0 0% 15%;
  
     --radius: 0.5rem;
   }
  
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Updated to warm dark palette */
+    --background: 30 9% 8%; /* #141311 */
+    --foreground: 0 0% 90%; /* #E5E5E5 - gray-200 */
  
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 90%;
  
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 90%;
  
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 0 0% 90%; /* gray-100 for dark mode */
+    --primary-foreground: 0 0% 15%;
  
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 90%;
  
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 45%;
  
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 90%;
  
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 90%;
  
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 0 0% 25%; /* gray-700 */
+    --input: 0 0% 25%;
+    --ring: 0 0% 90%;
   }
 }
  
@@ -70,6 +72,11 @@
   * {
     @apply border-border;
   }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
@@ -78,18 +85,28 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Improved heading styles */
+  /* Enhanced heading styles */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-medium tracking-tight;
+    @apply font-bold tracking-tight;
     font-feature-settings: "salt" 1, "ss01" 1;
+    color: hsl(var(--foreground));
   }
 
   /* Large text optimization */
   @media screen and (min-width: 768px) {
     h1 {
       font-feature-settings: "salt" 1, "ss01" 1, "kern" 1;
+      letter-spacing: -0.03em;
+    }
+    
+    h2 {
       letter-spacing: -0.02em;
     }
+  }
+  
+  /* Enhanced paragraph spacing */
+  p {
+    line-height: 1.6;
   }
 }
 
@@ -127,10 +144,10 @@ input:-webkit-autofill:focus {
   transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Selection styles */
+/* Selection styles - Inverted */
 ::selection {
-  background: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
 }
 
 /* Viewer container responsive styles */
@@ -202,4 +219,124 @@ input:-webkit-autofill:focus {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+}
+
+/* ================================
+   CUSTOM UTILITY CLASSES
+   ================================ */
+
+@layer components {
+  /* Container */
+  .container-custom {
+    @apply w-full max-w-7xl mx-auto px-6 md:px-8 lg:px-12;
+  }
+
+  /* Section Padding */
+  .section-padding {
+    @apply py-20 md:py-32;
+  }
+
+  /* Typography Classes */
+  .text-display {
+    font-size: clamp(3rem, 10vw, 8rem);
+    @apply font-bold tracking-tight leading-none;
+  }
+
+  .text-headline {
+    font-size: clamp(2rem, 5vw, 4rem);
+    @apply font-bold tracking-tight leading-tight;
+  }
+
+  .text-title {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    @apply font-bold tracking-tight leading-snug;
+  }
+
+  .text-body-lg {
+    @apply text-xl leading-relaxed;
+  }
+
+  .text-body {
+    @apply text-base leading-relaxed;
+  }
+
+  .text-small {
+    @apply text-sm leading-normal;
+  }
+
+  .text-caption {
+    @apply text-xs uppercase tracking-widest leading-tight;
+  }
+
+  /* Button Styles */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 font-medium rounded-lg;
+    @apply bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900;
+    @apply hover:bg-gray-700 dark:hover:bg-gray-300;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:ring-offset-2;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center px-6 py-3 font-medium rounded-lg;
+    @apply border-2 border-gray-900 dark:border-gray-100;
+    @apply text-gray-900 dark:text-gray-100;
+    @apply hover:bg-gray-900 dark:hover:bg-gray-100;
+    @apply hover:text-white dark:hover:text-gray-900;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white focus:ring-offset-2;
+  }
+
+  /* Link Hover Effect */
+  .link-hover {
+    @apply relative inline-block;
+  }
+
+  .link-hover::after {
+    content: '';
+    @apply absolute left-0 bottom-0 w-0 h-0.5 bg-current transition-all duration-300;
+  }
+
+  .link-hover:hover::after {
+    @apply w-full;
+  }
+}
+
+@layer utilities {
+  /* Animation Delays */
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  /* Text Balance for Better Typography */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Backdrop Blur Utilities */
+  .backdrop-blur-light {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .backdrop-blur-strong {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
 }

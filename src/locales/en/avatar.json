@@ -15,8 +15,10 @@
     "everyone": "Everyone"
   },
   "controls": {
+    "info": "Avatar Info",
     "wireframe": "Wireframe",
     "showBones": "Show Bones",
+    "ruler": "Height Ruler",
     "download": "Download",
     "select": "Select",
     "deselectAll": "Deselect All",
@@ -24,6 +26,7 @@
     "search": "Search avatars...",
     "browse": "Browse Avatars"
   },
+  "height": "Height: {{height}}m",
   "formats": {
     "vrm": "VRM",
     "fbx": "FBX",

@@ -1518,8 +1518,8 @@ const VRMInspector = React.memo(() => {
               <div className="h-6" />
               
               <div className="px-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('vrmviewer.title')}</h2>
-                <p className="text-base text-gray-600 mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">{t('vrmviewer.title')}</h2>
+                <p className="text-base text-gray-700 dark:text-gray-300 mb-6">
                   {t('vrmviewer.description')}
                 </p>
               </div>
@@ -1527,47 +1527,47 @@ const VRMInspector = React.memo(() => {
               <div className="px-6 mt-12">
                 <div className="flex items-center gap-2 mb-6">
                   <span className="text-xl">✨</span>
-                  <h3 className="text-sm font-semibold text-gray-900">{t('vrmviewer.features.title')}</h3>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('vrmviewer.features.title')}</h3>
                 </div>
 
                 <div className="grid gap-6">
                   <div className="flex items-start gap-4">
-                    <Info className="h-5 w-5 flex-none mt-0.5 text-blue-600" />
+                    <Info className="h-5 w-5 flex-none mt-0.5 text-gray-900 dark:text-gray-100" />
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">{t('vrmviewer.features.modelInfo.title')}</h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">{t('vrmviewer.features.modelInfo.title')}</h4>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                         {t('vrmviewer.features.modelInfo.description')}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <Image className="h-5 w-5 flex-none mt-0.5 text-purple-600" />
+                    <Image className="h-5 w-5 flex-none mt-0.5 text-gray-900 dark:text-gray-100" />
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">{t('vrmviewer.features.textureAnalysis.title')}</h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">{t('vrmviewer.features.textureAnalysis.title')}</h4>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                         {t('vrmviewer.features.textureAnalysis.description')}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <Layers className="h-5 w-5 flex-none mt-0.5 text-green-600" />
+                    <Layers className="h-5 w-5 flex-none mt-0.5 text-gray-900 dark:text-gray-100" />
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">{t('vrmviewer.features.expressionControl.title')}</h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">{t('vrmviewer.features.expressionControl.title')}</h4>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                         {t('vrmviewer.features.expressionControl.description')}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className="flex-none p-2.5 rounded-lg bg-amber-50 text-amber-600">
+                    <div className="flex-none p-2.5 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                       <Code className="h-5 w-5" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">{t('vrmviewer.features.technicalDetails.title')}</h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">{t('vrmviewer.features.technicalDetails.title')}</h4>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                         {t('vrmviewer.features.technicalDetails.description')}
                       </p>
                     </div>
@@ -1578,40 +1578,40 @@ const VRMInspector = React.memo(() => {
               <div className="px-6 py-8">
                 <div className="flex items-center gap-2 mb-6">
                   <span className="text-xl">🎮</span>
-                  <h3 className="text-sm font-semibold text-gray-900">{t('vrmviewer.tips.title')}</h3>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('vrmviewer.tips.title')}</h3>
                 </div>
                 <div className="grid gap-6">
                   <div className="flex items-start gap-4">
-                    <div className="flex-none w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 text-xl">
+                    <div className="flex-none w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-xl">
                       👆
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">{t('vrmviewer.tips.controls.title')}</h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">{t('vrmviewer.tips.controls.title')}</h4>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                         {t('vrmviewer.tips.controls.description')}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className="flex-none w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 text-xl">
+                    <div className="flex-none w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-xl">
                       🔍
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">{t('vrmviewer.tips.wireframe.title')}</h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">{t('vrmviewer.tips.wireframe.title')}</h4>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                         {t('vrmviewer.tips.wireframe.description')}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className="flex-none w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 text-xl">
+                    <div className="flex-none w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-xl">
                       🎭
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">{t('vrmviewer.tips.expressions.title')}</h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">{t('vrmviewer.tips.expressions.title')}</h4>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                         {t('vrmviewer.tips.expressions.description')}
                       </p>
                     </div>
@@ -1620,7 +1620,7 @@ const VRMInspector = React.memo(() => {
               </div>
 
               <div className="px-6 py-6">
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {t('vrmviewer.dropzone.description')}
                 </p>
               </div>
@@ -1631,51 +1631,51 @@ const VRMInspector = React.memo(() => {
         return vrmMetadata ? (
           <div className="p-4 space-y-6">
             {/* Basic Info Section */}
-            <div className="bg-white rounded-lg shadow-sm">
+            <div className="bg-cream dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors">
               <div className="p-4">
-                <h3 className="text-sm font-medium flex items-center gap-2 mb-4">
-                  <FileIcon className="h-4 w-4 text-blue-500" />
+                <h3 className="text-xs font-semibold uppercase tracking-wider flex items-center gap-2 mb-4 text-gray-600 dark:text-gray-400">
+                  <FileIcon className="h-4 w-4" />
                   {t('vrmviewer.metadata.basicInfo')}
                 </h3>
                 <div className="grid gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-24 text-xs text-gray-500">{t('vrmviewer.metadata.title')}</div>
-                    <div className="flex-1 text-sm font-medium">{vrmMetadata.title || 'undefined'}</div>
+                    <div className="w-24 text-xs text-gray-500 dark:text-gray-400">{t('vrmviewer.metadata.title')}</div>
+                    <div className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100">{vrmMetadata.title || 'undefined'}</div>
                 </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-24 text-xs text-gray-500">{t('vrmviewer.metadata.author')}</div>
-                    <div className="flex-1 text-sm font-medium break-all">{vrmMetadata.author || 'undefined'}</div>
+                    <div className="w-24 text-xs text-gray-500 dark:text-gray-400">{t('vrmviewer.metadata.author')}</div>
+                    <div className="flex-1 text-sm font-medium break-all text-gray-900 dark:text-gray-100">{vrmMetadata.author || 'undefined'}</div>
                 </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-24 text-xs text-gray-500">{t('vrmviewer.metadata.version')}</div>
-                    <div className="flex-1 text-sm font-medium">
+                    <div className="w-24 text-xs text-gray-500 dark:text-gray-400">{t('vrmviewer.metadata.version')}</div>
+                    <div className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100">
                       {vrmMetadata?.version && vrmMetadata.version !== 'Unknown' ? `v${vrmMetadata.version}` : 'undefined'}
                 </div>
                 </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-24 text-xs text-gray-500">{t('vrmviewer.metadata.contactInfo')}</div>
-                    <div className="flex-1 text-sm">{vrmMetadata.contactInformation || 'undefined'}</div>
+                    <div className="w-24 text-xs text-gray-500 dark:text-gray-400">{t('vrmviewer.metadata.contactInfo')}</div>
+                    <div className="flex-1 text-sm text-gray-900 dark:text-gray-100">{vrmMetadata.contactInformation || 'undefined'}</div>
                 </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-24 text-xs text-gray-500">{t('vrmviewer.metadata.references')}</div>
-                    <div className="flex-1 text-sm">{vrmMetadata.reference || 'undefined'}</div>
+                    <div className="w-24 text-xs text-gray-500 dark:text-gray-400">{t('vrmviewer.metadata.references')}</div>
+                    <div className="flex-1 text-sm text-gray-900 dark:text-gray-100">{vrmMetadata.reference || 'undefined'}</div>
                 </div>
                   </div>
               </div>
             </div>
 
             {/* License Section */}
-            <div className="bg-white rounded-lg shadow-sm">
+            <div className="bg-cream dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors">
               <div className="p-4">
-                <h3 className="text-sm font-medium flex items-center gap-2 mb-4">
-                  <FileText className="h-4 w-4 text-green-500" />
+                <h3 className="text-xs font-semibold uppercase tracking-wider flex items-center gap-2 mb-4 text-gray-600 dark:text-gray-400">
+                  <FileText className="h-4 w-4" />
                   {t('vrmviewer.license.title')}
                 </h3>
                 <div className="space-y-4">
                   {/* License Type */}
                   <div>
-                    <div className="text-xs text-gray-500 mb-1.5">{t('vrmviewer.license.type')}</div>
-                    <div className="inline-flex px-2.5 py-1 rounded-full text-sm font-medium bg-green-50 text-green-700">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t('vrmviewer.license.type')}</div>
+                    <div className="inline-flex px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
                     {getLicenseTypeName(vrmMetadata.licenseType, vrmMetadata.licenseName)}
                 </div>
                   </div>
@@ -1683,45 +1683,29 @@ const VRMInspector = React.memo(() => {
                   {/* Usage Grid */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <div className="text-xs text-gray-500 mb-1.5">{t('vrmviewer.license.allowedUsers')}</div>
-                      <div className={`inline-flex px-2.5 py-1 rounded-full text-sm font-medium ${
-                        getAllowedUserName(vrmMetadata.allowedUserName) === 'Everyone' 
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-yellow-50 text-yellow-700'
-                      }`}>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t('vrmviewer.license.allowedUsers')}</div>
+                      <div className="inline-flex px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
                         {getAllowedUserName(vrmMetadata.allowedUserName)}
                   </div>
                     </div>
 
                     <div>
-                      <div className="text-xs text-gray-500 mb-1.5">{t('vrmviewer.license.commercialUse')}</div>
-                      <div className={`inline-flex px-2.5 py-1 rounded-full text-sm font-medium ${
-                        getUsageName(vrmMetadata.commercialUsageName) === 'Allow'
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-red-50 text-red-700'
-                      }`}>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t('vrmviewer.license.commercialUse')}</div>
+                      <div className="inline-flex px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
                         {getUsageName(vrmMetadata.commercialUsageName)}
                       </div>
                 </div>
                 
                     <div>
-                      <div className="text-xs text-gray-500 mb-1.5">{t('vrmviewer.license.violentUsage')}</div>
-                      <div className={`inline-flex px-2.5 py-1 rounded-full text-sm font-medium ${
-                        getUsageName(vrmMetadata.violentUsageName) === 'Allow'
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-red-50 text-red-700'
-                      }`}>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t('vrmviewer.license.violentUsage')}</div>
+                      <div className="inline-flex px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
                     {getUsageName(vrmMetadata.violentUsageName)}
                       </div>
                 </div>
                 
                     <div>
-                      <div className="text-xs text-gray-500 mb-1.5">{t('vrmviewer.license.sexualUsage')}</div>
-                      <div className={`inline-flex px-2.5 py-1 rounded-full text-sm font-medium ${
-                        getUsageName(vrmMetadata.sexualUsageName) === 'Allow'
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-red-50 text-red-700'
-                      }`}>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t('vrmviewer.license.sexualUsage')}</div>
+                      <div className="inline-flex px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
                         {getUsageName(vrmMetadata.sexualUsageName)}
                       </div>
                     </div>
@@ -1729,9 +1713,9 @@ const VRMInspector = React.memo(() => {
 
                   {/* Other Permissions Section */}
                   {vrmMetadata.otherPermissions && (
-                    <div className="mt-4 border-t pt-4">
-                      <div className="text-xs text-gray-500 mb-2">{t('vrmviewer.metadata.otherPermissions')}</div>
-                      <div className="text-sm text-gray-700 break-words bg-gray-50 p-3 rounded">
+                    <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">{t('vrmviewer.metadata.otherPermissions')}</div>
+                      <div className="text-sm text-gray-900 dark:text-gray-100 break-words bg-gray-50 dark:bg-gray-800 p-3 rounded border border-gray-300 dark:border-gray-700">
                         {vrmMetadata.otherPermissions}
                       </div>
                     </div>
@@ -1741,28 +1725,28 @@ const VRMInspector = React.memo(() => {
             </div>
 
             {/* Model Statistics Section */}
-            <div className="bg-white rounded-lg shadow-sm">
+            <div className="bg-cream dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors">
               <div className="p-4">
-                <h3 className="text-sm font-medium flex items-center gap-2 mb-4">
-                  <Layers className="h-4 w-4 text-purple-500" />
+                <h3 className="text-xs font-semibold uppercase tracking-wider flex items-center gap-2 mb-4 text-gray-600 dark:text-gray-400">
+                  <Layers className="h-4 w-4" />
                   {t('vrmviewer.statistics.title')}
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   {/* File Stats */}
                   <div className="space-y-3">
                     <div>
-                      <div className="text-xs text-gray-500 mb-1">{t('vrmviewer.statistics.fileSize')}</div>
-                      <div className="text-sm font-medium">{modelStats.fileSize}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('vrmviewer.statistics.fileSize')}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{modelStats.fileSize}</div>
                     </div>
                     <div>
-                      <div className="text-xs text-gray-500 mb-1">{t('vrmviewer.statistics.format')}</div>
-                      <div className="inline-flex px-2.5 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('vrmviewer.statistics.format')}</div>
+                      <div className="inline-flex px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
                         {vrmVersion || 'Unknown'}
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs text-gray-500 mb-1">{t('vrmviewer.statistics.height')}</div>
-                      <div className="text-sm font-medium">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('vrmviewer.statistics.height')}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {modelStats.height > 0 ? `${modelStats.height.toFixed(2)}m` : 'Unknown'}
                 </div>
               </div>
@@ -1771,32 +1755,32 @@ const VRMInspector = React.memo(() => {
                   {/* Mesh Stats */}
                   <div className="space-y-3">
             <div>
-                      <div className="text-xs text-gray-500 mb-1">{t('vrmviewer.statistics.geometry')}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('vrmviewer.statistics.geometry')}</div>
                       <div className="grid gap-1">
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">{t('vrmviewer.statistics.vertices')}</span>
-                          <span className="font-medium">{modelStats.vertices.toLocaleString()}</span>
+                          <span className="text-gray-600 dark:text-gray-400">{t('vrmviewer.statistics.vertices')}</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">{modelStats.vertices.toLocaleString()}</span>
                 </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">{t('vrmviewer.statistics.triangles')}</span>
-                          <span className="font-medium">{modelStats.triangles.toLocaleString()}</span>
+                          <span className="text-gray-600 dark:text-gray-400">{t('vrmviewer.statistics.triangles')}</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">{modelStats.triangles.toLocaleString()}</span>
                 </div>
                 </div>
                 </div>
                     <div>
-                      <div className="text-xs text-gray-500 mb-1">{t('vrmviewer.statistics.assets')}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('vrmviewer.statistics.assets')}</div>
                       <div className="grid gap-1">
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">{t('vrmviewer.statistics.materials')}</span>
-                          <span className="font-medium">{modelStats.materials}</span>
+                          <span className="text-gray-600 dark:text-gray-400">{t('vrmviewer.statistics.materials')}</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">{modelStats.materials}</span>
                 </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">{t('vrmviewer.statistics.textures')}</span>
-                          <span className="font-medium">{modelStats.textures}</span>
+                          <span className="text-gray-600 dark:text-gray-400">{t('vrmviewer.statistics.textures')}</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">{modelStats.textures}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">{t('vrmviewer.statistics.bones')}</span>
-                          <span className="font-medium">{modelStats.bones}</span>
+                          <span className="text-gray-600 dark:text-gray-400">{t('vrmviewer.statistics.bones')}</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">{modelStats.bones}</span>
                         </div>
                       </div>
                     </div>
@@ -1807,7 +1791,7 @@ const VRMInspector = React.memo(() => {
           </div>
         ) : (
           <div className="flex items-center justify-center h-48">
-            <p className="text-gray-400">{t('vrmviewer.upload.instructions')}</p>
+            <p className="text-gray-500 dark:text-gray-400">{t('vrmviewer.upload.instructions')}</p>
           </div>
         );
       case 'textures':
@@ -1825,68 +1809,43 @@ const VRMInspector = React.memo(() => {
               let fileSize = texture.fileSize || 'Unknown';
               
               return (
-                <div key={index} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                  {/* Texture Preview */}
-                  <div className="aspect-square w-full relative bg-gray-50 border-b border-gray-200">
+                <div key={index} className="bg-cream dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
+                  {/* Compact Texture Preview - Fixed height container for uniform display */}
+                  <div className="w-full h-[240px] relative bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-center p-3">
                     <TextureRenderer 
                       texture={tex} 
-                      width={400} 
-                      height={400}
+                      size={220}
                     />
                   </div>
                   
-                  {/* Texture Info */}
-                  <div className="p-4">
-                    <h3 className="font-medium text-base text-gray-900 mb-3 break-all">
+                  {/* Compact Texture Info */}
+                  <div className="p-3">
+                    <h3 className="font-medium text-sm text-gray-900 dark:text-gray-100 mb-2 truncate" title={texture.name}>
                       {texture.name}
                     </h3>
                     
-                    <div className="space-y-2 text-sm">
-                      <div className="grid grid-cols-2 gap-x-4">
-                        <span className="text-gray-500">{t('vrmviewer.texture.dimensions')}:</span>
-                        <span>{dimensions}</span>
+                    <div className="space-y-1 text-xs">
+                      <div className="grid grid-cols-[auto_1fr] gap-x-3 items-center">
+                        <span className="text-gray-500 dark:text-gray-400">{t('vrmviewer.texture.dimensions')}:</span>
+                        <span className="text-gray-900 dark:text-gray-100 text-right">{dimensions}</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-x-4">
-                        <span className="text-gray-500">{t('vrmviewer.texture.fileSize')}:</span>
-                        <span>{fileSize}</span>
+                      <div className="grid grid-cols-[auto_1fr] gap-x-3 items-center">
+                        <span className="text-gray-500 dark:text-gray-400">{t('vrmviewer.texture.fileSize')}:</span>
+                        <span className="text-gray-900 dark:text-gray-100 text-right">{fileSize}</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-x-4">
-                        <span className="text-gray-500">{t('vrmviewer.texture.format')}:</span>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          {imageFormat}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-x-4">
-                        <span className="text-gray-500">{t('vrmviewer.texture.type')}:</span>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          {texture.type}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-x-4">
-                        <span className="text-gray-500">{t('vrmviewer.texture.usage')}:</span>
-                        <span>{t('vrmviewer.texture.material')}: {texture.material}{texture.mapType && ` (${texture.mapType})`}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-x-4">
-                        <span className="text-gray-500">{t('vrmviewer.texture.filter')}:</span>
-                        <span>{filterModes}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-x-4">
-                        <span className="text-gray-500">{t('vrmviewer.texture.wrap')}:</span>
-                        <span>{wrapModes}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-x-4">
-                        <span className="text-gray-500">{t('vrmviewer.texture.mipmaps')}:</span>
-                        <span>{hasMipmaps}</span>
+                      <div className="grid grid-cols-[auto_1fr] gap-x-3 items-center">
+                        <span className="text-gray-500 dark:text-gray-400">{t('vrmviewer.texture.type')}:</span>
+                        <span className="text-gray-900 dark:text-gray-100 text-right">{texture.type}</span>
                       </div>
                     </div>
                     
-                    {/* Download Button */}
+                    {/* Icon-only Download Button */}
                     <button
                       onClick={() => downloadTextureAsImage(tex, texture.name)}
-                      className="mt-4 w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                      className="mt-3 w-full inline-flex items-center justify-center p-2 border border-gray-300 dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 bg-cream dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-900 dark:hover:border-gray-100 transition-all"
+                      title={t('vrmviewer.texture.download')}
                     >
-                      <Download className="h-4 w-4 mr-2" />
-                      {t('vrmviewer.texture.download')}
+                      <Download className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
@@ -1895,18 +1854,18 @@ const VRMInspector = React.memo(() => {
           </div>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500">{t('vrmviewer.textures.noTextures')}</p>
+            <p className="text-gray-500 dark:text-gray-400">{t('vrmviewer.textures.noTextures')}</p>
           </div>
         );
       case 'expressions':
         return expressions.length > 0 ? (
           <div className="flex flex-col overflow-y-auto">
             {/* Header with Reset Button */}
-            <div className="flex justify-between items-center p-3 sticky top-0 bg-white/95 backdrop-blur-sm border-b z-10">
-              <h3 className="text-sm font-medium text-gray-900">{t('vrmviewer.expressions.controls')}</h3>
+            <div className="flex justify-between items-center p-3 sticky top-0 bg-cream dark:bg-gray-900 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 z-10 transition-colors">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">{t('vrmviewer.expressions.controls')}</h3>
               <Button 
                 size="sm" 
-                className="h-8 bg-gray-800 hover:bg-gray-700 text-white transition-colors" 
+                className="h-8 btn-primary transition-colors" 
                 onClick={resetAllExpressions}
               >
                 {t('vrmviewer.expressions.reset')}
@@ -1924,10 +1883,10 @@ const VRMInspector = React.memo(() => {
 
                 return (
                   <div key={category} className="space-y-2">
-                    <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <h4 className="text-caption text-gray-500 dark:text-gray-400">
                       {t(`vrmviewer.expressions.categories.${category}`)}
                     </h4>
-                    <div className="grid gap-2 bg-gray-50 rounded-lg p-2">
+                    <div className="grid gap-2 bg-gray-50 dark:bg-gray-800 rounded-lg p-2 border border-gray-200 dark:border-gray-700 transition-colors">
                       {categoryItems.map((expression, index) => (
                         <div key={index} className="flex items-center gap-3 h-8 px-1">
                           {/* Icon */}
@@ -1936,7 +1895,7 @@ const VRMInspector = React.memo(() => {
                           </div>
                           
                           {/* Name */}
-                          <div className="flex-none w-24 text-xs font-medium truncate" title={expression.name}>
+                          <div className="flex-none w-24 text-xs font-medium truncate text-gray-900 dark:text-gray-100" title={expression.name}>
                             {expression.name}
                           </div>
                           
@@ -1949,13 +1908,15 @@ const VRMInspector = React.memo(() => {
                               step="0.01"
                               value={expression.value}
                               onChange={(e) => updateExpressionWeight(expression.name, parseFloat(e.target.value))}
-                              className="flex-1 h-1.5 bg-gray-200 rounded-full appearance-none cursor-pointer
+                              className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer
                                 [&::-webkit-slider-thumb]:appearance-none
                                 [&::-webkit-slider-thumb]:w-3
                                 [&::-webkit-slider-thumb]:h-3
                                 [&::-webkit-slider-thumb]:rounded-full
                                 [&::-webkit-slider-thumb]:bg-gray-900
+                                [&::-webkit-slider-thumb]:dark:bg-gray-100
                                 [&::-webkit-slider-thumb]:hover:bg-black
+                                [&::-webkit-slider-thumb]:dark:hover:bg-white
                                 [&::-webkit-slider-thumb]:border-0
                                 [&::-moz-range-thumb]:appearance-none
                                 [&::-moz-range-thumb]:border-0
@@ -1963,9 +1924,11 @@ const VRMInspector = React.memo(() => {
                                 [&::-moz-range-thumb]:h-3
                                 [&::-moz-range-thumb]:rounded-full
                                 [&::-moz-range-thumb]:bg-gray-900
-                                [&::-moz-range-thumb]:hover:bg-black"
+                                [&::-moz-range-thumb]:dark:bg-gray-100
+                                [&::-moz-range-thumb]:hover:bg-black
+                                [&::-moz-range-thumb]:dark:hover:bg-white"
                             />
-                            <span className="flex-none w-10 text-xs font-mono text-gray-500 text-right">
+                            <span className="flex-none w-10 text-xs font-mono text-gray-500 dark:text-gray-400 text-right">
                               {expression.value.toFixed(2)}
                             </span>
                           </div>
@@ -1979,16 +1942,16 @@ const VRMInspector = React.memo(() => {
           </div>
         ) : (
           <div className="p-4 text-center">
-            <p className="text-gray-500">{t('vrmviewer.expressions.noExpressions')}</p>
+            <p className="text-body text-gray-500 dark:text-gray-400">{t('vrmviewer.expressions.noExpressions')}</p>
           </div>
         );
       case 'rawMetadata':
         return (
           <div className="p-4">
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-body text-gray-500 dark:text-gray-400 mb-4">
               {t('vrmviewer.raw.description')}
             </p>
-            <pre className="bg-gray-900 p-4 rounded-lg overflow-auto text-sm font-mono text-white">
+            <pre className="bg-gray-900 dark:bg-gray-950 p-4 rounded-lg overflow-auto text-sm font-mono text-white border border-gray-700">
               {JSON.stringify({
                 metadata: vrmMetadata,
                 version: vrmVersion,
@@ -2006,28 +1969,28 @@ const VRMInspector = React.memo(() => {
       case 'about':
         return (
           <div className="p-4 space-y-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-body text-gray-500 dark:text-gray-400">
               {t('vrmviewer.upload.instructions')}
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-body text-gray-500 dark:text-gray-400">
               {t('vrmviewer.dropzone.instructions')}
             </p>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium text-base text-gray-900 mb-2">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-300 dark:border-gray-700 transition-colors">
+              <h3 className="font-medium text-base text-gray-900 dark:text-gray-100 mb-2">
                 {t('vrmviewer.controls.title')}
               </h3>
-              <ul className="text-sm text-gray-600 space-y-2">
+              <ul className="text-body text-gray-500 dark:text-gray-400 space-y-2">
                 <li>
-                  <span className="font-medium">Orbit:</span> {t('vrmviewer.controls.orbit')}
+                  <span className="font-medium text-gray-900 dark:text-gray-100">Orbit:</span> {t('vrmviewer.controls.orbit')}
                 </li>
                 <li>
-                  <span className="font-medium">Pan:</span> {t('vrmviewer.controls.pan')}
+                  <span className="font-medium text-gray-900 dark:text-gray-100">Pan:</span> {t('vrmviewer.controls.pan')}
                 </li>
                 <li>
-                  <span className="font-medium">Zoom:</span> {t('vrmviewer.controls.zoom')}
+                  <span className="font-medium text-gray-900 dark:text-gray-100">Zoom:</span> {t('vrmviewer.controls.zoom')}
                 </li>
                 <li>
-                  <span className="font-medium">Reset:</span> {t('vrmviewer.controls.reset')}
+                  <span className="font-medium text-gray-900 dark:text-gray-100">Reset:</span> {t('vrmviewer.controls.reset')}
                 </li>
               </ul>
             </div>
@@ -2039,7 +2002,7 @@ const VRMInspector = React.memo(() => {
   };
 
   return (
-    <div className="h-screen max-h-screen w-screen max-w-screen overflow-hidden bg-white flex flex-col">
+    <div className="h-screen max-h-screen w-screen max-w-screen overflow-hidden bg-cream dark:bg-cream-dark flex flex-col transition-colors">
       <div className="flex-none">
         <AvatarHeader 
           title="Open Source Avatars"
@@ -2057,17 +2020,17 @@ const VRMInspector = React.memo(() => {
         onDrop={handleDrop}
       >
         {/* 3D Viewer - Always Full Size */}
-        <div className={`absolute inset-0 bg-blue-50 transition-all ${isDragging ? 'bg-opacity-50' : ''}`}>
+        <div className={`absolute inset-0 bg-cream dark:bg-cream-dark transition-all ${isDragging ? 'bg-opacity-50' : ''}`}>
           <MemoizedVRMInspectorViewer 
             url={fileUrl} 
             onMetadataLoad={onMetadataLoad} 
           />
           {!fileUrl && (
             <div className="absolute inset-0 flex items-center justify-center bg-transparent backdrop-blur-sm">
-              <div className="text-center max-w-md">
-                <Eye className="h-16 w-16 mx-auto mb-6 text-gray-400" />
-                <h2 className="text-2xl font-bold mb-3">{t('vrmviewer.dropzone.title')}</h2>
-                <p className="text-gray-500 mb-6">
+              <div className="text-center max-w-md px-6">
+                <Eye className="h-16 w-16 mx-auto mb-6 text-gray-400 dark:text-gray-500" />
+                <h2 className="text-title mb-3 text-gray-900 dark:text-gray-100">{t('vrmviewer.dropzone.title')}</h2>
+                <p className="text-body text-gray-500 dark:text-gray-400 mb-6">
                   {t('vrmviewer.dropzone.description')}
                 </p>
                 <Button
@@ -2076,7 +2039,7 @@ const VRMInspector = React.memo(() => {
                     fileInputRef.current.click();
                   }}
                   size="lg"
-                  className="bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+                  className="btn-primary"
                 >
                   {t('vrmviewer.buttons.openFile')}
                 </Button>
@@ -2094,22 +2057,22 @@ const VRMInspector = React.memo(() => {
 
         {/* Drag & Drop Overlay - Only shown when dragging */}
         {isDragging && (
-          <div className="absolute inset-0 bg-gray-900/20 backdrop-blur-sm z-50 flex items-center justify-center">
-            <div className="bg-white/90 backdrop-blur-sm rounded-xl p-8 shadow-2xl">
-              <Upload className="h-12 w-12 mx-auto mb-4 text-gray-900" />
-              <p className="text-lg font-medium text-gray-900">{t('vrmviewer.dropzone.instructions')}</p>
+          <div className="absolute inset-0 bg-gray-900/20 dark:bg-gray-100/10 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div className="bg-cream/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-xl p-8 shadow-2xl border border-gray-300 dark:border-gray-700">
+              <Upload className="h-12 w-12 mx-auto mb-4 text-gray-900 dark:text-gray-100" />
+              <p className="text-lg font-medium text-gray-900 dark:text-gray-100">{t('vrmviewer.dropzone.instructions')}</p>
             </div>
           </div>
         )}
 
         {/* Vertical Tab Navigation */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 bg-white/80 backdrop-blur-sm border-r border-gray-200 flex flex-col items-center py-4 gap-2 z-20">
+        <div className="absolute left-0 top-0 bottom-0 w-16 bg-cream/90 dark:bg-gray-900/90 backdrop-blur-md border-r border-gray-300 dark:border-gray-700 flex flex-col items-center py-4 gap-2 z-20 transition-colors">
           <button
             onClick={() => setActiveInfoSection(activeInfoSection === 'upload' ? '' : 'upload')}
-            className={`p-3 rounded-lg transition-all ${
+            className={`p-3 rounded-lg transition-all duration-200 ${
               activeInfoSection === 'upload'
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}
             title={t('vrmviewer.tabs.about')}
           >
@@ -2117,10 +2080,10 @@ const VRMInspector = React.memo(() => {
           </button>
           <button
             onClick={() => setActiveInfoSection(activeInfoSection === 'info' ? '' : 'info')}
-            className={`p-3 rounded-lg transition-all ${
+            className={`p-3 rounded-lg transition-all duration-200 ${
               activeInfoSection === 'info'
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
             title={t('vrmviewer.tabs.information')}
             disabled={!file}
@@ -2129,10 +2092,10 @@ const VRMInspector = React.memo(() => {
           </button>
           <button
             onClick={() => setActiveInfoSection(activeInfoSection === 'textures' ? '' : 'textures')}
-            className={`p-3 rounded-lg transition-all ${
+            className={`p-3 rounded-lg transition-all duration-200 ${
               activeInfoSection === 'textures'
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
             title={t('vrmviewer.tabs.textures')}
             disabled={!file}
@@ -2141,10 +2104,10 @@ const VRMInspector = React.memo(() => {
           </button>
           <button
             onClick={() => setActiveInfoSection(activeInfoSection === 'expressions' ? '' : 'expressions')}
-            className={`p-3 rounded-lg transition-all ${
+            className={`p-3 rounded-lg transition-all duration-200 ${
               activeInfoSection === 'expressions'
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
             title={t('vrmviewer.tabs.expressions')}
             disabled={!file}
@@ -2153,10 +2116,10 @@ const VRMInspector = React.memo(() => {
           </button>
           <button
             onClick={() => setActiveInfoSection(activeInfoSection === 'rawMetadata' ? '' : 'rawMetadata')}
-            className={`p-3 rounded-lg transition-all ${
+            className={`p-3 rounded-lg transition-all duration-200 ${
               activeInfoSection === 'rawMetadata'
-                ? 'bg-gray-900 text-white'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
             title={t('vrmviewer.tabs.rawMetadata')}
             disabled={!file}
@@ -2165,20 +2128,23 @@ const VRMInspector = React.memo(() => {
           </button>
         </div>
 
-        {/* Overlay Panel - Fixed height and proper scrolling */}
+        {/* Overlay Panel - Strictly fixed width */}
         {activeInfoSection !== '' && (
           <div 
-            className={`absolute top-0 bottom-0 w-[320px] bg-white shadow-lg 
+            className={`absolute top-0 bottom-0 bg-cream dark:bg-gray-900 shadow-lg border-r border-gray-300 dark:border-gray-700
               transition-all duration-300 ease-in-out transform flex flex-col`}
             style={{
               left: '4rem',
+              width: '400px',
+              minWidth: '400px',
+              maxWidth: '400px',
               transform: activeInfoSection !== '' ? 'translateX(0)' : 'translateX(-100%)',
               height: '100%'
             }}
           >
             {/* Panel Header - Fixed */}
-            <div className="flex-none px-6 py-4 border-b border-gray-100 bg-white/95 backdrop-blur-sm">
-              <h2 className="text-sm font-semibold text-gray-900">
+            <div className="flex-none px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-cream dark:bg-gray-900 backdrop-blur-sm">
+              <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 {activeInfoSection === 'upload' && t('vrmviewer.title')}
                 {activeInfoSection === 'info' && t('vrmviewer.metadata.title')}
                 {activeInfoSection === 'textures' && t('vrmviewer.textures.title')}

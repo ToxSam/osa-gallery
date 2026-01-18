@@ -15,8 +15,10 @@
     "everyone": "制限なし"
   },
   "controls": {
+    "info": "アバター情報",
     "wireframe": "ワイヤーフレーム",
     "showBones": "ボーン表示",
+    "ruler": "身長定規",
     "download": "ダウンロード",
     "select": "選択",
     "deselectAll": "全選択解除",
@@ -24,6 +26,7 @@
     "search": "アバターを検索...",
     "browse": "アバターを選択"
   },
+  "height": "身長: {{height}}m",
   "formats": {
     "vrm": "VRM",
     "fbx": "FBX",

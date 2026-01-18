@@ -8,15 +8,28 @@
   "status": {
     "title": "Current Status",
     "badges": {
-      "beta": "Super Beta",
+      "beta": "Beta",
       "avatars": "300+ Avatars",
       "format": "VRM Format"
     },
     "description": "The platform is in its early stages and will receive regular updates. More avatars will be added as they're created, including the upcoming Grifters collection."
   },
   "updates": {
-    "title": "Recent Updates",
+    "title": "Recent Updates (January 2026)",
     "intro": "We've made significant progress on the project recently:",
+    "list": [
+      "Revamped overall web design",
+      "New animation features on the 3D viewers",
+      "Improved 3D scenarios looks and feel",
+      "Improved inspector tools, fixed ratios",
+      "Added size tool for inspector and gallery",
+      "New dark and day mode on the site",
+      "Improved search bars",
+      "Improved bone displaying look"
+    ]
+  },
+  "previousUpdates": {
+    "title": "Previous Updates (March 2025)",
     "list": [
       "Launched the VRM Inspector tool - a powerful utility for reviewing VRM file metadata and properties",
       "Added full Japanese language support across the entire platform (AI-assisted translations)",
@@ -36,7 +49,9 @@
     "title": "Future Plans",
     "list": [
       "Continue adding more open source avatars",
-      "Release the Grifters collection",
+      "Spanish translations",
+      "Upload Grifters collection",
+      "Upload Vipes collection",
       "Begin incorporating CC0 avatars from other creators",
       "Improve the 3D gallery viewer with smaller tools"
     ]

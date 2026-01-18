@@ -111,7 +111,7 @@ export function AvatarFormFields({ formData, uploadProgress, onChange }: AvatarF
           onCheckedChange={(checked) => updateField('isPublic', checked)}
           className="relative h-6 w-11 cursor-pointer rounded-full bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 data-[state=checked]:bg-gray-900"
         >
-          <Switch.Thumb className="block h-5 w-5 rounded-full bg-white transition-transform data-[state=checked]:translate-x-5" />
+          <Switch.Thumb className="block h-5 w-5 rounded-full bg-cream transition-transform data-[state=checked]:translate-x-5" />
         </Switch.Root>
         <Label htmlFor="public-switch" className="text-gray-900 font-medium">
           Make public immediately

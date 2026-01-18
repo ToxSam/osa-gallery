@@ -1,5 +1,7 @@
 import './globals.css';
 import { I18nProvider } from '@/lib/i18n';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 
 export const metadata = {
   title: 'Open Source Avatars',
@@ -12,8 +14,35 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <I18nProvider defaultLocale="en">
-      {children}
-    </I18nProvider>
+    <html 
+      lang="en" 
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Theme initialization script to prevent flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const theme = localStorage.getItem('theme');
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const shouldBeDark = theme === 'dark' || (!theme && systemPrefersDark);
+                if (shouldBeDark) {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
+      <body className={GeistSans.className}>
+        <I18nProvider defaultLocale="en">
+          {children}
+        </I18nProvider>
+      </body>
+    </html>
   );
 }

@@ -46,7 +46,7 @@ export default function AdminPage() {
 
   return (
     <div>
-      <div className="p-4 flex justify-between items-center bg-white border-b">
+      <div className="p-4 flex justify-between items-center bg-cream border-b">
         <div className="text-sm text-gray-600">
           Admin Dashboard
         </div>

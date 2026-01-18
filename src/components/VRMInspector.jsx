@@ -20,7 +20,7 @@
                             href="https://github.com/ToxSam/vrm-inspector"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-gray-700 bg-white/50 hover:bg-white/80 transition-colors"
+                            className="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-gray-700 bg-cream/50 hover:bg-cream/80 transition-colors"
                           >
                             Learn More
                           </a>
@@ -86,7 +86,7 @@
 
                   {/* Quick Tips */}
                   <div className="px-6 py-8">
-                    <div className="bg-white/50 backdrop-blur-sm border border-gray-100 rounded-xl p-6">
+                    <div className="bg-cream/50 backdrop-blur-sm border border-gray-100 rounded-xl p-6">
                       <div className="flex items-center gap-2 mb-4">
                         <span className="text-xl">💡</span>
                         <h3 className="font-medium text-gray-900">Quick Tips</h3>

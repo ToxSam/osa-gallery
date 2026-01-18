@@ -1,17 +1,16 @@
 ///src/components/avatar/AvatarGallery.tsx
 
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Download, Dice6 } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Search, Download, RefreshCw, ChevronDown, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAvatarSelection } from '@/lib/hooks/useAvatarSelection';
-import { Avatar, ViewerConfig, ApiResponse } from '@/types/avatar';
+import { Avatar, ViewerConfig, ApiResponse, Project } from '@/types/avatar';
 import { AvatarCard } from './AvatarCard';
 import { AvatarViewer } from './AvatarViewer';
 import { AvatarHeader } from './AvatarHeader';
-import { Checkbox } from "@/components/ui/checkbox";
 import { useI18n } from '@/lib/i18n';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 
@@ -24,21 +23,39 @@ const formatName = (name: string): string => {
 export const AvatarGallery: React.FC = () => {
   const { t } = useI18n();
   const [avatars, setAvatars] = useState<Avatar[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedProjectIds, setSelectedProjectIds] = useState<Set<string>>(new Set());
   const [currentAvatar, setCurrentAvatar] = useState<Avatar | null>(null);
   const [vrmMetadata, setVrmMetadata] = useState<Record<string, any> | null>(null);
+  const [projectsExpanded, setProjectsExpanded] = useState(false);
   const isMobile = useIsMobile();
   const [showAvatarsList, setShowAvatarsList] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(280); // Default width in pixels
+  const [isResizing, setIsResizing] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { 
-    selectedAvatars, 
     selectedFormat,
-    handleAvatarSelect, 
-    handleDownloadSelected,
-    clearSelection,
     handleFormatChange
   } = useAvatarSelection();
+
+  // Featured avatar names (handpicked)
+  const featuredAvatarNames = [
+    'CoolBanana',
+    'Mushy',
+    'Skull',
+    'Butter',
+    'CoolAlien',
+    'Milk',
+    'EyeSummoner',
+    'Hotdog',
+    'CactusBoy',
+    'CosmicPerson',
+    'EggBoy',
+    'SharkPerson'
+  ];
 
   const [viewerConfig] = useState<ViewerConfig>({
     position: { x: 0, y: 0, z: 0 },
@@ -68,12 +85,15 @@ export const AvatarGallery: React.FC = () => {
           throw new Error(data.error || 'Failed to fetch avatars');
         }
 
-        setAvatars(data.avatars);
-        if (data.avatars && data.avatars.length > 0) {
+        const apiData = data as ApiResponse;
+        setAvatars(apiData.avatars);
+        setProjects(apiData.projects || []);
+        
+        if (apiData.avatars && apiData.avatars.length > 0) {
           // Select a random avatar instead of the first one
-          const randomIndex = Math.floor(Math.random() * data.avatars.length);
-          setCurrentAvatar(data.avatars[randomIndex]);
-          console.log(`Selected random avatar: ${data.avatars[randomIndex].name}`);
+          const randomIndex = Math.floor(Math.random() * apiData.avatars.length);
+          setCurrentAvatar(apiData.avatars[randomIndex]);
+          console.log(`Selected random avatar: ${apiData.avatars[randomIndex].name}`);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch avatars');
@@ -90,9 +110,53 @@ export const AvatarGallery: React.FC = () => {
     };
   }, []);
 
-  const filteredAvatars = avatars.filter(avatar =>
-    avatar.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filtered avatars based on project selection and search
+  const filteredAvatars = useMemo(() => {
+    let result = avatars;
+    
+    // If searching
+    if (searchQuery) {
+      // Filter by search term
+      result = result.filter(avatar =>
+        avatar.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        avatar.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      
+      // If projects are selected, filter to only those projects
+      if (selectedProjectIds.size > 0) {
+        result = result.filter(avatar => selectedProjectIds.has(avatar.projectId));
+      }
+      // If no projects selected, search returns ALL matching avatars
+    } else {
+      // No search query
+      if (selectedProjectIds.size > 0) {
+        // Show avatars from selected projects
+        result = result.filter(avatar => selectedProjectIds.has(avatar.projectId));
+      } else {
+        // No projects selected, no search → Show Featured (default view)
+        result = result.filter(avatar => 
+          featuredAvatarNames.some(name => 
+            avatar.name.toLowerCase().replace(/\s/g, '') === name.toLowerCase()
+          )
+        ).slice(0, 12);
+      }
+    }
+    
+    return result;
+  }, [avatars, selectedProjectIds, searchQuery, featuredAvatarNames]);
+
+  // Toggle project selection
+  const toggleProjectSelection = (projectId: string) => {
+    setSelectedProjectIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(projectId)) {
+        newSet.delete(projectId);
+      } else {
+        newSet.add(projectId);
+      }
+      return newSet;
+    });
+  };
 
   const handleMetadataLoad = useCallback((metadata: Record<string, any>) => {
     console.log('VRM metadata loaded:', metadata);
@@ -119,21 +183,58 @@ export const AvatarGallery: React.FC = () => {
     }
   }, [currentAvatar, selectedFormat]);
 
+  // Handle sidebar resize
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // Calculate new width, constrained between min and max
+      const newWidth = Math.min(Math.max(e.clientX, 200), 600);
+      setSidebarWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+
+  // Calculate number of columns based on sidebar width
+  const gridColumns = useMemo(() => {
+    if (sidebarWidth < 250) return 2;
+    if (sidebarWidth < 350) return 3;
+    if (sidebarWidth < 500) return 4;
+    return 5;
+  }, [sidebarWidth]);
+
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-lg">Welcome to the home of truly free avatars.</div>
+      <div className="h-screen flex items-center justify-center bg-cream dark:bg-cream-dark">
+        <div className="text-body-lg text-gray-500 dark:text-gray-400">Welcome to the home of truly free avatars.</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center gap-4">
-        <div className="text-lg text-red-500">Error: {error}</div>
+      <div className="h-screen flex flex-col items-center justify-center gap-4 bg-cream dark:bg-cream-dark">
+        <div className="text-body-lg text-red-500">Error: {error}</div>
         <Button 
           onClick={() => window.location.reload()}
           variant="outline"
+          className="btn-outline"
         >
           Retry
         </Button>
@@ -143,14 +244,14 @@ export const AvatarGallery: React.FC = () => {
 
   if (!avatars.length) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-lg text-gray-500">No avatars found</div>
+      <div className="h-screen flex items-center justify-center bg-cream dark:bg-cream-dark">
+        <div className="text-body-lg text-gray-500 dark:text-gray-400">No avatars found</div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen max-h-screen w-screen max-w-screen overflow-hidden bg-white flex flex-col">
+    <div className="h-screen max-h-screen w-screen max-w-screen overflow-hidden bg-cream dark:bg-cream-dark flex flex-col transition-colors">
       <div className="flex-none">
         <AvatarHeader 
           title="Open Source Avatars"
@@ -161,120 +262,159 @@ export const AvatarGallery: React.FC = () => {
   
       <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
         {/* Avatar List - Left Side on desktop only */}
-        {!isMobile && (
-          <div className="w-1/6 border-r border-gray-200 overflow-hidden flex flex-col bg-gray-50">
-            {/* Search and Controls Container */}
-            <div className="p-3 flex-none border-b border-gray-200 space-y-3">
-              {/* Search and Random Button Row */}
-              <div className="flex items-center gap-2">
-                <div className="relative flex-grow">
+        {!isMobile && !sidebarCollapsed && (
+          <>
+            <div 
+              className="border-r border-gray-300 dark:border-gray-700 overflow-hidden flex flex-col bg-cream dark:bg-gray-900 relative"
+              style={{ width: `${sidebarWidth}px`, minWidth: '200px', maxWidth: '600px' }}
+            >
+              {/* Search and Controls Container */}
+              <div className="p-3 flex-none border-b border-gray-300 dark:border-gray-700 space-y-3">
+                {/* Search Bar - Moved to Top */}
+                <div className="relative">
                   <Input
                     type="text"
                     placeholder={t('avatar.controls.search') as string}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-3 h-9 text-sm"
+                    className="w-full pl-9 pr-3 h-9 text-sm border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100"
                   />
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                     <Search className="h-4 w-4 text-gray-400" />
                   </div>
                 </div>
+
+                {/* Project Filter Section - Collapsible */}
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setProjectsExpanded(!projectsExpanded)}
+                    className="w-full flex items-center justify-between text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                  >
+                    <span>Projects</span>
+                    {projectsExpanded ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </button>
+                  
+                  {projectsExpanded && (
+                    <div className="space-y-1">
+                      {/* Individual Project Checkboxes */}
+                      {projects.map(project => (
+                        <label
+                          key={project.id}
+                          className={`
+                            w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-all cursor-pointer
+                            ${selectedProjectIds.has(project.id)
+                              ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium border-l-2 border-gray-900 dark:border-gray-100' 
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 text-gray-700 dark:text-gray-300'
+                            }
+                          `}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedProjectIds.has(project.id)}
+                            onChange={() => toggleProjectSelection(project.id)}
+                            className="h-4 w-4 rounded"
+                          />
+                          <span className="flex-1">{project.name}</span>
+                          <span className="text-xs">{project.avatarCount}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Random Avatar Button */}
+              <div className="px-3 pt-3 pb-2 border-b border-gray-300 dark:border-gray-700">
                 <Button 
                   onClick={selectRandomAvatar} 
-                  variant="ghost" 
-                  size="sm"
-                  className="flex-none h-9 w-9 border border-gray-200 rounded-md hover:bg-gray-100"
-                  title="Select a random avatar"
+                  variant="outline"
+                  className="w-full h-10 text-sm font-medium border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center justify-center gap-2"
                 >
-                  <Dice6 className="h-5 w-5 text-gray-700" />
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Random Avatar</span>
                 </Button>
               </div>
+
+              {/* Avatar List - Dynamic Grid layout */}
+              <div className="flex-1 py-2 overflow-y-auto">
+                <div 
+                  className="grid gap-2 px-3"
+                  style={{ gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}
+                >
+                  {filteredAvatars.map(avatar => (
+                    <button 
+                      key={avatar.id}
+                      className={`
+                        flex flex-col rounded-lg overflow-hidden cursor-pointer transition-all
+                        ${currentAvatar?.id === avatar.id ? 
+                          'ring-2 ring-gray-900 dark:ring-gray-100' : 
+                          'hover:ring-2 hover:ring-gray-400 dark:hover:ring-gray-600'
+                        }
+                      `}
+                      onClick={() => setCurrentAvatar(avatar)}
+                    >
+                      {/* Thumbnail */}
+                      <div className="aspect-square w-full bg-gray-100 dark:bg-gray-800">
+                        <img
+                          src={avatar.thumbnailUrl || '/placeholder.png'}
+                          alt={formatName(avatar.name)}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      
+                      {/* Info */}
+                      <div className="p-2 bg-cream dark:bg-gray-900 text-left">
+                        <h3 className="text-xs font-medium truncate text-gray-900 dark:text-gray-100">
+                          {formatName(avatar.name)}
+                        </h3>
+                        <p className="text-xs truncate text-gray-500 dark:text-gray-400">
+                          {avatar.project}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            {/* Resize Handle */}
+            <div
+              className="w-1 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 cursor-col-resize transition-colors flex-shrink-0 group relative"
+              onMouseDown={handleMouseDown}
+            >
+              {/* Visual indicator on hover */}
+              <div className="absolute inset-y-0 left-1/2 transform -translate-x-1/2 w-1 bg-gray-900 dark:bg-gray-100 opacity-0 group-hover:opacity-50 transition-opacity" />
               
-              {/* Selection Controls */}
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    // Select all filtered avatars
-                    filteredAvatars.forEach(avatar => {
-                      handleAvatarSelect(avatar.id);
-                    });
-                  }}
-                  className="flex-1 h-9 text-sm font-normal"
-                  size="sm"
-                >
-                  {t('avatar.controls.selectAll')}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={clearSelection}
-                  className="flex-1 h-9 text-sm font-normal"
-                  size="sm"
-                >
-                  {t('avatar.controls.deselectAll')}
-                </Button>
-              </div>
-
-              {/* Bulk Download Button */}
-              {selectedAvatars.size > 0 && (
-                <Button
-                  onClick={() => handleDownloadSelected()}
-                  className="w-full h-12 text-base font-normal bg-black text-white hover:bg-gray-800 flex items-center justify-center"
-                >
-                  <div className="flex items-center justify-center">
-                    <Download className="h-5 w-5 mr-2" />
-                    <span>Download ({selectedAvatars.size})</span>
-                  </div>
-                </Button>
-              )}
+              {/* Collapse button */}
+              <button
+                onClick={() => setSidebarCollapsed(true)}
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-12 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                aria-label="Collapse sidebar"
+              >
+                <ChevronLeft className="h-4 w-4 text-gray-900 dark:text-gray-100" />
+              </button>
             </div>
-
-            {/* Avatar List - Vertical scroll */}
-            <div className="flex-1 py-2 overflow-y-auto">
-              <div className="space-y-2 px-3">
-                {filteredAvatars.map(avatar => (
-                  <div 
-                    key={avatar.id}
-                    className={`
-                      w-full flex items-center p-2 rounded-md cursor-pointer gap-1
-                      ${currentAvatar?.id === avatar.id ? 
-                        'bg-blue-50 border-l-2 border-blue-500' : 
-                        'hover:bg-gray-100'
-                      }
-                    `}
-                    onClick={() => setCurrentAvatar(avatar)}
-                  >
-                    <div onClick={(e) => { e.stopPropagation(); handleAvatarSelect(avatar.id); }}>
-                      <Checkbox
-                        checked={selectedAvatars.has(avatar.id)}
-                        onChange={() => handleAvatarSelect(avatar.id)}
-                        className="h-4 w-4"
-                      />
-                    </div>
-                    <div className="h-10 w-10 flex-shrink-0">
-                      <img
-                        src={avatar.thumbnailUrl || '/placeholder.png'}
-                        alt={formatName(avatar.name)}
-                        className="rounded object-cover w-full h-full"
-                        loading="lazy"
-                      />
-                    </div>
-                    
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-sm font-medium text-gray-900 truncate">
-                        {formatName(avatar.name)}
-                      </h3>
-                      <p className="text-xs text-gray-500 truncate">{avatar.project}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          </>
+        )}
+        
+        {/* Expand button when sidebar is collapsed */}
+        {!isMobile && sidebarCollapsed && (
+          <button
+            onClick={() => setSidebarCollapsed(false)}
+            className="absolute top-1/2 left-0 transform -translate-y-1/2 w-6 h-16 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r-md flex items-center justify-center z-20 shadow-md transition-colors"
+            aria-label="Expand sidebar"
+          >
+            <ChevronRight className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+          </button>
         )}
 
-        {/* 3D Viewer - Full width on mobile, 5/6 on desktop */}
-        <div className={`${isMobile ? 'w-full h-full' : 'w-5/6'} relative overflow-hidden`}>
+        {/* 3D Viewer - Full width on mobile, dynamic width on desktop */}
+        <div className={`${isMobile ? 'w-full h-full' : 'flex-1'} relative overflow-hidden bg-cream dark:bg-cream-dark`}>
           {currentAvatar ? (
             <>
               {/* We're removing the Metadata Panel from here, as it will be conditionally rendered
@@ -288,8 +428,7 @@ export const AvatarGallery: React.FC = () => {
                   <Button 
                     onClick={handleDownloadCurrent}
                     variant="default"
-                    className="bg-white text-black hover:bg-gray-100 px-6 py-2 rounded-md flex items-center gap-2 shadow-md border border-gray-200 font-medium"
-                    style={{ backdropFilter: 'blur(4px)' }}
+                    className="bg-cream/90 dark:bg-gray-900/90 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-700 hover:shadow-xl hover:scale-105 px-6 py-2 rounded-md flex items-center gap-2 shadow-lg border border-gray-300 dark:border-gray-700 font-medium backdrop-blur-md transition-all duration-200"
                   >
                     <Download className="h-4 w-4" />
                     <span>
@@ -319,14 +458,17 @@ export const AvatarGallery: React.FC = () => {
                   selectedFormat={selectedFormat}
                   onDownload={handleDownloadCurrent}
                   metadata={vrmMetadata}
-                  avatars={filteredAvatars}
+                  avatars={avatars}
                   onAvatarSelect={setCurrentAvatar}
+                  projects={projects}
+                  selectedProjectIds={selectedProjectIds}
+                  onProjectToggle={toggleProjectSelection}
                 />
               </div>
             </>
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-50">
-              <p className="text-gray-500">Select an avatar to view</p>
+            <div className="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+              <p className="text-gray-500 dark:text-gray-400">Select an avatar to view</p>
             </div>
           )}
         </div>

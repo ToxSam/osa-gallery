@@ -24,7 +24,7 @@ export const AvatarDetails: React.FC<AvatarDetailsProps> = ({ metadata }) => {
   const { t } = useI18n();
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-lg">
+    <div className="bg-cream/90 backdrop-blur-sm rounded-lg p-4 shadow-lg">
       {metadata.title && (
         <h2 className="text-xl font-bold mb-4">{metadata.title}</h2>
       )}
