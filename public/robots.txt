@@ -6,7 +6,6 @@ Allow: /
 
 # Sitemap location
 Sitemap: https://opensourceavatars.com/sitemap.xml
-Sitemap: https://opensourceavatars.com/sitemap-avatars.xml
 
 # Block admin and API routes
 Disallow: /admin
