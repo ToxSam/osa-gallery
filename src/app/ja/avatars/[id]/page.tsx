@@ -54,6 +54,42 @@ export default function AvatarDetailPage() {
         }
 
         setAvatar(foundAvatar);
+
+        // Update meta tags dynamically
+        if (foundAvatar) {
+          const ogImageUrl = `/api/og?type=avatar&avatarName=${encodeURIComponent(foundAvatar.name)}&project=${encodeURIComponent(foundAvatar.project)}&thumbnail=${encodeURIComponent(foundAvatar.thumbnailUrl || '')}`;
+          const pageTitle = `${foundAvatar.name} - 無料VRMアバター | Open Source Avatars`;
+          const pageDescription = `${foundAvatar.name}をダウンロード - ${foundAvatar.project}の無料3D VRMアバター。CC0ライセンス、${foundAvatar.polygonCount.toLocaleString()}ポリゴン、VR、ゲーム、メタバース対応。`;
+
+          // Update document title
+          document.title = pageTitle;
+
+          // Update or create meta tags
+          const updateMetaTag = (property: string, content: string) => {
+            let meta = document.querySelector(`meta[property="${property}"]`) || 
+                       document.querySelector(`meta[name="${property}"]`);
+            if (!meta) {
+              meta = document.createElement('meta');
+              if (property.startsWith('og:') || property.startsWith('twitter:')) {
+                meta.setAttribute('property', property);
+              } else {
+                meta.setAttribute('name', property);
+              }
+              document.head.appendChild(meta);
+            }
+            meta.setAttribute('content', content);
+          };
+
+          updateMetaTag('description', pageDescription);
+          updateMetaTag('og:title', pageTitle);
+          updateMetaTag('og:description', pageDescription);
+          updateMetaTag('og:image', `https://opensourceavatars.com${ogImageUrl}`);
+          updateMetaTag('og:url', window.location.href);
+          updateMetaTag('twitter:card', 'summary_large_image');
+          updateMetaTag('twitter:title', pageTitle);
+          updateMetaTag('twitter:description', pageDescription);
+          updateMetaTag('twitter:image', `https://opensourceavatars.com${ogImageUrl}`);
+        }
       } catch (err) {
         console.error('Error fetching avatar:', err);
         setError('Failed to load avatar');

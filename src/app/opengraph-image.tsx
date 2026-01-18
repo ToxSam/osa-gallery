@@ -19,72 +19,147 @@ export default async function Image() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#FAF9F6',
-          backgroundImage: 'radial-gradient(circle at 25px 25px, lightgray 2%, transparent 0%), radial-gradient(circle at 75px 75px, lightgray 2%, transparent 0%)',
-          backgroundSize: '100px 100px',
+          backgroundColor: '#0a0a0a',
+          backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(100, 100, 100, 0.15) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(100, 100, 100, 0.15) 0%, transparent 50%)',
+          padding: '80px',
         }}
       >
+        {/* Logo */}
+        <div
+          style={{
+            fontSize: '72px',
+            fontWeight: 'bold',
+            color: '#fff',
+            marginBottom: '32px',
+            letterSpacing: '-0.02em',
+            textAlign: 'center',
+          }}
+        >
+          Open Source Avatars
+        </div>
+
+        {/* Description */}
+        <div
+          style={{
+            fontSize: '36px',
+            color: '#aaa',
+            textAlign: 'center',
+            maxWidth: '900px',
+            lineHeight: 1.4,
+            marginBottom: '64px',
+          }}
+        >
+          300+ Free 3D VRM Avatars for VR, Gaming & Metaverse
+        </div>
+
+        {/* Stats */}
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '80px',
+            gap: '48px',
+            marginBottom: '64px',
           }}
         >
           <div
             style={{
-              fontSize: '80px',
-              fontWeight: 'bold',
-              color: '#000',
-              marginBottom: '40px',
-              letterSpacing: '-0.02em',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '24px 32px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '16px',
+              border: '2px solid rgba(255, 255, 255, 0.1)',
             }}
           >
-            Open Source Avatars
-          </div>
-          <div
-            style={{
-              fontSize: '40px',
-              color: '#666',
-              textAlign: 'center',
-              maxWidth: '900px',
-              lineHeight: 1.3,
-              marginBottom: '60px',
-            }}
-          >
-            300+ Free 3D VRM Avatars for VR, Gaming & Metaverse
+            <div
+              style={{
+                fontSize: '48px',
+                fontWeight: 'bold',
+                color: '#fff',
+              }}
+            >
+              300+
+            </div>
+            <div
+              style={{
+                fontSize: '20px',
+                color: '#888',
+                marginTop: '8px',
+              }}
+            >
+              Free Avatars
+            </div>
           </div>
           <div
             style={{
               display: 'flex',
-              gap: '60px',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '24px 32px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '16px',
+              border: '2px solid rgba(255, 255, 255, 0.1)',
             }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ fontSize: '56px', fontWeight: 'bold', color: '#000' }}>300+</div>
-              <div style={{ fontSize: '28px', color: '#666' }}>Avatars</div>
+            <div
+              style={{
+                fontSize: '48px',
+                fontWeight: 'bold',
+                color: '#fff',
+              }}
+            >
+              CC0
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ fontSize: '56px', fontWeight: 'bold', color: '#000' }}>CC0</div>
-              <div style={{ fontSize: '28px', color: '#666' }}>License</div>
+            <div
+              style={{
+                fontSize: '20px',
+                color: '#888',
+                marginTop: '8px',
+              }}
+            >
+              License
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ fontSize: '56px', fontWeight: 'bold', color: '#000' }}>FREE</div>
-              <div style={{ fontSize: '28px', color: '#666' }}>Forever</div>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '24px 32px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '16px',
+              border: '2px solid rgba(255, 255, 255, 0.1)',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '48px',
+                fontWeight: 'bold',
+                color: '#fff',
+              }}
+            >
+              VRM
+            </div>
+            <div
+              style={{
+                fontSize: '20px',
+                color: '#888',
+                marginTop: '8px',
+              }}
+            >
+              Format
             </div>
           </div>
         </div>
+
+        {/* Footer */}
         <div
           style={{
-            position: 'absolute',
-            bottom: '50px',
-            fontSize: '24px',
+            fontSize: '18px',
             color: '#666',
           }}
         >
-          opensourceavatars.com
+          opensourceavatars.com · @toxsam
         </div>
       </div>
     ),
