@@ -27,6 +27,7 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
   const frameIdRef = useRef<number | null>(null);
   const isActiveRef = useRef(true);
   const animationLoadedRef = useRef(false);
+  const rotationAnimationTimeRef = useRef(0);
 
   // Fetch random avatar
   useEffect(() => {
@@ -206,8 +207,13 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
         controls.target.set(0, size.y * 0.5, 0);
         controls.update();
 
+        // Check if mobile device - disable interactions on mobile
+        const isMobile = window.innerWidth < 1024; // lg breakpoint
+
         // Mouse handlers - moved after controls setup
+        // Only enable on desktop (non-mobile)
         const handleMouseDown = (event: MouseEvent) => {
+          if (isMobile) return; // Disable on mobile
           if (!vrmRef.current || !controlsRef.current || !renderer?.domElement) return;
 
           const rect = renderer.domElement.getBoundingClientRect();
@@ -228,6 +234,7 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
         };
 
         const handleMouseMove = (event: MouseEvent) => {
+          if (isMobile) return; // Disable on mobile
           if (isDraggingRef.current && vrmRef.current) {
             const deltaX = event.clientX - previousMousePositionRef.current.x;
             vrmRef.current.scene.rotation.y += deltaX * 0.01; // Rotate avatar
@@ -236,14 +243,29 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
         };
 
         const handleMouseUp = () => {
+          if (isMobile) return; // Disable on mobile
           if (isDraggingRef.current && controlsRef.current) {
             isDraggingRef.current = false;
             controlsRef.current.enabled = true; // Re-enable orbit controls for zooming
+            
+            // Reset animation time to match current rotation for smooth continuation
+            if (vrmRef.current?.scene) {
+              const currentRotation = vrmRef.current.scene.rotation.y;
+              const baseRotation = Math.PI;
+              const rotationOffset = currentRotation - baseRotation;
+              // Calculate animation time that would produce this rotation offset
+              // rotationOffset = sin(time * speed) * (PI/4)
+              // time = arcsin(rotationOffset / (PI/4)) / speed
+              const rotationSpeed = 0.5;
+              if (Math.abs(rotationOffset) <= Math.PI / 4) {
+                rotationAnimationTimeRef.current = Math.asin(rotationOffset / (Math.PI / 4)) / rotationSpeed;
+              }
+            }
           }
         };
 
-        // Add event listeners after everything is set up
-        if (renderer?.domElement) {
+        // Add event listeners after everything is set up - only on desktop
+        if (renderer?.domElement && !isMobile) {
           renderer.domElement.addEventListener('mousedown', handleMouseDown);
           window.addEventListener('mousemove', handleMouseMove);
           window.addEventListener('mouseup', handleMouseUp);
@@ -279,6 +301,20 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
 
           if (vrm) {
             vrm.update(delta);
+          }
+
+          // Add rotation animation: 45° left → -45° right → 45° left (back and forth)
+          // Always animate (works on both mobile and desktop)
+          // Only skip animation when user is actively dragging (desktop only)
+          if (vrmRef.current?.scene) {
+            if (!isDraggingRef.current) {
+              rotationAnimationTimeRef.current += delta;
+              // Use a sine wave to create smooth back-and-forth motion
+              const rotationSpeed = 0.5; // Adjust this to change animation speed
+              const rotationAmount = Math.sin(rotationAnimationTimeRef.current * rotationSpeed) * (Math.PI / 4); // ±45 degrees
+              // Base rotation is Math.PI (180°), add the animated rotation
+              vrmRef.current.scene.rotation.y = Math.PI + rotationAmount;
+            }
           }
 
           controls.update();
@@ -372,10 +408,15 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
     <div 
       ref={containerRef} 
       className={`relative ${className}`}
-      style={{ minHeight: '500px' }}
+      style={{ 
+        minHeight: '500px', 
+        width: '100%', 
+        height: '100%',
+        position: 'relative'
+      }}
     >
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center z-20">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       )}

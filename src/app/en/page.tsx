@@ -23,32 +23,64 @@ export default function Home() {
       />
       
       {/* Hero Section with Large Avatar Display */}
-      <section className="relative overflow-hidden bg-cream dark:bg-gray-950">
-        <div className="container mx-auto px-4 pt-20 pb-32">
+      <section className="relative overflow-hidden bg-cream dark:bg-gray-950 min-h-[600px] lg:min-h-0">
+        {/* 3D Viewer - behind text on mobile, positioned absolutely */}
+        <div 
+          className="absolute inset-0 pointer-events-none z-0 lg:hidden"
+          style={{ 
+            width: '100%', 
+            height: '100%', 
+            minHeight: '600px',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0
+          }}
+        >
+          <div 
+            className="absolute right-0 top-1/2 -translate-y-1/2"
+            style={{ 
+              width: '600px', 
+              height: '600px',
+              maxWidth: '100vw',
+              maxHeight: '100vh'
+            }}
+          >
+            <HomeVRMViewer 
+              className="w-full h-full blur-sm opacity-50"
+            />
+          </div>
+        </div>
+        
+        {/* Text content - on top with higher z-index */}
+        <div className="container mx-auto px-4 pt-20 pb-32 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-20">
-            <div className="flex-1 max-w-2xl">
-              <h1 className="text-7xl md:text-8xl font-bold mb-12 leading-[0.95] tracking-tight text-gray-900 dark:text-white dark:text-white">
+            {/* Text content */}
+            <div className="flex-1 max-w-2xl relative z-10">
+              <h1 className="text-7xl md:text-8xl font-bold mb-12 leading-[0.95] tracking-tight text-gray-900 dark:text-white">
                 {t('home.hero.title')} {t('home.hero.tagline')}
               </h1>
-              <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 dark:text-gray-300 mb-12 leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 leading-relaxed">
                 {t('home.hero.description')}
               </p>
               <div className="flex gap-4">
                 <a
-                  href="/gallery"
+                  href="/en/gallery"
                   className="inline-flex items-center px-8 py-4 bg-black dark:bg-cream text-white dark:text-black rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all text-lg font-medium"
                 >
                   {t('home.hero.exploreButton')} <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
                 <a
-                  href="/vrminspector"
-                  className="inline-flex items-center px-8 py-4 border-2 border-gray-200 dark:border-gray-700 dark:border-gray-700 text-gray-900 dark:text-white dark:text-white rounded-lg hover:border-gray-900 dark:hover:border-gray-300 transition-all text-lg font-medium"
+                  href="/en/vrminspector"
+                  className="inline-flex items-center px-8 py-4 border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white rounded-lg hover:border-gray-900 dark:hover:border-gray-300 transition-all text-lg font-medium"
                 >
                   {t('home.hero.viewerButton')}
                 </a>
               </div>
             </div>
-            <div className="flex-1 w-full lg:w-auto">
+            {/* 3D Viewer - normal on desktop */}
+            <div className="flex-1 w-full lg:w-auto hidden lg:block">
               <HomeVRMViewer 
                 className="w-full aspect-square max-w-2xl mx-auto"
               />

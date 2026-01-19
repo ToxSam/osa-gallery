@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useI18n } from '@/lib/i18n';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
-import { RotateCcw, ZoomIn, ZoomOut, Maximize2, Minimize2, Info, Eye, EyeOff, DownloadCloud, X, Menu, Search, Dice6, ChevronDown, ChevronRight } from 'lucide-react';
+import { Maximize2, Minimize2, Info, Eye, EyeOff, DownloadCloud, X, Menu, Search, Dice6, ChevronDown, ChevronRight } from 'lucide-react';
 import { setupMobileGestureHelp } from '@/lib/utils';
 
 const VRMViewer = dynamic(() => import('@/components/VRMViewer/VRMViewer').then(mod => mod.VRMViewer), { 
@@ -360,10 +360,12 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
                 </button>
               </div>
               
-              <div className="bg-cream/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg p-2 shadow-md flex flex-col items-center gap-2">
-                {/* Control buttons */}
+              <div className="bg-cream/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg p-2 shadow-md flex flex-col items-center gap-2 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                {/* Control buttons - Reordered: info, animations, random avatar, format selector, grid, bones, size, download */}
+                
+                {/* 1. Info panel toggle */}
                 <button 
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-cream dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
+                  className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-cream dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
                   onClick={() => setShowInfoPanel(!showInfoPanel)}
                   aria-label={showInfoPanel ? "Hide info panel" : "Show info panel"}
                 >
@@ -374,8 +376,70 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
                   )}
                 </button>
                 
+                {/* 2. Animations toggle */}
                 <button 
-                  className={`w-10 h-10 flex items-center justify-center rounded-full ${
+                  className={`w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full ${
+                    showAnimationPanel ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900' : 'bg-cream dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  } border border-gray-200 dark:border-gray-700 shadow-sm`}
+                  onClick={toggleAnimationPanel}
+                  aria-label="Toggle animations"
+                >
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-5 w-5" 
+                    viewBox="0 0 18 18" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="1.5"
+                  >
+                    <path d="M4 3L15 9L4 15V3Z" fill="currentColor" stroke="none" />
+                  </svg>
+                </button>
+                
+                {/* 3. Random Avatar Button */}
+                {avatars && avatars.length > 0 && (
+                  <button
+                    onClick={() => {
+                      if (avatars?.length) {
+                        const randomIndex = Math.floor(Math.random() * avatars.length);
+                        onAvatarSelect?.(avatars[randomIndex]);
+                      }
+                    }}
+                    className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-cream dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
+                    aria-label="Random avatar"
+                  >
+                    <Dice6 className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  </button>
+                )}
+                
+                {/* 4. Format selector - button only, panel expands on left */}
+                {hasAlternateFormats && (
+                  <button 
+                    className={`w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full ${
+                      showFormatMenu ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900' : 'bg-cream dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                    } border border-gray-200 dark:border-gray-700 shadow-sm`}
+                    onClick={() => setShowFormatMenu(!showFormatMenu)}
+                    aria-label="Toggle format menu"
+                  >
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className="h-5 w-5" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                    >
+                      <rect x="4" y="4" width="16" height="16" rx="2" />
+                      <path d="M4 12h16" />
+                    </svg>
+                  </button>
+                )}
+                
+                {/* 5. Grid/Wireframe toggle */}
+                <button 
+                  className={`w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full ${
                     wireframeMode ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900' : 'bg-cream dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                   } border border-gray-200 dark:border-gray-700 shadow-sm`}
                   onClick={toggleWireframeMode}
@@ -399,8 +463,9 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
                   </svg>
                 </button>
                 
+                {/* 6. Bones/Skeleton toggle */}
                 <button 
-                  className={`w-10 h-10 flex items-center justify-center rounded-full ${
+                  className={`w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full ${
                     skeletonMode ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900' : 'bg-cream dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                   } border border-gray-200 dark:border-gray-700 shadow-sm`}
                   onClick={toggleSkeletonMode}
@@ -422,8 +487,9 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
                   </svg>
                 </button>
                 
+                {/* 7. Size/Ruler toggle */}
                 <button 
-                  className={`w-10 h-10 flex items-center justify-center rounded-full ${
+                  className={`w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full ${
                     rulerMode ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900' : 'bg-cream dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                   } border border-gray-200 dark:border-gray-700 shadow-sm`}
                   onClick={toggleRulerMode}
@@ -446,61 +512,10 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
                   </svg>
                 </button>
                 
-                <button 
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-cream dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
-                  onClick={() => {
-                    const event = new CustomEvent('reset-camera');
-                    window.dispatchEvent(event);
-                  }}
-                  aria-label="Reset view"
-                >
-                  <RotateCcw className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-                </button>
-                
-                <button 
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-cream dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
-                  onClick={() => {
-                    const event = new CustomEvent('zoom-in');
-                    window.dispatchEvent(event);
-                  }}
-                  aria-label="Zoom in"
-                >
-                  <ZoomIn className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-                </button>
-                
-                <button 
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-cream dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
-                  onClick={() => {
-                    const event = new CustomEvent('zoom-out');
-                    window.dispatchEvent(event);
-                  }}
-                  aria-label="Zoom out"
-                >
-                  <ZoomOut className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-                </button>
-                
-                <button 
-                  className={`w-10 h-10 flex items-center justify-center rounded-full ${
-                    showAnimationPanel ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900' : 'bg-cream dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                  } border border-gray-200 dark:border-gray-700 shadow-sm`}
-                  onClick={toggleAnimationPanel}
-                  aria-label="Toggle animations"
-                >
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="h-5 w-5" 
-                    viewBox="0 0 18 18" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="1.5"
-                  >
-                    <path d="M4 3L15 9L4 15V3Z" fill="currentColor" stroke="none" />
-                  </svg>
-                </button>
-                
+                {/* 8. Download */}
                 {onDownload && (
                   <button 
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-cream dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
+                    className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-cream dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
                     onClick={() => onDownload(avatar.id, selectedFormat)}
                     aria-label="Download avatar"
                   >
@@ -520,62 +535,40 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
               </button>
             </div>
           )}
-
-          {/* Format picker expandable - Separate menu */}
-          {isMobile && hasAlternateFormats && (
-            <div className="absolute top-4 right-20 z-10 flex flex-col gap-2">
-              {showFormatMenu ? (
-                <>
-                  <div className="bg-cream/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-full p-2 shadow-md">
-                    <button 
-                      className="w-10 h-10 flex items-center justify-center rounded-full bg-cream dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
-                      onClick={() => setShowFormatMenu(false)}
-                      aria-label="Hide format menu"
-                    >
-                      <Minimize2 className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-                    </button>
-                  </div>
-                  
-                  <div className="bg-cream/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg p-2 shadow-md flex flex-col items-center gap-2">
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{t('avatar.details.format')}</span>
-                    <div className="flex flex-col items-center gap-1">
-                      {availableFormats.map((format) => (
-                        <Button
-                          key={format.id || 'default'}
-                          variant={selectedFormat === format.id ? "default" : "outline"}
-                          size="xs"
-                          onClick={() => onFormatSelect && onFormatSelect(format.id)}
-                          className={`w-24 text-center ${selectedFormat === format.id 
-                            ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 font-medium" 
-                            : "bg-cream dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"} text-xs px-2 py-1 h-7`}
-                        >
-                          {t(`avatar.formats.${format.id || 'vrm'}`)}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <button 
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-cream/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-md"
-                  onClick={() => setShowFormatMenu(true)}
-                  aria-label="Show format menu"
-                >
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="h-5 w-5 text-gray-700 dark:text-gray-300" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
+          
+          {/* Format selector - Secondary floating panel on the left */}
+          {hasAlternateFormats && showFormatMenu && (
+            <div className="absolute top-4 left-4 z-20 bg-cream/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-lg p-3 shadow-md">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('avatar.details.format')}</span>
+                  <button
+                    onClick={() => setShowFormatMenu(false)}
+                    className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                    aria-label="Close format menu"
                   >
-                    <rect x="4" y="4" width="16" height="16" rx="2" />
-                    <path d="M4 12h16" />
-                  </svg>
-                </button>
-              )}
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  {availableFormats.map((format) => (
+                    <Button
+                      key={format.id || 'default'}
+                      variant={selectedFormat === format.id ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => {
+                        onFormatSelect && onFormatSelect(format.id);
+                        setShowFormatMenu(false);
+                      }}
+                      className={`w-full text-center ${selectedFormat === format.id 
+                        ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 font-medium" 
+                        : "bg-cream dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"} text-sm px-3 py-2`}
+                    >
+                      {t(`avatar.formats.${format.id || 'vrm'}`)}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </>
@@ -584,22 +577,6 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
       {/* Mobile Avatar Browser */}
       {isMobile && (
         <>
-          {/* Random Avatar Button - Floating */}
-          {!showAvatarBrowser && (
-            <button
-              onClick={() => {
-                if (avatars?.length) {
-                  const randomIndex = Math.floor(Math.random() * avatars.length);
-                  onAvatarSelect?.(avatars[randomIndex]);
-                }
-              }}
-              className="absolute bottom-24 right-4 w-12 h-12 flex items-center justify-center rounded-full bg-cream/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-md z-20"
-              aria-label="Random avatar"
-            >
-              <Dice6 className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-            </button>
-          )}
-
           {/* Avatar Browser */}
           <div className="absolute bottom-0 left-0 right-0 z-20">
             {showAvatarBrowser ? (

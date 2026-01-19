@@ -23,10 +23,41 @@ export default function Home() {
       />
       
       {/* Hero Section with Large Avatar Display */}
-      <section className="relative overflow-hidden bg-cream dark:bg-cream-dark">
-        <div className="container-custom section-padding">
+      <section className="relative overflow-hidden bg-cream dark:bg-cream-dark min-h-[600px] lg:min-h-0">
+        {/* 3D Viewer - behind text on mobile, positioned absolutely */}
+        <div 
+          className="absolute inset-0 pointer-events-none z-0 lg:hidden"
+          style={{ 
+            width: '100%', 
+            height: '100%', 
+            minHeight: '600px',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0
+          }}
+        >
+          <div 
+            className="absolute right-0 top-1/2 -translate-y-1/2"
+            style={{ 
+              width: '400px', 
+              height: '400px',
+              maxWidth: '80vw',
+              maxHeight: '80vw'
+            }}
+          >
+            <HomeVRMViewer 
+              className="w-full h-full blur-2xl opacity-40"
+            />
+          </div>
+        </div>
+        
+        {/* Text content - on top with higher z-index */}
+        <div className="container-custom section-padding relative z-10 bg-transparent">
           <div className="flex flex-col lg:flex-row items-center gap-20">
-            <div className="flex-1 max-w-2xl">
+            {/* Text content */}
+            <div className="flex-1 max-w-2xl relative z-10">
               <h1 className="text-display mb-12 text-gray-900 dark:text-gray-100">
                 {t('home.hero.title')} {t('home.hero.tagline')}
               </h1>
@@ -48,7 +79,8 @@ export default function Home() {
                 </a>
               </div>
             </div>
-            <div className="flex-1 w-full lg:w-auto">
+            {/* 3D Viewer - normal on desktop */}
+            <div className="flex-1 w-full lg:w-auto hidden lg:block">
               <HomeVRMViewer 
                 className="w-full aspect-square max-w-2xl mx-auto"
               />
