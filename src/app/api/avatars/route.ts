@@ -130,7 +130,7 @@ export async function GET(req: NextRequest) {
       return acc;
     }, {});
     console.log('Avatar counts by project:', projectIdCounts);
-    console.log('Available project IDs:', publicProjects.map(p => ({ id: p.id, name: p.name, count: p.avatarCount })));
+    console.log('Available project IDs:', publicProjects.map((p: any) => ({ id: p.id, name: p.name, count: p.avatarCount })));
 
     return NextResponse.json({ 
       avatars: transformedAvatars,
@@ -191,12 +191,12 @@ export async function POST(req: NextRequest) {
       id: uuidv4(),
       name: avatarData.name,
       projectId: avatarData.projectId,
-      description: avatarData.description || '',
-      thumbnailUrl: avatarData.thumbnailUrl || '',
-      modelFileUrl: avatarData.modelFileUrl || '',
-      polygonCount: avatarData.polygonCount || 0,
+      description: avatarData.description ?? '',
+      thumbnailUrl: avatarData.thumbnailUrl ?? '',
+      modelFileUrl: avatarData.modelFileUrl ?? '',
+      polygonCount: avatarData.polygonCount ?? 0,
       format: avatarData.format || 'VRM',
-      materialCount: avatarData.materialCount || 0,
+      materialCount: avatarData.materialCount ?? 0,
       isPublic: avatarData.isPublic === true,
       isDraft: avatarData.isDraft !== false,
       metadata: avatarData.metadata || {},
@@ -205,7 +205,7 @@ export async function POST(req: NextRequest) {
     };
     
     // Get current avatars and add the new one
-    const avatars = await getAvatars();
+    const avatars: GithubAvatar[] = await getAvatars() as GithubAvatar[];
     avatars.push(newAvatar);
     
     // Save the updated avatars array
