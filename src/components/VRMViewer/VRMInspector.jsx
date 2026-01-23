@@ -202,7 +202,8 @@ const getImageFormat = (texture) => {
         // PNGs often have alpha, JPEGs don't
         if (texture.format === THREE.RGBAFormat) {
           return 'PNG';
-        } else if (texture.format === THREE.RGBFormat) {
+        } else if (texture.format === THREE.RGFormat || texture.format === THREE.RedFormat) {
+          // RGB-like formats (without full alpha channel) are typically JPEG
           return 'JPEG';
         }
       }
@@ -229,8 +230,8 @@ const getImageFormat = (texture) => {
   if (texture.format === THREE.RGBAFormat) {
     // RGBA format is typically PNG in VRMs
     return 'PNG (inferred)';
-  } else if (texture.format === THREE.RGBFormat) {
-    // RGB format is typically JPEG in VRMs
+  } else if (texture.format === THREE.RGFormat || texture.format === THREE.RedFormat) {
+    // RGB-like formats (without full alpha channel) are typically JPEG in VRMs
     return 'JPEG (inferred)';
   }
   
