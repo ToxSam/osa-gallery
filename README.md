@@ -72,8 +72,8 @@ All avatar data available as JSON via our data repository
 
 Two-repository approach:
 
-- **osa-gallery** (this repo) - Website code and UI
-- **open-source-avatars** - Avatar metadata and registry
+- **[osa-gallery](https://github.com/ToxSam/osa-gallery)** (this repo) - Website code and UI
+- **[open-source-avatars](https://github.com/ToxSam/open-source-avatars)** - Avatar metadata and registry
 
 This separation keeps data transparent and makes community contributions easier.
 
