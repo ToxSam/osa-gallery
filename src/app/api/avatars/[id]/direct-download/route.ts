@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getArweaveTxId } from '@/lib/arweaveMapping';
-import { getArweaveUrl } from '@/lib/arweave';
 import { getAvatars, getDownloadCounts, saveDownloadCounts } from '@/lib/github-storage';
-import path from 'path';
 
 // Define interfaces
 interface DownloadCounts {
@@ -64,6 +61,20 @@ function getFileExtension(format: string): string {
   return '.vrm'; // Default to VRM for any other format
 }
 
+// Helper to check if a URL is an IPFS URL
+function isIPFSUrl(url: string): boolean {
+  return url.includes('ipfs') || url.includes('dweb.link') || url.startsWith('ipfs://');
+}
+
+// Helper to normalize IPFS URLs (convert ipfs:// to https://dweb.link/ipfs/)
+function normalizeIPFSUrl(url: string): string {
+  if (url.startsWith('ipfs://')) {
+    const ipfsHash = url.replace('ipfs://', '').replace('ipfs/', '');
+    return `https://dweb.link/ipfs/${ipfsHash}`;
+  }
+  return url;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -98,7 +109,8 @@ export async function GET(
       console.log('Format filename found:', formatFilename);
       
       if (formatFilename) {
-        modelUrl = formatFilename;
+        // Normalize IPFS URLs in alternate models too
+        modelUrl = normalizeIPFSUrl(formatFilename);
       } else {
         // Format not found in alternate models - but instead of returning an error,
         // let's fallback to the default model and log a warning
@@ -115,21 +127,111 @@ export async function GET(
       return NextResponse.json({ error: 'Could not determine model URL' }, { status: 400 });
     }
     
+    // Normalize IPFS URLs if needed
+    const normalizedUrl = normalizeIPFSUrl(modelUrl);
+    const isIPFS = isIPFSUrl(normalizedUrl);
+    
     // Create a proper filename
     const extension = getFileExtension(actualFormat);
     const cleanName = (avatar.name || avatar.metadata?.number || 'avatar').replace(/[^a-zA-Z0-9_-]/g, '_');
     const voxelPart = actualFormat && (actualFormat.includes('voxel') || actualFormat === 'voxel') ? '_voxel' : '';
     const filename = `${cleanName}${voxelPart}${extension}`;
     
-    console.log(`Downloading ${filename} from ${modelUrl}`);
+    console.log(`Downloading ${filename} from ${normalizedUrl}${isIPFS ? ' (IPFS)' : ''}`);
     
     try {
       // Fetch the file directly
-      const response = await fetch(modelUrl);
+      // For IPFS URLs, we might need a longer timeout and retry logic
+      const fetchOptions: RequestInit = {
+        headers: {
+          'Accept': '*/*',
+        }
+      };
+      
+      // Add timeout for IPFS URLs (use AbortSignal.timeout if available, otherwise skip)
+      let timeoutId: NodeJS.Timeout | null = null;
+      if (isIPFS && typeof AbortSignal !== 'undefined' && AbortSignal.timeout) {
+        try {
+          fetchOptions.signal = AbortSignal.timeout(30000); // 30 seconds for IPFS
+        } catch (e) {
+          // Fallback: use manual timeout if AbortSignal.timeout is not available
+          const controller = new AbortController();
+          timeoutId = setTimeout(() => controller.abort(), 30000);
+          fetchOptions.signal = controller.signal;
+        }
+      }
+      
+      const response = await fetch(normalizedUrl, fetchOptions);
+      
+      // Clear timeout if we set one manually
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       
       if (!response.ok) {
+        // For IPFS URLs, provide more helpful error messages
+        if (isIPFS) {
+          console.error(`IPFS fetch failed: ${response.status} ${response.statusText}`);
+          // Try alternative IPFS gateway if dweb.link fails
+          if (normalizedUrl.includes('dweb.link')) {
+            const alternativeUrl = normalizedUrl.replace('dweb.link', 'ipfs.io');
+            console.log(`Retrying with alternative IPFS gateway: ${alternativeUrl}`);
+            try {
+              // Create new fetch options for retry
+              const retryFetchOptions: RequestInit = {
+                headers: {
+                  'Accept': '*/*',
+                }
+              };
+              
+              // Add timeout for retry too
+              let retryTimeoutId: NodeJS.Timeout | null = null;
+              if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) {
+                try {
+                  retryFetchOptions.signal = AbortSignal.timeout(30000);
+                } catch (e) {
+                  const controller = new AbortController();
+                  retryTimeoutId = setTimeout(() => controller.abort(), 30000);
+                  retryFetchOptions.signal = controller.signal;
+                }
+              }
+              
+              const retryResponse = await fetch(alternativeUrl, retryFetchOptions);
+              
+              if (retryTimeoutId) {
+                clearTimeout(retryTimeoutId);
+              }
+              if (retryResponse.ok) {
+                const buffer = await retryResponse.arrayBuffer();
+                // Update download counts in the background
+                try {
+                  const downloadCounts = await getDownloadCounts() as DownloadCounts;
+                  if (!downloadCounts.counts) {
+                    downloadCounts.counts = {};
+                  }
+                  downloadCounts.counts[avatar.id] = (downloadCounts.counts[avatar.id] || 0) + 1;
+                  saveDownloadCounts(downloadCounts).catch((err: Error) => 
+                    console.error('Failed to save download count:', err)
+                  );
+                } catch (error) {
+                  console.error('Error updating download counts:', error);
+                }
+                return new NextResponse(buffer, {
+                  status: 200,
+                  headers: {
+                    'Content-Type': actualFormat === 'fbx' ? 'application/octet-stream' : 'model/vrm',
+                    'Content-Disposition': `attachment; filename="${filename}"`,
+                    'Cache-Control': 'public, max-age=86400',
+                  }
+                });
+              }
+            } catch (retryError) {
+              console.error('Retry with alternative gateway also failed:', retryError);
+            }
+          }
+        }
         return NextResponse.json({
-          error: `Failed to fetch file: ${response.status} ${response.statusText}`
+          error: `Failed to fetch file: ${response.status} ${response.statusText}${isIPFS ? ' (IPFS gateway may be slow or unavailable)' : ''}`
         }, { status: response.status });
       }
       

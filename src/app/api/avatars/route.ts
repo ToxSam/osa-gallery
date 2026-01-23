@@ -14,8 +14,14 @@ export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
     const search = searchParams.get('search');
+    const projectIdsParam = searchParams.get('projectIds');
     
-    console.log('Search params:', { search });
+    // Parse projectIds if provided (comma-separated list)
+    const projectIds = projectIdsParam 
+      ? projectIdsParam.split(',').map(id => id.trim()).filter(Boolean)
+      : undefined;
+    
+    console.log('Search params:', { search, projectIds });
 
     // Check if user is authenticated and has admin/creator role
     let isAdmin = false;
@@ -30,17 +36,20 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Fetch all avatars and projects from GitHub storage
+    // Fetch avatars and projects from GitHub storage
+    // If projectIds is provided, only fetch avatars from those projects
     const [avatars, projects] = await Promise.all([
-      getAvatars(),
+      getAvatars(projectIds),
       getProjects()
     ]);
+
+    console.log(`API: Received ${avatars.length} avatars, ${projects.length} projects`);
 
     // Filter avatars based on search criteria and visibility
     const filteredAvatars = avatars.filter((avatar: GithubAvatar) => {
       // If user is admin, show all avatars
-      // Otherwise, only show public avatars
-      if (!isAdmin && !avatar.isPublic) return false;
+      // Otherwise, only show public avatars (default to true if not specified)
+      if (!isAdmin && avatar.isPublic === false) return false;
       
       // Filter by search term if provided
       if (search) {
@@ -115,6 +124,14 @@ export async function GET(req: NextRequest) {
       }))
       .sort((a: any, b: any) => a.name.localeCompare(b.name)); // Sort by name (R1, R2, R3)
 
+    // Debug: Log project ID distribution
+    const projectIdCounts = transformedAvatars.reduce((acc: Record<string, number>, avatar: any) => {
+      acc[avatar.projectId] = (acc[avatar.projectId] || 0) + 1;
+      return acc;
+    }, {});
+    console.log('Avatar counts by project:', projectIdCounts);
+    console.log('Available project IDs:', publicProjects.map(p => ({ id: p.id, name: p.name, count: p.avatarCount })));
+
     return NextResponse.json({ 
       avatars: transformedAvatars,
       projects: publicProjects, // Include projects in response
@@ -122,7 +139,8 @@ export async function GET(req: NextRequest) {
         timestamp: new Date().toISOString(),
         count: transformedAvatars.length,
         projectCount: publicProjects.length,
-        storage: 'github+arweave' // Indicate that we're using GitHub + Arweave
+        storage: 'github+arweave', // Indicate that we're using GitHub + Arweave
+        projectIdCounts // Include project ID distribution for debugging
       }
     });
   } catch (error) {

@@ -1,18 +1,51 @@
 // src/app/page.tsx
 'use client';
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { AvatarHeader } from '@/components/avatar/AvatarHeader';
 import { HomeVRMViewer } from '@/components/VRMViewer/HomeVRMViewer';
 import { Footer } from '@/components/Footer';
 import { useI18n } from '@/lib/i18n';
 import { Download, Palette, Search, Code, Box, GitBranch, Boxes, Microscope, ArrowRight } from "lucide-react";
+import { Avatar } from '@/types/avatar';
+
+// Allowed project IDs for home page viewer (100Avatars R1, R2, R3)
+const ALLOWED_PROJECT_IDS = [
+  '7dd289fc-c98a-4224-a5a7-74a9aef751a8', // 100Avatars R1
+  'fed7b40b-088c-45aa-b833-2416ae32d2ee', // 100Avatars R2
+  '4fd74d41-0828-417d-a005-de46c3bdf5b3', // 100Avatars R3
+];
 
 export default function Home() {
   const { t } = useI18n();
+  const [randomAvatar, setRandomAvatar] = useState<Avatar | null>(null);
   
   const title = String(t('home.title'));
   const description = String(t('home.description'));
+
+  // Fetch random avatar once for both viewer instances
+  useEffect(() => {
+    const fetchRandomAvatar = async () => {
+      try {
+        // Pass projectIds to API so it only fetches the projects we need
+        const projectIdsParam = ALLOWED_PROJECT_IDS.join(',');
+        const response = await fetch(`/api/avatars?projectIds=${encodeURIComponent(projectIdsParam)}`);
+        const data = await response.json();
+        
+        if (data.avatars && data.avatars.length > 0) {
+          // No need to filter again - API already filtered by projectIds
+          const randomIndex = Math.floor(Math.random() * data.avatars.length);
+          setRandomAvatar(data.avatars[randomIndex]);
+        } else {
+          console.warn('No avatars found in allowed projects');
+        }
+      } catch (error) {
+        console.error('Error fetching avatar:', error);
+      }
+    };
+
+    fetchRandomAvatar();
+  }, []);
 
   return (
     <main className="min-h-screen bg-cream dark:bg-cream-dark transition-colors">
@@ -49,6 +82,7 @@ export default function Home() {
           >
             <HomeVRMViewer 
               className="w-full h-full blur-2xl opacity-40"
+              avatar={randomAvatar}
             />
           </div>
         </div>
@@ -83,6 +117,7 @@ export default function Home() {
             <div className="flex-1 w-full lg:w-auto hidden lg:block">
               <HomeVRMViewer 
                 className="w-full aspect-square max-w-2xl mx-auto"
+                avatar={randomAvatar}
               />
             </div>
           </div>

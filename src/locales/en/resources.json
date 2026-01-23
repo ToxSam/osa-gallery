@@ -1,59 +1,122 @@
 {
   "title": "Resources & Downloads",
-  "batch": {
-    "title": "Batch Downloads",
-    "description": "Looking to download all the files in this site at once? All the models, textures, and renders of the avatars can be found on this ArDrive folder:",
-    "button": {
-      "title": "Open Source Avatars by ToxSam - ArDrive Folder",
-      "description": "Complete collection with all assets and files"
-    }
+  "collections": {
+    "title": "Avatar Collections",
+    "description": "This site hosts multiple avatar collections with different licenses and sources:",
+    "original": {
+      "title": "Our Original Avatars (CC0)",
+      "name": "100Avatars Series (R1, R2, R3) - 300 free avatars",
+      "license": "License: CC0 (Public Domain) - use however you want, no attribution needed",
+      "storage": "Storage: Arweave (permanent)",
+      "batchDownload": "Batch Download: ArDrive Folder - Open Source Avatars by ToxSam",
+      "includes": "Includes: VRM files, alternate formats (FBX, voxel versions), textures, renders"
+    },
+    "community": {
+      "title": "Community Collections",
+      "vipe": {
+        "name": "VIPE Heroes - NFT avatar collection",
+        "license": "License: CC-BY (attribution required)",
+        "storage": "Storage: IPFS",
+        "source": "Source: OpenSea",
+        "sourceLink": "https://opensea.io/collection/vipe-heroes"
+      },
+      "grifter": {
+        "name": "Grifter Squaddies",
+        "license": "License: CC0",
+        "storage": "Storage: IPFS",
+        "source": "Source: OpenSea",
+        "sourceLink": "https://opensea.io/collection/grifterssquaddies"
+      }
+    },
+    "licenseNote": "License matters! CC0 avatars can be used freely without credit. CC-BY avatars require attribution to the original creator. Always check the collection details."
   },
-  "ardrive": {
-    "title": "What is ArDrive?",
-    "description1": "ArDrive is a decentralized storage platform built on the Arweave blockchain. Unlike traditional cloud storage, files stored on ArDrive are permanently saved on the Arweave network, creating truly permanent data storage.",
-    "description2": "This means all the avatar files will be available forever - they can't be deleted, censored, or taken offline. The one-time storage fee ensures perpetual access without subscription costs, making it ideal for preserving open source content like these avatars."
-  },
-  "github": {
-    "title": "GitHub Repositories",
-    "description": "Access the avatar database and website source code on GitHub.",
+  "developers": {
+    "title": "For Developers",
     "database": {
-      "title": "Avatar Database",
-      "description": "JSON metadata for all avatars - useful for developers"
+      "title": "Avatar Database (GitHub)",
+      "description": "Access all avatar metadata as JSON files - perfect for integrating into your app or game.",
+      "link": "View Avatar Database →",
+      "structure": {
+        "title": "Structure",
+        "projects": "projects.json → All collections + license info",
+        "avatars": "/avatars/",
+        "r1": "100avatars-r1.json → Individual avatar data",
+        "r2": "100avatars-r2.json",
+        "r3": "100avatars-r3.json",
+        "vipe": "vipe-heroes-genesis.json",
+        "grifter": "grifters-squaddies.json"
+      },
+      "includes": "Each avatar includes:",
+      "includesList": [
+        "Direct VRM download link",
+        "Preview images",
+        "Metadata and traits",
+        "License information"
+      ]
     },
     "website": {
-      "title": "Gallery Website",
-      "description": "Source code for OpenSourceAvatars.com"
+      "title": "Website Source Code",
+      "description": "The gallery website itself is also open source.",
+      "link": "View Website Code →"
     }
   },
   "vrm": {
     "title": "About VRM Format",
-    "description": "All avatars in this collection are primarily available in VRM format, with some also offered in alternative formats.",
-    "what": {
-      "title": "What is VRM?",
-      "description1": "VRM is an open file format for 3D humanoid avatars used in VR applications. Based on glTF, it extends the format with humanoid skeletal structure, material definitions for various rendering styles, facial expressions, and look-at controls.",
-      "description2": "We use VRM because it's an open, standardized format that works across multiple platforms including VRChat, VTuber applications, web browsers, Unity, and other 3D engines. It has excellent support for humanoid avatars and includes built-in rigging that makes animation straightforward.",
-      "learnMore": "Learn more about VRM at the official website"
-    }
-  },
-  "philosophy": {
-    "title": "Our Open Source Philosophy",
-    "description": "We believe in the power of open source to drive innovation and creativity in the virtual world.",
-    "goals": {
-      "intro": "By making these avatars freely available under permissive licenses (primarily CC0), we aim to:",
-      "list": [
-        "Lower the barrier to entry for creators new to virtual worlds",
-        "Encourage experimentation and derivative works",
-        "Provide high-quality reference materials for learning",
-        "Build a more diverse and inclusive representation of characters in virtual spaces"
+    "description": "VRM is a 3D avatar file format designed for games, VR, and virtual worlds.",
+    "why": {
+      "title": "Why we use VRM:",
+      "reasons": [
+        "Works across multiple platforms (Unity, web browsers, VR apps)",
+        "Open standard - not locked to one company",
+        "Includes built-in rigging for easy animation",
+        "Supports facial expressions and customization"
       ]
     },
-    "description1": "The metaverse should be built on open standards and shared creative resources, not locked behind proprietary formats and restrictive licenses. Our avatars can be freely modified, remixed, and used in both personal and commercial projects.",
-    "description2": "Feel free to use these avatars for your website, game, artwork, training an LLM or AI model, or pretty much whatever you want. There are no restrictions - that's the beauty of truly open content.",
-    "description3": "We encourage others to join this movement by sharing their own creations under similar open licenses."
+    "compatible": {
+      "title": "Compatible with:",
+      "list": [
+        "VRChat, VSeeFace, VTuber apps",
+        "Unity (with UniVRM)",
+        "Web browsers (with three-vrm)",
+        "Unreal Engine (with VRM4U)"
+      ]
+    },
+    "learnMore": "Learn more about VRM →"
   },
-  "contact": {
-    "title": "Need Something Specific?",
-    "description": "If you need specific resources or have questions about usage, feel free to reach out.",
-    "button": "Contact ToxSam"
+  "ardrive": {
+    "title": "What is ArDrive?",
+    "description": "ArDrive is permanent, decentralized storage built on Arweave.",
+    "why": {
+      "title": "Why it matters:",
+      "reasons": [
+        "Files stored forever (can't be deleted or taken offline)",
+        "One-time payment, no subscriptions",
+        "Perfect for preserving open source content"
+      ]
+    },
+    "note": "Our original avatars (100Avatars series) are stored on ArDrive to ensure they're always available, no matter what happens to this website."
+  },
+  "philosophy": {
+    "title": "Open Source Philosophy",
+    "description": "We believe avatars should be free and accessible.",
+    "why": "That's why our original collections are CC0 (public domain):",
+    "benefits": [
+      "✅ Use in commercial projects",
+      "✅ Modify and remix freely",
+      "✅ No attribution required",
+      "✅ Train AI models",
+      "✅ Use in games, apps, artwork"
+    ],
+    "note": "Community collections have their own licenses - we make these easy to find so you know exactly what you can do with each avatar.",
+    "conclusion": "The metaverse should be built on open standards, not locked behind paywalls."
+  },
+  "help": {
+    "title": "Need Help?",
+    "questions": "Questions about licenses? Check the collection details on each avatar page.",
+    "building": "Building something? Our JSON data is free to use - build your own avatar browser!",
+    "contribute": "Want to contribute? Submit your collection via GitHub Discussions.",
+    "contributeLink": "https://github.com/toxsam/open-source-avatars/discussions",
+    "contact": "Contact: @ToxSam",
+    "contactLink": "https://x.com/toxsam"
   }
-} 
+}

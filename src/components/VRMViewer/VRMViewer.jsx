@@ -8,6 +8,7 @@ import { loadMixamoAnimation } from './utils/animationLoader';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { SkeletonHelper } from 'three';
 import { useI18n } from '@/lib/i18n';
+import { Progress } from '@/components/ui/progress';
 
 export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, showInfoPanel = true, onToggleInfoPanel }) => {
   const { t } = useI18n();
@@ -34,6 +35,8 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
   const particleSystemRef = useRef(null); // Store particle system reference
 
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [showLoadingBar, setShowLoadingBar] = useState(false);
   const [error, setError] = useState(null);
   const [processedUrl, setProcessedUrl] = useState('');
   const [wireframeMode, setWireframeMode] = useState(false);
@@ -48,6 +51,7 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
   const floorRef = useRef(null);
   const avatarOriginalPositionRef = useRef(new THREE.Vector3(0, 0, 0));
   const hipsOriginalPositionRef = useRef(null);
+  const loadingBarTimeoutRef = useRef(null);
 
   // Process URL when it changes
   useEffect(() => {
@@ -1319,9 +1323,21 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
     }
     
     setIsLoading(true);
+    setLoadingProgress(0);
+    setShowLoadingBar(false);
     if (loadingIndicatorRef.current) {
       loadingIndicatorRef.current.visible = true;
     }
+    
+    // Clear any existing timeout
+    if (loadingBarTimeoutRef.current) {
+      clearTimeout(loadingBarTimeoutRef.current);
+    }
+    
+    // Show loading bar only after 2 seconds delay
+    loadingBarTimeoutRef.current = setTimeout(() => {
+      setShowLoadingBar(true);
+    }, 2000);
     
     console.log('Loading VRM from URL:', processedUrl);
     let isActive = true;
@@ -1353,6 +1369,10 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
             if (!vrm) {
               console.error('No VRM data in loaded model');
             setError('Invalid VRM model - No VRM data found');
+            if (loadingBarTimeoutRef.current) {
+              clearTimeout(loadingBarTimeoutRef.current);
+            }
+            setShowLoadingBar(false);
             setIsLoading(false);
               return;
             }
@@ -1405,6 +1425,10 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
           } else {
             console.error("Scene reference lost, can't add model");
             setError("Scene reference lost, can't add model");
+            if (loadingBarTimeoutRef.current) {
+              clearTimeout(loadingBarTimeoutRef.current);
+            }
+            setShowLoadingBar(false);
             setIsLoading(false);
             return;
           }
@@ -1541,26 +1565,45 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
               }
             }
 
+            setLoadingProgress(100);
+            if (loadingBarTimeoutRef.current) {
+              clearTimeout(loadingBarTimeoutRef.current);
+            }
+            setShowLoadingBar(false);
             setIsLoading(false);
           },
           (progress) => {
           const percentage = progress.total ? Math.round((progress.loaded / progress.total) * 100) : 0;
+          setLoadingProgress(percentage);
           console.log(`Loading progress: ${percentage}%`);
           },
           (error) => {
           console.error('Error loading VRM model:', error);
           setError(`Failed to load 3D model: ${error.message}`);
+          setLoadingProgress(0);
+          if (loadingBarTimeoutRef.current) {
+            clearTimeout(loadingBarTimeoutRef.current);
+          }
+          setShowLoadingBar(false);
             setIsLoading(false);
           }
         );
     } catch (err) {
       console.error('Exception during model loading setup:', err);
       setError(`Exception loading model: ${err.message}`);
+      setLoadingProgress(0);
+      if (loadingBarTimeoutRef.current) {
+        clearTimeout(loadingBarTimeoutRef.current);
+      }
+      setShowLoadingBar(false);
       setIsLoading(false);
     }
     
     return () => {
       isActive = false;
+      if (loadingBarTimeoutRef.current) {
+        clearTimeout(loadingBarTimeoutRef.current);
+      }
     };
   }, [processedUrl, animationUrl, onMetadataLoad, skeletonMode, wireframeMode]);
 
@@ -1622,6 +1665,18 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
           }}
         />
       </div>
+      
+      {/* Loading Progress Overlay */}
+      {isLoading && showLoadingBar && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-30">
+          <div className="w-full max-w-xs px-8 space-y-2">
+            <Progress value={loadingProgress} className="h-1.5" />
+            <p className="text-center text-xs text-gray-600 dark:text-gray-400 font-medium">
+              {loadingProgress}%
+            </p>
+          </div>
+        </div>
+      )}
       
       {/* Control buttons group - hide on mobile */}
       {window.innerWidth >= 768 && (

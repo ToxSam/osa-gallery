@@ -1,6 +1,6 @@
 /// src/components/avatar/AvatarViewer.tsx
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { AvatarViewerProps } from '@/types/avatar';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
@@ -156,6 +156,11 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
   const [showAvatarBrowser, setShowAvatarBrowser] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [projectsExpanded, setProjectsExpanded] = useState(false);
+  
+  // Infinite scroll state for mobile browser
+  const [displayedCount, setDisplayedCount] = useState(50);
+  const ITEMS_PER_BATCH = 50;
+  const SCROLL_THRESHOLD = 200;
 
   // Featured avatar names (same as desktop)
   const featuredAvatarNames = [
@@ -208,6 +213,30 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
     
     return result;
   }, [avatars, selectedProjectIds, searchQuery, featuredAvatarNames]);
+
+  // Reset displayed count when filters change
+  useEffect(() => {
+    setDisplayedCount(ITEMS_PER_BATCH);
+  }, [searchQuery, selectedProjectIds]);
+
+  // Avatars to actually display (sliced from filtered list)
+  const displayedAvatars = useMemo(() => {
+    return filteredAvatars.slice(0, displayedCount);
+  }, [filteredAvatars, displayedCount]);
+
+  // Check if there are more avatars to load
+  const hasMore = displayedCount < filteredAvatars.length;
+
+  // Handle scroll to load more (for mobile browser)
+  const handleMobileScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const scrollBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
+    
+    // Load more when near the bottom
+    if (scrollBottom < SCROLL_THRESHOLD && hasMore) {
+      setDisplayedCount(prev => Math.min(prev + ITEMS_PER_BATCH, filteredAvatars.length));
+    }
+  }, [hasMore, filteredAvatars.length]);
   
   // Initialize showInfoPanel based on device type
   const [showInfoPanel, setShowInfoPanel] = useState(() => {
@@ -281,21 +310,11 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
     console.log("Toggling info panel to:", newMode);
   };
   
-  // Log full avatar data when component renders
-  console.log(`Rendering AvatarViewer for ${avatar.name} (ID: ${avatar.id})`);
-  console.log('Full avatar data:', JSON.stringify(avatar, null, 2));
-  console.log('Model file URL:', avatar.modelFileUrl);
-  console.log('Selected format:', selectedFormat);
-
-  if (!avatar.modelFileUrl) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg">
-        <p className="text-gray-500">No model file available for preview</p>
-      </div>
-    );
-  }
+  // Memoize availableFormats to prevent unnecessary recalculations
+  const availableFormats = useMemo(() => {
+    return getAvailableFormats(avatar);
+  }, [avatar]);
   
-  const availableFormats = getAvailableFormats(avatar);
   const hasAlternateFormats = availableFormats.length > 1;
 
   // Determine which model URL to display in the viewer
@@ -305,7 +324,6 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
     
     // Get the selected format details
     const selectedFormatDetails = availableFormats.find(f => f.id === selectedFormat);
-    console.log('Selected format details:', selectedFormatDetails);
     
     // If voxel format is selected, try to use the voxel VRM for display
     if (selectedFormatDetails?.isVoxel) {
@@ -331,7 +349,7 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
     
     // Otherwise use the default VRM
     return avatar.modelFileUrl;
-  }, [avatar, selectedFormat, availableFormats]);
+  }, [avatar.modelFileUrl, avatar.metadata?.alternateModels, selectedFormat, availableFormats]);
 
   return (
     <div className="w-full h-full relative">
@@ -675,10 +693,13 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
                     </div>
                   )}
 
-                  {/* Avatar grid */}
-                  <div className="flex-1 overflow-y-auto p-4">
+                  {/* Avatar grid with infinite scroll */}
+                  <div 
+                    className="flex-1 overflow-y-auto p-4"
+                    onScroll={handleMobileScroll}
+                  >
                     <div className="grid grid-cols-2 gap-4">
-                      {filteredAvatars.map((a) => (
+                      {displayedAvatars.map((a) => (
                           <button
                             key={a.id}
                             onClick={() => {
@@ -696,6 +717,7 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
                                 src={a.thumbnailUrl || '/placeholder.png'}
                                 alt={a.name}
                                 className="w-full h-full object-cover"
+                                loading="lazy"
                               />
                             </div>
                             <span className="mt-2 text-sm font-medium text-gray-900 truncate w-full text-center">
@@ -704,6 +726,22 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
                           </button>
                         ))}
                     </div>
+                    
+                    {/* Loading indicator when more items are available */}
+                    {hasMore && (
+                      <div className="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                        Showing {displayedAvatars.length} of {filteredAvatars.length} avatars
+                        <br />
+                        <span className="text-xs">Scroll down to load more...</span>
+                      </div>
+                    )}
+                    
+                    {/* End of list indicator */}
+                    {!hasMore && displayedAvatars.length > 0 && (
+                      <div className="py-4 text-center text-xs text-gray-400 dark:text-gray-500">
+                        All {filteredAvatars.length} avatars displayed
+                      </div>
+                    )}
                   </div>
                 </div>
               </>

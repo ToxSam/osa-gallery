@@ -7,15 +7,20 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 import { Avatar } from '@/types/avatar';
 import { loadMixamoAnimation } from './utils/animationLoader';
+import { Progress } from '@/components/ui/progress';
 
 interface HomeVRMViewerProps {
   className?: string;
+  avatar?: Avatar | null;
 }
 
-export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
+export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className, avatar: propAvatar }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
-  const [avatar, setAvatar] = useState<Avatar | null>(null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [showLoadingBar, setShowLoadingBar] = useState(false);
+  const loadingBarTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const avatar = propAvatar || null;
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const clockRef = useRef(new THREE.Clock());
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -28,25 +33,6 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
   const isActiveRef = useRef(true);
   const animationLoadedRef = useRef(false);
   const rotationAnimationTimeRef = useRef(0);
-
-  // Fetch random avatar
-  useEffect(() => {
-    const fetchRandomAvatar = async () => {
-      try {
-        const response = await fetch('/api/avatars');
-        const data = await response.json();
-        
-        if (data.avatars && data.avatars.length > 0) {
-          const randomIndex = Math.floor(Math.random() * data.avatars.length);
-          setAvatar(data.avatars[randomIndex]);
-        }
-      } catch (error) {
-        console.error('Error fetching avatar:', error);
-      }
-    };
-
-    fetchRandomAvatar();
-  }, []);
 
   const setupCamera = (box: THREE.Box3, aspect: number) => {
     const size = new THREE.Vector3();
@@ -77,6 +63,19 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
     
     const init = async () => {
       try {
+        setLoadingProgress(0);
+        setShowLoadingBar(false);
+        
+        // Clear any existing timeout
+        if (loadingBarTimeoutRef.current) {
+          clearTimeout(loadingBarTimeoutRef.current);
+        }
+        
+        // Show loading bar only after 2 seconds delay
+        loadingBarTimeoutRef.current = setTimeout(() => {
+          setShowLoadingBar(true);
+        }, 2000);
+        
         // Create renderer first to establish WebGL context
         try {
           renderer = new THREE.WebGLRenderer({
@@ -155,7 +154,13 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
           loader.load(
             avatar.modelFileUrl as string,
             resolve,
-            undefined,
+            (progress) => {
+              if (progress.total) {
+                const percentage = Math.round((progress.loaded / progress.total) * 100);
+                setLoadingProgress(percentage);
+                console.log(`Loading progress: ${percentage}%`);
+              }
+            },
             reject
           );
         });
@@ -286,6 +291,11 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
           console.log('Animation started');
         }
 
+        setLoadingProgress(100);
+        if (loadingBarTimeoutRef.current) {
+          clearTimeout(loadingBarTimeoutRef.current);
+        }
+        setShowLoadingBar(false);
         setLoading(false);
 
         // Animation loop
@@ -355,6 +365,11 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
           renderer = null;
         }
         console.error('Setup error:', error);
+        setLoadingProgress(0);
+        if (loadingBarTimeoutRef.current) {
+          clearTimeout(loadingBarTimeoutRef.current);
+        }
+        setShowLoadingBar(false);
         setLoading(false);
       }
     };
@@ -364,6 +379,9 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
     // Cleanup function
     return () => {
       isActiveRef.current = false;
+      if (loadingBarTimeoutRef.current) {
+        clearTimeout(loadingBarTimeoutRef.current);
+      }
       
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
@@ -415,9 +433,14 @@ export const HomeVRMViewer: React.FC<HomeVRMViewerProps> = ({ className }) => {
         position: 'relative'
       }}
     >
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center z-20">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      {loading && showLoadingBar && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
+          <div className="w-full max-w-xs px-8 space-y-2">
+            <Progress value={loadingProgress} className="h-1.5" />
+            <p className="text-center text-xs text-gray-600 dark:text-gray-400 font-medium">
+              {loadingProgress}%
+            </p>
+          </div>
         </div>
       )}
     </div>

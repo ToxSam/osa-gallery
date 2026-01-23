@@ -24,6 +24,8 @@ export interface GithubProject extends BaseEntity {
   creatorId: string;
   description?: string;
   isPublic: boolean;
+  // New field from open-source-avatars structure
+  avatar_data_file?: string; // Path to avatar file in avatars/ folder (e.g., "100avatars-r1.json")
 }
 
 // Avatar model

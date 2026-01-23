@@ -1,7 +1,7 @@
 ///src/components/avatar/AvatarGallery.tsx
 
 "use client";
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Search, Download, RefreshCw, ChevronDown, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -45,6 +45,14 @@ export const AvatarGallery: React.FC = () => {
     selectedFormat,
     handleFormatChange
   } = useAvatarSelection();
+  
+  // Use ref to track if avatar has been initialized (prevents double selection in Strict Mode)
+  const avatarInitializedRef = useRef(false);
+  
+  // Infinite scroll state
+  const [displayedCount, setDisplayedCount] = useState(50); // Initial batch size
+  const ITEMS_PER_BATCH = 50; // Load 50 more avatars at a time
+  const SCROLL_THRESHOLD = 200; // Load more when 200px from bottom
 
   // Helper function to create URL-friendly slug from avatar name
   const createSlug = (name: string) => {
@@ -110,7 +118,10 @@ export const AvatarGallery: React.FC = () => {
         setAvatars(apiData.avatars);
         setProjects(apiData.projects || []);
         
-        if (apiData.avatars && apiData.avatars.length > 0) {
+        // Only initialize avatar selection once (prevents double selection in React Strict Mode)
+        if (apiData.avatars && apiData.avatars.length > 0 && !avatarInitializedRef.current) {
+          avatarInitializedRef.current = true;
+          
           // Check if there's an avatar in the URL
           const params = new URLSearchParams(window.location.search);
           const avatarSlug = params.get('avatar');
@@ -183,6 +194,30 @@ export const AvatarGallery: React.FC = () => {
     return result;
   }, [avatars, selectedProjectIds, searchQuery, featuredAvatarNames]);
 
+  // Reset displayed count when filters change
+  useEffect(() => {
+    setDisplayedCount(ITEMS_PER_BATCH);
+  }, [searchQuery, selectedProjectIds]);
+
+  // Avatars to actually display (sliced from filtered list)
+  const displayedAvatars = useMemo(() => {
+    return filteredAvatars.slice(0, displayedCount);
+  }, [filteredAvatars, displayedCount]);
+
+  // Check if there are more avatars to load
+  const hasMore = displayedCount < filteredAvatars.length;
+
+  // Handle scroll to load more
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const scrollBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
+    
+    // Load more when near the bottom
+    if (scrollBottom < SCROLL_THRESHOLD && hasMore) {
+      setDisplayedCount(prev => Math.min(prev + ITEMS_PER_BATCH, filteredAvatars.length));
+    }
+  }, [hasMore, filteredAvatars.length]);
+
   // Toggle project selection
   const toggleProjectSelection = (projectId: string) => {
     setSelectedProjectIds(prev => {
@@ -202,24 +237,38 @@ export const AvatarGallery: React.FC = () => {
   }, []);
 
   const selectRandomAvatar = useCallback(() => {
-    if (filteredAvatars.length > 0) {
-      const randomIndex = Math.floor(Math.random() * filteredAvatars.length);
-      const randomAvatar = filteredAvatars[randomIndex];
+    if (avatars.length > 0) {
+      const randomIndex = Math.floor(Math.random() * avatars.length);
+      const randomAvatar = avatars[randomIndex];
       setCurrentAvatar(randomAvatar);
+      const slug = createSlug(randomAvatar.name);
+      // Update URL without navigation using shallow routing
+      window.history.pushState(null, '', `${pathname}?avatar=${slug}`);
     }
-  }, [filteredAvatars]);
+  }, [avatars, pathname]);
 
-  const handleDownloadCurrent = useCallback(() => {
-    if (currentAvatar) {
-      // Directly open the download URL for the current avatar
-      const format = selectedFormat || null;
-      const formatParam = format ? `?format=${format}` : '';
-      const directDownloadUrl = `/api/avatars/${currentAvatar.id}/direct-download${formatParam}`;
-      
-      // Open the download in a new tab
-      window.open(directDownloadUrl, '_blank');
+  const handleDownloadCurrent = useCallback(async (avatarId?: string, format?: string | null) => {
+    // Use provided avatarId or currentAvatar
+    const targetAvatar = avatarId 
+      ? avatars.find(a => a.id === avatarId) 
+      : currentAvatar;
+    
+    if (!targetAvatar) {
+      alert('Avatar not found');
+      return;
     }
-  }, [currentAvatar, selectedFormat]);
+
+    // Use provided format or selectedFormat
+    const targetFormat = format !== undefined ? format : selectedFormat;
+
+    try {
+      const { downloadAvatar } = await import('@/lib/download-utils');
+      await downloadAvatar(targetAvatar, targetFormat || null);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Download failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  }, [currentAvatar, selectedFormat, avatars]);
 
   // Handle sidebar resize
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -377,13 +426,16 @@ export const AvatarGallery: React.FC = () => {
                 </Button>
               </div>
 
-              {/* Avatar List - Dynamic Grid layout */}
-              <div className="flex-1 py-2 overflow-y-auto">
+              {/* Avatar List - Dynamic Grid layout with infinite scroll */}
+              <div 
+                className="flex-1 py-2 overflow-y-auto"
+                onScroll={handleScroll}
+              >
                 <div 
                   className="grid gap-2 px-3"
                   style={{ gridTemplateColumns: `repeat(${gridColumns}, minmax(0, 1fr))` }}
                 >
-                  {filteredAvatars.map(avatar => (
+                  {displayedAvatars.map(avatar => (
                     <button
                       key={avatar.id}
                       className={`
@@ -417,6 +469,22 @@ export const AvatarGallery: React.FC = () => {
                     </button>
                   ))}
                 </div>
+                
+                {/* Loading indicator when more items are available */}
+                {hasMore && (
+                  <div className="px-3 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                    Showing {displayedAvatars.length} of {filteredAvatars.length} avatars
+                    <br />
+                    <span className="text-xs">Scroll down to load more...</span>
+                  </div>
+                )}
+                
+                {/* End of list indicator */}
+                {!hasMore && displayedAvatars.length > 0 && (
+                  <div className="px-3 py-4 text-center text-xs text-gray-400 dark:text-gray-500">
+                    All {filteredAvatars.length} avatars displayed
+                  </div>
+                )}
               </div>
             </div>
             
@@ -464,7 +532,10 @@ export const AvatarGallery: React.FC = () => {
                   className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10"
                 >
                   <Button 
-                    onClick={handleDownloadCurrent}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDownloadCurrent();
+                    }}
                     variant="default"
                     className="bg-cream/90 dark:bg-gray-900/90 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-700 hover:shadow-xl hover:scale-105 px-6 py-2 rounded-md flex items-center gap-2 shadow-lg border border-gray-300 dark:border-gray-700 font-medium backdrop-blur-md transition-all duration-200"
                   >

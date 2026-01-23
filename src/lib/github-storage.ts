@@ -34,6 +34,8 @@ export type GithubProject = {
   isPublic: boolean;
   createdAt: string;
   updatedAt: string;
+  // New field from open-source-avatars structure
+  avatar_data_file?: string; // Path to avatar file in avatars/ folder (e.g., "100avatars-r1.json")
 };
 
 // Type definitions for avatars
@@ -104,8 +106,9 @@ const RAW_CONTENT_BASE = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GI
  */
 async function fetchData(path: string) {
   try {
-    console.log(`Fetching from: ${RAW_CONTENT_BASE}/${path}?timestamp=${Date.now()}`);
-    const response = await fetch(`${RAW_CONTENT_BASE}/${path}?timestamp=${Date.now()}`, {
+    const url = `${RAW_CONTENT_BASE}/${path}?timestamp=${Date.now()}`;
+    console.log(`Fetching from: ${url}`);
+    const response = await fetch(url, {
       headers: {
         'Cache-Control': 'no-cache',
       },
@@ -113,17 +116,21 @@ async function fetchData(path: string) {
     
     if (!response.ok) {
       if (response.status === 404) {
+        console.warn(`  ✗ File not found (404): ${path}`);
         // File doesn't exist yet, return empty array or object
         return (path.includes('users') || path.includes('projects') || 
                path.includes('avatars') || path.includes('tags') || 
                path.includes('downloads')) ? [] : {};
       }
+      console.error(`  ✗ HTTP Error ${response.status}: ${response.statusText} for ${path}`);
       throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log(`  ✓ Successfully fetched ${path} (response size: ${JSON.stringify(data).length} chars)`);
+    return data;
   } catch (error) {
-    console.error(`Error fetching data from GitHub: ${path}`, error);
+    console.error(`  ✗ Error fetching data from GitHub: ${path}`, error);
     throw error;
   }
 }
@@ -260,7 +267,9 @@ async function getProjects() {
     description: project.description,
     isPublic: project.is_public,
     createdAt: project.created_at,
-    updatedAt: project.updated_at
+    updatedAt: project.updated_at,
+    // Support new avatar_data_file field from open-source-avatars structure
+    avatar_data_file: project.avatar_data_file || project.avatarDataFile
   }));
 }
 
@@ -273,17 +282,160 @@ async function saveProjects(projects: any[]) {
     description: project.description,
     is_public: project.isPublic,
     created_at: project.createdAt,
-    updated_at: project.updatedAt
+    updated_at: project.updatedAt,
+    // Preserve avatar_data_file field if it exists
+    avatar_data_file: project.avatar_data_file || project.avatarDataFile
   }));
   return updateData(DATA_PATHS.projects, snakeCaseProjects, 'Update projects data');
 }
 
 // Avatars
-async function getAvatars() {
-  const rawAvatars = await fetchData(DATA_PATHS.avatars);
+async function getAvatars(projectIds?: string[]) {
+  let allAvatars: any[] = [];
+  
+  try {
+    // First, try the new multi-file structure from open-source-avatars
+    // Fetch projects to see which avatar files to load
+    const projects = await fetchData(DATA_PATHS.projects);
+    
+    if (Array.isArray(projects) && projects.length > 0) {
+      // Check if any project has avatar_data_file field (new structure)
+      const hasAvatarDataFiles = projects.some((p: any) => p.avatar_data_file || p.avatarDataFile);
+      
+      if (hasAvatarDataFiles) {
+        console.log('Using new multi-file avatar structure from projects.json');
+        
+        // Fetch avatars from each project's avatar file
+        const avatarPromises = projects
+          .filter((project: any) => {
+            const avatarFile = project.avatar_data_file || project.avatarDataFile;
+            // Only filter if is_public is explicitly false, otherwise include it
+            const isPublic = project.is_public !== false; // Default to true if not specified
+            const hasAvatarFile = !!avatarFile;
+            
+            // Filter by project IDs if provided
+            if (projectIds && projectIds.length > 0) {
+              if (!projectIds.includes(project.id)) {
+                return false; // Skip projects not in the filter list
+              }
+            }
+            
+            if (!hasAvatarFile) {
+              console.log(`Skipping project ${project.name || project.id}: no avatar_data_file`);
+            }
+            if (!isPublic) {
+              console.log(`Skipping project ${project.name || project.id}: not public`);
+            }
+            
+            return hasAvatarFile && isPublic;
+          })
+          .map(async (project: any) => {
+            const avatarFile = project.avatar_data_file || project.avatarDataFile;
+            const projectId = project.id;
+            
+            try {
+              // Normalize the avatar file path
+              // Handle cases where avatar_data_file might be:
+              // - Just filename: "100avatars-r1.json"
+              // - With avatars/ prefix: "avatars/100avatars-r1.json"
+              // - Full path: "data/avatars/100avatars-r1.json"
+              let avatarPath: string;
+              if (avatarFile.startsWith('data/avatars/')) {
+                // Already has full path
+                avatarPath = avatarFile;
+              } else if (avatarFile.startsWith('avatars/')) {
+                // Has avatars/ prefix, add data/ prefix
+                avatarPath = `data/${avatarFile}`;
+              } else {
+                // Just filename, add data/avatars/ prefix
+                avatarPath = `data/avatars/${avatarFile}`;
+              }
+              
+              console.log(`Fetching avatars from: ${avatarPath} for project: ${project.name || projectId}`);
+              
+              const projectAvatars = await fetchData(avatarPath);
+              
+              // Debug: log what we actually got
+              console.log(`  Response type: ${typeof projectAvatars}, isArray: ${Array.isArray(projectAvatars)}`);
+              if (!Array.isArray(projectAvatars)) {
+                console.log(`  Response content (first 200 chars):`, JSON.stringify(projectAvatars).substring(0, 200));
+              }
+              
+              if (Array.isArray(projectAvatars)) {
+                console.log(`  ✓ Loaded ${projectAvatars.length} avatars from ${avatarFile}`);
+                
+                if (projectAvatars.length > 0) {
+                  // Check project_id distribution in the file
+                  const projectIdDistribution = projectAvatars.reduce((acc: Record<string, number>, avatar: any) => {
+                    const pid = avatar.project_id || 'undefined';
+                    acc[pid] = (acc[pid] || 0) + 1;
+                    return acc;
+                  }, {});
+                  console.log(`  Project ID distribution in ${avatarFile}:`, projectIdDistribution);
+                  
+                  // Log first avatar as sample
+                  console.log(`  Sample avatar (first one):`, {
+                    id: projectAvatars[0].id,
+                    name: projectAvatars[0].name,
+                    project_id: projectAvatars[0].project_id
+                  });
+                } else {
+                  console.warn(`  ⚠ File ${avatarFile} exists but is empty (0 avatars)`);
+                }
+                
+                // Ensure all avatars have the correct project_id
+                // Use the project_id from the file if it exists, otherwise use the project.id
+                // This handles cases where avatar files have their own project_id values
+                return projectAvatars.map((avatar: any) => ({
+                  ...avatar,
+                  // Keep the original project_id from the file, but ensure it's set
+                  project_id: avatar.project_id || projectId
+                }));
+              } else {
+                console.warn(`  ✗ Invalid data format from ${avatarFile}: expected array, got ${typeof projectAvatars}`);
+              }
+              return [];
+            } catch (error) {
+              console.error(`  ✗ Error fetching avatars for project ${project.name || projectId} (${avatarFile}):`, error);
+              return [];
+            }
+          });
+        
+        // Wait for all avatar files to be fetched
+        const avatarArrays = await Promise.all(avatarPromises);
+        allAvatars = avatarArrays.flat();
+        
+        console.log(`✓ Loaded ${allAvatars.length} avatars from ${avatarPromises.length} project files`);
+        if (allAvatars.length === 0) {
+          console.warn('⚠ No avatars loaded! Check project files and avatar_data_file paths.');
+        }
+      }
+    }
+    
+    // Fallback: If no avatars were loaded from project files, try the old single-file structure
+    if (allAvatars.length === 0) {
+      console.log('Falling back to single-file avatar structure (data/avatars.json)');
+      const rawAvatars = await fetchData(DATA_PATHS.avatars);
+      if (Array.isArray(rawAvatars)) {
+        allAvatars = rawAvatars;
+      }
+    }
+  } catch (error) {
+    console.error('Error in getAvatars, trying fallback:', error);
+    // Final fallback: try the old single-file structure
+    try {
+      const rawAvatars = await fetchData(DATA_PATHS.avatars);
+      if (Array.isArray(rawAvatars)) {
+        allAvatars = rawAvatars;
+      }
+    } catch (fallbackError) {
+      console.error('Fallback also failed:', fallbackError);
+      return []; // Return empty array if everything fails
+    }
+  }
   
   // Convert snake_case to camelCase for compatibility
-  return rawAvatars.map((avatar: any) => ({
+  const convertedAvatars = allAvatars.map((avatar: any) => ({
     id: avatar.id,
     name: avatar.name,
     projectId: avatar.project_id,
@@ -293,12 +445,16 @@ async function getAvatars() {
     polygonCount: avatar.polygon_count,
     format: avatar.format,
     materialCount: avatar.material_count,
-    isPublic: avatar.is_public,
-    isDraft: avatar.is_draft,
+    // Default isPublic to true if not specified (for backward compatibility)
+    isPublic: avatar.is_public !== false,
+    isDraft: avatar.is_draft === true,
     createdAt: avatar.created_at,
     updatedAt: avatar.updated_at,
-    metadata: avatar.metadata
+    metadata: avatar.metadata || {}
   }));
+  
+  console.log(`✓ Converted ${convertedAvatars.length} avatars to camelCase format`);
+  return convertedAvatars;
 }
 
 async function saveAvatars(avatars: any[]) {
