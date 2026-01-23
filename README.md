@@ -1,105 +1,128 @@
 # OpenSourceAvatars.com
 
-A collection of CC0 and open source avatars for the metaverse, games, VR, and creative projects.
+The central registry for discovering free and open source 3D avatars
 
-## 🌟 About the Project
+🌐 [opensourceavatars.com](https://opensourceavatars.com)
 
-OpenSourceAvatars.com is a platform dedicated to providing high-quality, freely available 3D avatars. What began as a showcase for ToxSam's personal collection of CC0 avatars has evolved into an ambitious mission to become the internet's central hub for discovering and downloading open source 3D characters.
+A curated directory that makes it easy to find VRM avatars you can actually use - from CC0 public domain avatars to community NFT collections with clear licensing.
 
-Currently the collection includes over 300 metaverse-ready avatars, including the original 200+ VRM avatars from the 100avatars challenge created in 2018 and 2020, with more being added regularly.
+## What is this?
 
-### Vision
+OpenSourceAvatars.com started as a showcase for ToxSam's CC0 avatar collection but has evolved into a discovery platform for all kinds of open source 3D avatars.
 
-Our goal is to build the most comprehensive library of high-quality CC0 and Creative Commons 3D avatars available online. We want to make it easy for developers, creators, and enthusiasts to find and use well-made avatars for:
+We aggregate avatars from multiple sources:
 
-- Games and interactive experiences
-- VR applications and virtual worlds
-- Creative and artistic projects
-- AI training and educational purposes
+- **Original collections** (our CC0 avatars stored on Arweave)
+- **Community NFT collections** (like VIPE Heroes, Grifter Squaddies)
+- **Other creators' CC0 work** (coming soon)
 
-All with no strings attached!
+Our mission: Make it dead simple to find quality avatars with transparent licensing.
 
-## 🚀 Current Status
+## Current Collections
 
-- **Super Beta**: The platform is in its early stages with continuous updates
-- **300+ Avatars**: Growing collection of 3D characters
-- **Multiple Formats**: Primarily VRM, with FBX versions also available
-- **Voxel Variants**: Voxel versions of many avatars are available
-- **Permanent Storage**: All avatars are stored on ArDrive for longevity
-- **Multilingual Support**: Full Japanese localization available
-- **VRM Inspector**: Advanced tool for analyzing VRM avatar files
+### ToxSam's Original Collections (CC0)
 
-## 🔄 Recent Updates
+- **100Avatars R1, R2, R3** - 300+ avatars
+- Multiple formats: VRM, FBX, voxel variants
+- Permanently stored on ArDrive
+- Use however you want, no attribution needed
 
-- Added 100 more VRM avatars to the collection
-- Created voxel versions of the original 100 Avatars from Round 1 and Round 2
-- Added FBX versions for both regular and voxel variants
-- Upgraded from CloudFlare buckets to permanent ArDrive storage
-- Migrated data to the new open-source-avatars database repository for increased transparency
-- Added full Japanese language support
-- Implemented VRM Inspector tool for advanced avatar analysis
+### Community Collections
 
-## 💡 Development Story
+- **VIPE Heroes** - NFT avatars (CC-BY)
+- **Grifter Squaddies** - [Add details]
+- More being added regularly
 
-This website was initially developed in just 4 days using AI tools like Claude, ChatGPT, and Bolt.new, with further updates implemented using Claude 3.7 Sonnet through Cursor.
-The project demonstrates how modern AI tools can empower creators with limited programming experience to build functional web applications.
+Each collection clearly displays its license so you know exactly what you can do with it.
 
-## 🔮 Future Plans
+## Features
 
-- Continue adding more open source avatars
-- Release the upcoming Grifters collection
-- Begin incorporating CC0 avatars from other talented creators
-- Improve the 3D gallery viewer with better navigation tools
+### 🔍 Browse & Filter
 
-## 💻 Technical Information
+- Search by collection, style, or traits
+- Filter by license type (CC0, CC-BY, etc.)
+- Preview 3D models before downloading
 
-This repository contains the codebase for OpenSourceAvatars.com, a Next.js application built with:
+### 🛠️ VRM Inspector
 
-- Next.js and React
-- Tailwind CSS for styling
-- ArDrive for permanent avatar storage
-- GitHub for data management through the open-source-avatars repository
+Advanced tool for analyzing VRM files:
 
-### Data Architecture
+- View metadata and technical specs
+- Test facial expressions and blendshapes
+- Examine textures and materials
+- Visualize skeleton and wireframe
 
-The project uses a two-repository approach:
-- **osa-gallery**: This main application repository with all code and UI components ([GitHub](https://github.com/ToxSam/osa-gallery))
-- **open-source-avatars**: A separate repository containing all avatar data in JSON format ([GitHub](https://github.com/ToxSam/open-source-avatars))
+Access at `/vrmviewer`
 
-This separation allows for better data management, transparency, and community contributions.
+### 🌐 Multilingual
 
-## 🔧 Special Features
+Full Japanese localization available
 
-### VRM Inspector
+### 📊 Developer-Friendly
 
-The VRM Inspector is a powerful analysis tool that allows you to:
-- Examine detailed metadata from VRM avatar files
-- View and test facial expressions and blendshapes
-- Analyze textures with format details
-- See technical specifications like polygon count, materials, and bone structure
-- Visualize the avatar's skeleton and wireframe
+All avatar data available as JSON via our data repository
 
-Access the VRM Inspector (implemented as the VRMInspector component) from the main navigation menu under "Viewer" or directly at `/vrmviewer`.
+## Technical Stack
 
-### Multilingual Support
+- **Frontend**: Next.js, React, Tailwind CSS
+- **Data Source**: open-source-avatars JSON repository
+- **Storage**: Arweave (our avatars), IPFS (community collections)
 
-The site features complete Japanese localization with an easy language switcher in the navigation bar. All major sections including the VRM Inspector, avatar gallery, and resource pages are fully translated.
+## Architecture
 
-## 🤝 Contributing
+Two-repository approach:
 
-Interested in contributing avatars or helping with development? We welcome contributions from the community! Feel free to:
+- **osa-gallery** (this repo) - Website code and UI
+- **open-source-avatars** - Avatar metadata and registry
 
-- Report bugs or suggest features
-- Help improve the codebase
-- Contribute to translations
+This separation keeps data transparent and makes community contributions easier.
 
-## 📱 Get in Touch
+## What's VRM?
 
-- Twitter: [@ToxSam](https://twitter.com/ToxSam)
-- Website: [ToxSam.com](https://toxsam.com)
+VRM is an open 3D avatar format that works across games, VR apps, and web browsers. Think of it as a universal avatar file.
 
-## 📜 License
+Works with:
 
-All code in this repository is available under the MIT License.
+- VRChat, VSeeFace, VTuber apps
+- Unity (UniVRM)
+- Web (three-vrm)
+- Unreal Engine (VRM4U)
 
-The 3D avatar models featured on OpenSourceAvatars.com are primarily released under Creative Commons CC0 licenses, making them free to use, modify, and distribute for any purpose, including commercial projects.
+## Development Story
+
+Built in 4 days using Claude, ChatGPT, and Bolt.new, then continuously improved with Claude 3.7 Sonnet through Cursor. Proof that AI tools can help creators with limited coding experience build real applications.
+
+## Roadmap
+
+- ✅ Multi-collection support with clear licensing
+- ✅ VRM Inspector tool
+- ✅ Japanese localization
+- 🔄 Add more community collections
+- 🔄 Improved 3D viewer navigation
+- 📋 Community submission system for new collections
+- 📋 Advanced filtering (polygon count, style, etc.)
+
+## Contributing
+
+### Want to add a collection?
+
+Submit via GitHub Discussions with:
+
+- Collection info and license
+- Links to VRM files (IPFS, Arweave, permanent hosting)
+- Preview images
+
+### Code contributions
+
+Found a bug? Want to improve the UI? PRs welcome!
+
+## Connect
+
+- **Twitter**: [@ToxSam](https://twitter.com/ToxSam)
+- **Website**: [ToxSam.com](https://toxsam.com)
+
+## License
+
+- **Website code**: MIT License
+- **Avatar models**: Varies by collection - check individual collection licenses
+- Our original avatars (100Avatars series) are **CC0 public domain**.
