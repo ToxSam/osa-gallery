@@ -1,14 +1,50 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Github, Database, ExternalLink } from "lucide-react";
 import { AvatarHeader } from "@/components/avatar/AvatarHeader";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
 
+interface CommunityCollection {
+  id: string;
+  name: string;
+  description: string;
+  license: string;
+  source_type: string;
+  source_network?: string | string[];
+  storage_type: string;
+  opensea_url?: string;
+  avatar_data_file?: string;
+}
+
 export default function ResourcesPage() {
   const { t, isLoading } = useI18n();
+  const [communityCollections, setCommunityCollections] = useState<CommunityCollection[]>([]);
+  const [collectionsLoading, setCollectionsLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch community collections
+    const fetchCollections = async () => {
+      try {
+        setCollectionsLoading(true);
+        const response = await fetch('/api/collections');
+        if (response.ok) {
+          const data = await response.json();
+          setCommunityCollections(data.collections || []);
+        } else {
+          console.error('Failed to fetch collections:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching collections:', error);
+      } finally {
+        setCollectionsLoading(false);
+      }
+    };
+
+    fetchCollections();
+  }, []);
 
   if (isLoading) {
     return <div className="min-h-screen bg-cream dark:bg-gray-950 flex items-center justify-center">Loading...</div>;
@@ -93,84 +129,75 @@ export default function ResourcesPage() {
                 <div className="mb-8">
                   <h3 className="text-title mb-6 text-gray-900 dark:text-gray-100">{t('resources.collections.community.title')}</h3>
                   
-                  <div className="bg-gray-50 dark:bg-gray-900 p-8 rounded-lg border border-gray-300 dark:border-gray-700 mb-6">
-                    <div className="mb-6">
-                      <p className="text-body font-semibold mb-3 text-gray-900 dark:text-gray-100">{t('resources.collections.community.vipe.name')}</p>
-                      <ul className="space-y-2 text-body text-gray-500 dark:text-gray-400 ml-4">
-                        <li className="flex items-start gap-3">
-                          <span className="w-2 h-2 bg-gray-900 dark:bg-gray-100 rounded-full mt-2"></span>
-                          <span>{t('resources.collections.community.vipe.license')}</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="w-2 h-2 bg-gray-900 dark:bg-gray-100 rounded-full mt-2"></span>
-                          <span>{t('resources.collections.community.vipe.storage')}</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="w-2 h-2 bg-gray-900 dark:bg-gray-100 rounded-full mt-2"></span>
-                          <span>
-                            {(() => {
-                              const source = t('resources.collections.community.vipe.source');
-                              const sourceText = typeof source === 'string' ? source : String(source);
-                              const parts = sourceText.split(':');
-                              return (
-                                <>
-                                  {parts[0]}:{' '}
-                                  <a 
-                                    href={t('resources.collections.community.vipe.sourceLink') as string} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 underline link-hover"
-                                  >
-                                    {parts[1]?.trim()}
-                                  </a>
-                                </>
-                              );
-                            })()}
-                          </span>
-                        </li>
-                      </ul>
+                  {collectionsLoading ? (
+                    <div className="bg-gray-50 dark:bg-gray-900 p-8 rounded-lg border border-gray-300 dark:border-gray-700 mb-6">
+                      <p className="text-body text-gray-500 dark:text-gray-400">Loading collections...</p>
                     </div>
+                  ) : communityCollections.length === 0 ? (
+                    <div className="bg-gray-50 dark:bg-gray-900 p-8 rounded-lg border border-gray-300 dark:border-gray-700 mb-6">
+                      <p className="text-body text-gray-500 dark:text-gray-400">No community collections found.</p>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 dark:bg-gray-900 p-8 rounded-lg border border-gray-300 dark:border-gray-700 mb-6 space-y-6">
+                      {communityCollections.map((collection, index) => {
+                        const isLast = index === communityCollections.length - 1;
+                        const network = Array.isArray(collection.source_network) 
+                          ? collection.source_network.map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(', ') 
+                          : collection.source_network 
+                            ? collection.source_network.charAt(0).toUpperCase() + collection.source_network.slice(1)
+                            : '';
+                        const sourceUrl = collection.opensea_url || '#';
+                        const sourceLabel = collection.opensea_url 
+                          ? `OpenSea${network ? ` (${network})` : ''}`
+                          : 'Website';
+                        
+                        // Format storage type
+                        const storageLabel = collection.storage_type === 'ipfs' 
+                          ? 'IPFS' 
+                          : collection.storage_type.charAt(0).toUpperCase() + collection.storage_type.slice(1);
+                        
+                        // Format license
+                        const licenseLabel = collection.license === 'CC0' 
+                          ? 'CC0 (Public Domain) - use however you want, no attribution needed'
+                          : collection.license === 'CC-BY'
+                          ? 'CC-BY (attribution required)'
+                          : collection.license;
 
-                    <div>
-                      <p className="text-body font-semibold mb-3 text-gray-900 dark:text-gray-100">{t('resources.collections.community.grifter.name')}</p>
-                      <ul className="space-y-2 text-body text-gray-500 dark:text-gray-400 ml-4">
-                        <li className="flex items-start gap-3">
-                          <span className="w-2 h-2 bg-gray-900 dark:bg-gray-100 rounded-full mt-2"></span>
-                          <span>{t('resources.collections.community.grifter.license')}</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="w-2 h-2 bg-gray-900 dark:bg-gray-100 rounded-full mt-2"></span>
-                          <span>{t('resources.collections.community.grifter.storage')}</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="w-2 h-2 bg-gray-900 dark:bg-gray-100 rounded-full mt-2"></span>
-                          <span>
-                            {(() => {
-                              const source = t('resources.collections.community.grifter.source');
-                              const sourceText = typeof source === 'string' ? source : String(source);
-                              if (sourceText.includes('[')) {
-                                return sourceText;
-                              }
-                              const parts = sourceText.split(':');
-                              return (
-                                <>
-                                  {parts[0]}:{' '}
+                        return (
+                          <div key={collection.id} className={!isLast ? 'pb-6 border-b border-gray-300 dark:border-gray-700' : ''}>
+                            <p className="text-body font-semibold mb-3 text-gray-900 dark:text-gray-100">{collection.name}</p>
+                            {collection.description && (
+                              <p className="text-body text-gray-600 dark:text-gray-400 mb-3">{collection.description}</p>
+                            )}
+                            <ul className="space-y-2 text-body text-gray-500 dark:text-gray-400 ml-4">
+                              <li className="flex items-start gap-3">
+                                <span className="w-2 h-2 bg-gray-900 dark:bg-gray-100 rounded-full mt-2"></span>
+                                <span>License: {licenseLabel}</span>
+                              </li>
+                              <li className="flex items-start gap-3">
+                                <span className="w-2 h-2 bg-gray-900 dark:bg-gray-100 rounded-full mt-2"></span>
+                                <span>Storage: {storageLabel}</span>
+                              </li>
+                              <li className="flex items-start gap-3">
+                                <span className="w-2 h-2 bg-gray-900 dark:bg-gray-100 rounded-full mt-2"></span>
+                                <span>
+                                  Source:{' '}
                                   <a 
-                                    href={t('resources.collections.community.grifter.sourceLink') as string} 
+                                    href={sourceUrl} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     className="text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 underline link-hover"
                                   >
-                                    {parts[1]?.trim()}
+                                    {sourceLabel}
                                   </a>
-                                </>
-                              );
-                            })()}
-                          </span>
-                        </li>
-                      </ul>
+                                </span>
+                              </li>
+                            </ul>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 p-6 rounded-lg border border-yellow-200 dark:border-yellow-800">
@@ -209,17 +236,20 @@ export default function ResourcesPage() {
 
                   <div className="bg-gray-50 dark:bg-gray-900 p-8 rounded-lg border border-gray-300 dark:border-gray-700 mb-6">
                     <p className="text-body font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('resources.developers.database.structure.title')}</p>
-                    <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700 overflow-x-auto mb-6">
-                      <code className="text-sm text-gray-800 dark:text-gray-200 font-mono">
-                        /data/{'\n'}
+                    <pre className="bg-gray-900 dark:bg-gray-950 p-6 rounded-lg border border-gray-700 dark:border-gray-800 overflow-x-auto mb-6 shadow-inner">
+                      <code className="text-sm text-gray-100 dark:text-gray-300 font-mono leading-relaxed block">
+                        <span className="text-gray-400">/data/</span>{'\n'}
                         {'\n'}
-                        projects.json → All collections + license info{'\n'}
-                        /avatars/{'\n'}
-                        100avatars-r1.json → Individual avatar data{'\n'}
-                        100avatars-r2.json{'\n'}
-                        100avatars-r3.json{'\n'}
-                        vipe-heroes-genesis.json{'\n'}
-                        grifters-squaddies.json
+                        <span className="text-blue-400">projects.json</span> <span className="text-gray-500">→</span> <span className="text-gray-400">All collections + license info</span>{'\n'}
+                        <span className="text-gray-400">/avatars/</span>{'\n'}
+                        <span className="text-green-400">  100avatars-r1.json</span> <span className="text-gray-500">→</span> <span className="text-gray-400">Individual avatar data</span>{'\n'}
+                        <span className="text-green-400">  100avatars-r2.json</span>{'\n'}
+                        <span className="text-green-400">  100avatars-r3.json</span>{'\n'}
+                        {communityCollections.map((collection) => (
+                          <span key={collection.id}>
+                            <span className="text-green-400">  {collection.avatar_data_file?.replace('avatars/', '') || `${collection.id}.json`}</span>{'\n'}
+                          </span>
+                        ))}
                       </code>
                     </pre>
                     <p className="text-body font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('resources.developers.database.includes')}</p>

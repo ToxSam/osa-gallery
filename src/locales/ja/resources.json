@@ -14,18 +14,44 @@
     "community": {
       "title": "コミュニティコレクション",
       "vipe": {
-        "name": "VIPE Heroes - NFTアバターコレクション",
+        "name": "VIPE Heroes Genesis",
+        "description": "VIPE NFTアバターマーケットプレイスのジェネシスPFPコレクション。相互運用性、IP商用権、カスタマイズ機能付き。",
         "license": "ライセンス：CC-BY（帰属表示が必要）",
         "storage": "ストレージ：IPFS",
-        "source": "ソース：OpenSea",
+        "source": "ソース：OpenSea（Ethereum）",
         "sourceLink": "https://opensea.io/collection/vipe-heroes"
       },
       "grifter": {
-        "name": "Grifter Squaddies",
+        "name": "Grifters Squaddies",
+        "description": "Grifters gonna grift!",
         "license": "ライセンス：CC0",
         "storage": "ストレージ：IPFS",
-        "source": "ソース：OpenSea",
+        "source": "ソース：OpenSea（Base）",
         "sourceLink": "https://opensea.io/collection/grifterssquaddies"
+      },
+      "toxsam": {
+        "name": "ToxSam",
+        "description": "EthereumとBaseネットワークにまたがるToxSamによるNFTアバターコレクション",
+        "license": "ライセンス：CC0",
+        "storage": "ストレージ：IPFS",
+        "source": "ソース：ウェブサイト",
+        "sourceLink": "https://toxsam.com"
+      },
+      "halloween": {
+        "name": "Halloween Rising",
+        "description": "不気味なハロウィンアバター - Optimismブロックチェーン上の60体のVRMアバター、5つのデザイン、3つのスタイル、5つのバリエーション。非推奨のVIPEプラットフォームでリリース。",
+        "license": "ライセンス：CC0",
+        "storage": "ストレージ：IPFS",
+        "source": "ソース：OpenSea（Optimism）",
+        "sourceLink": "https://opensea.io/collection/halloween-rising"
+      },
+      "xmas": {
+        "name": "Xmas Chibis",
+        "description": "VIPEの2023年クリスマスアバターコレクション。Polygon上の80体のVRMアバター、16のデザイン、5つのバリエーション。",
+        "license": "ライセンス：CC0",
+        "storage": "ストレージ：IPFS",
+        "source": "ソース：OpenSea（Polygon）",
+        "sourceLink": "https://opensea.io/collection/xmas-chibis"
       }
     },
     "licenseNote": "ライセンスは重要です！CC0アバターはクレジットなしで自由に使用できます。CC-BYアバターは元の作成者への帰属表示が必要です。常にコレクションの詳細を確認してください。"
@@ -44,7 +70,10 @@
         "r2": "100avatars-r2.json",
         "r3": "100avatars-r3.json",
         "vipe": "vipe-heroes-genesis.json",
-        "grifter": "grifters-squaddies.json"
+        "grifter": "grifters-squaddies.json",
+        "toxsam": "toxsam.json",
+        "halloween": "halloween-rising.json",
+        "xmas": "xmas-chibis.json"
       },
       "includes": "各アバターには以下が含まれます：",
       "includesList": [

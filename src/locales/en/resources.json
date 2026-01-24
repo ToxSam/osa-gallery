@@ -14,18 +14,44 @@
     "community": {
       "title": "Community Collections",
       "vipe": {
-        "name": "VIPE Heroes - NFT avatar collection",
+        "name": "VIPE Heroes Genesis",
+        "description": "Genesis PFP collection of VIPE NFT Avatar Marketplace. With interoperability, IP Commercial Rights and Customization.",
         "license": "License: CC-BY (attribution required)",
         "storage": "Storage: IPFS",
-        "source": "Source: OpenSea",
+        "source": "Source: OpenSea (Ethereum)",
         "sourceLink": "https://opensea.io/collection/vipe-heroes"
       },
       "grifter": {
-        "name": "Grifter Squaddies",
+        "name": "Grifters Squaddies",
+        "description": "Grifters gonna grift!",
         "license": "License: CC0",
         "storage": "Storage: IPFS",
-        "source": "Source: OpenSea",
+        "source": "Source: OpenSea (Base)",
         "sourceLink": "https://opensea.io/collection/grifterssquaddies"
+      },
+      "toxsam": {
+        "name": "ToxSam",
+        "description": "Collection of NFT avatars by ToxSam across Ethereum and Base networks",
+        "license": "License: CC0",
+        "storage": "Storage: IPFS",
+        "source": "Source: Website",
+        "sourceLink": "https://toxsam.com"
+      },
+      "halloween": {
+        "name": "Halloween Rising",
+        "description": "Spooky Halloween avatars - 60 VRM Avatars on the Optimism blockchain with 5 designs, 3 styles and 5 variations. Released on the deprecated VIPE platform",
+        "license": "License: CC0",
+        "storage": "Storage: IPFS",
+        "source": "Source: OpenSea (Optimism)",
+        "sourceLink": "https://opensea.io/collection/halloween-rising"
+      },
+      "xmas": {
+        "name": "Xmas Chibis",
+        "description": "VIPE's Christmas Avatar Collection 2023. 80 VRM avatars with 16 designs and 5 variations on Polygon.",
+        "license": "License: CC0",
+        "storage": "Storage: IPFS",
+        "source": "Source: OpenSea (Polygon)",
+        "sourceLink": "https://opensea.io/collection/xmas-chibis"
       }
     },
     "licenseNote": "License matters! CC0 avatars can be used freely without credit. CC-BY avatars require attribution to the original creator. Always check the collection details."
@@ -44,7 +70,10 @@
         "r2": "100avatars-r2.json",
         "r3": "100avatars-r3.json",
         "vipe": "vipe-heroes-genesis.json",
-        "grifter": "grifters-squaddies.json"
+        "grifter": "grifters-squaddies.json",
+        "toxsam": "toxsam.json",
+        "halloween": "halloween-rising.json",
+        "xmas": "xmas-chibis.json"
       },
       "includes": "Each avatar includes:",
       "includesList": [

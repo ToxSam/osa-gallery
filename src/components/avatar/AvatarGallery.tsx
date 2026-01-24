@@ -238,14 +238,28 @@ export const AvatarGallery: React.FC = () => {
 
   const selectRandomAvatar = useCallback(() => {
     if (avatars.length > 0) {
-      const randomIndex = Math.floor(Math.random() * avatars.length);
-      const randomAvatar = avatars[randomIndex];
+      // Get the current avatar's projectId to exclude it
+      const currentProjectId = currentAvatar?.projectId;
+      
+      // Filter avatars from different collections (projects)
+      const avatarsFromOtherCollections = currentProjectId
+        ? avatars.filter(avatar => avatar.projectId !== currentProjectId)
+        : avatars;
+      
+      // If there are avatars from other collections, pick from those
+      // Otherwise, fall back to all avatars (edge case: only one collection exists)
+      const availableAvatars = avatarsFromOtherCollections.length > 0 
+        ? avatarsFromOtherCollections 
+        : avatars;
+      
+      const randomIndex = Math.floor(Math.random() * availableAvatars.length);
+      const randomAvatar = availableAvatars[randomIndex];
       setCurrentAvatar(randomAvatar);
       const slug = createSlug(randomAvatar.name);
       // Update URL without navigation using shallow routing
       window.history.pushState(null, '', `${pathname}?avatar=${slug}`);
     }
-  }, [avatars, pathname]);
+  }, [avatars, currentAvatar, pathname]);
 
   const handleDownloadCurrent = useCallback(async (avatarId?: string, format?: string | null) => {
     // Use provided avatarId or currentAvatar
@@ -419,7 +433,7 @@ export const AvatarGallery: React.FC = () => {
                 <Button 
                   onClick={selectRandomAvatar} 
                   variant="outline"
-                  className="w-full h-10 text-sm font-medium border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center justify-center gap-2"
+                  className="w-full h-10 text-sm font-medium border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 flex items-center justify-center gap-2"
                 >
                   <RefreshCw className="h-4 w-4" />
                   <span>Random Avatar</span>

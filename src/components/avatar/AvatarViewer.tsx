@@ -419,8 +419,22 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
                   <button
                     onClick={() => {
                       if (avatars?.length) {
-                        const randomIndex = Math.floor(Math.random() * avatars.length);
-                        onAvatarSelect?.(avatars[randomIndex]);
+                        // Get the current avatar's projectId to exclude it
+                        const currentProjectId = avatar?.projectId;
+                        
+                        // Filter avatars from different collections (projects)
+                        const avatarsFromOtherCollections = currentProjectId
+                          ? avatars.filter(a => a.projectId !== currentProjectId)
+                          : avatars;
+                        
+                        // If there are avatars from other collections, pick from those
+                        // Otherwise, fall back to all avatars (edge case: only one collection exists)
+                        const availableAvatars = avatarsFromOtherCollections.length > 0 
+                          ? avatarsFromOtherCollections 
+                          : avatars;
+                        
+                        const randomIndex = Math.floor(Math.random() * availableAvatars.length);
+                        onAvatarSelect?.(availableAvatars[randomIndex]);
                       }
                     }}
                     className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-full bg-cream dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm"
