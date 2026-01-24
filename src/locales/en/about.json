@@ -1,64 +1,202 @@
 {
   "title": "About OpenSourceAvatars.com",
-  "project": {
-    "title": "The Project",
-    "description1": "OpenSourceAvatars.com started as a platform showcasing CC0 and open source avatars created by ToxSam since 2018, including the original 200+ VRM avatars from the 100avatars challenge in 2018 and 2020. But we're dreaming bigger now!",
-    "description2": "Our mission is to transform OpenSourceAvatars.com into the internet's central hub for discovering and downloading high-quality CC0 and Creative Commons 3D avatars. While ToxSam's creations form the foundation of our collection, we're excited to expand by curating and featuring amazing open source avatars from talented creators worldwide. Think of it as a free, accessible library of metaverse-ready characters that anyone can use for games, VR applications, virtual worlds, art projects, or AI training – no strings attached!"
+  "whatWeDo": {
+    "title": "What We Do",
+    "description1": "OpenSourceAvatars.com is a registry that helps you discover VRM avatars with clear licensing.",
+    "description2": "We aggregate open source 3D avatars from multiple sources - original collections, NFT projects, community creations - and make them easy to find. No more hunting through IPFS gateways, NFT marketplaces, or scattered GitHub repos. We collect the metadata and links so you can focus on creating."
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "We index collections → Preserve metadata → You browse & download",
+    "steps": [
+      "We find VRM avatar collections with open source licenses",
+      "We catalog download links, previews, traits, and license info",
+      "You filter by license type, style, or collection and download what you need",
+      "Files stay where creators hosted them (we only re-host our own avatars)"
+    ],
+    "description": "Think of us as a search engine for VRM avatars - making thousands of avatars discoverable in one place."
   },
   "status": {
     "title": "Current Status",
     "badges": {
-      "beta": "Beta",
-      "avatars": "300+ Avatars",
-      "format": "VRM Format"
+      "beta": {
+        "label": "Beta",
+        "description": "Expect updates and improvements"
+      },
+      "avatars": {
+        "label": "4,262 Avatars",
+        "description": "Across 6 collections"
+      },
+      "format": {
+        "label": "VRM Format",
+        "description": "Works across games, VR, Vtubing apps, web, and more"
+      }
+    }
+  },
+  "collections": {
+    "title": "Our Collections",
+    "original": {
+      "title": "Original Collections (CC0)",
+      "name": "ToxSam's 100Avatars Series - Created since 2018",
+      "description": "300+ VRM avatars from the original 100avatars challenge",
+      "details": [
+        "Multiple formats: VRM, FBX, voxel variants",
+        "Permanently stored on ArDrive",
+        "CC0 license - use however you want, no attribution needed"
+      ]
     },
-    "description": "The platform is in its early stages and will receive regular updates. More avatars will be added as they're created, including the upcoming Grifters collection."
+    "community": {
+      "title": "Community Collections (Various Licenses)",
+      "collections": [
+        "VIPE Heroes - NFT avatar collection (CC-BY)",
+        "Grifter Squaddies - NFT collection",
+        "Halloween Rising - Seasonal collection",
+        "Xmas Chibis - Holiday themed avatars"
+      ],
+      "description": "Each collection clearly displays its license so you know exactly what you can do with it."
+    }
+  },
+  "whyThisExists": {
+    "title": "Why This Exists",
+    "problem": {
+      "title": "The Problem",
+      "description": "Amazing VRM avatars are scattered across the web - NFT collections on IPFS, indie creators on GitHub, CC0 projects on random sites. There's no central place to discover them all."
+    },
+    "solution": {
+      "title": "Our Solution",
+      "description": "Aggregate them with transparent licensing. One place to search, clear info on what you can use and how."
+    },
+    "mission": {
+      "title": "The Mission",
+      "description": "Make open source avatars as accessible as free stock photos. Whether you're prototyping a game, building VR worlds, or need a base model for art - we want this to be your first stop."
+    }
   },
   "updates": {
-    "title": "Recent Updates (January 2026)",
-    "intro": "We've made significant progress on the project recently:",
-    "list": [
-      "Revamped overall web design",
-      "New animation features on the 3D viewers",
-      "Improved 3D scenarios looks and feel",
-      "Improved inspector tools, fixed ratios",
-      "Added size tool for inspector and gallery",
-      "New dark and day mode on the site",
-      "Improved search bars",
-      "Improved bone displaying look"
-    ]
+    "title": "Recent Updates",
+    "lateJanuary": {
+      "title": "Late January 2026",
+      "list": [
+        "✅ Improved JSON structure for multi-collection support",
+        "✅ Added 4 new collections (VIPE, Grifters, Halloween Rising, Xmas Chibis)",
+        "✅ Performance improvements across the site"
+      ]
+    },
+    "midJanuary": {
+      "title": "Mid January 2026",
+      "list": [
+        "✅ Complete design overhaul",
+        "✅ New 3D viewer animations and scenarios",
+        "✅ Improved VRM Inspector tools",
+        "✅ Dark/day mode toggle",
+        "✅ Better search functionality",
+        "✅ Enhanced bone display visualization"
+      ]
+    },
+    "march2025": {
+      "title": "March 2025",
+      "list": [
+        "✅ VRM Inspector tool launched",
+        "✅ Full Japanese localization",
+        "✅ 100 new avatars added",
+        "✅ Voxel and FBX format variants",
+        "✅ Migrated to ArDrive for permanent storage",
+        "✅ Moved data to GitHub for transparency"
+      ]
+    }
   },
-  "previousUpdates": {
-    "title": "Previous Updates (March 2025)",
-    "list": [
-      "Launched the VRM Inspector tool - a powerful utility for reviewing VRM file metadata and properties",
-      "Added full Japanese language support across the entire platform (AI-assisted translations)",
-      "Added 100 more VRM avatars to the collection",
-      "Created voxel versions of the original 100 Avatars from Round 1 and Round 2",
-      "Added FBX versions for both regular and voxel variants of the 100 Avatars collection",
-      "Upgraded storage from CloudFlare buckets to permanent ArDrive storage for better longevity",
-      "Migrated from Supabase to GitHub for increased transparency and easier developer access"
+  "whatMakesUsDifferent": {
+    "title": "What Makes Us Different",
+    "features": [
+      "✅ License Clarity - Every collection shows CC0, CC-BY, or other licenses upfront",
+      "✅ No Re-hosting - We link to original sources, respecting creators' choices",
+      "✅ Developer-Friendly - All data available as JSON via GitHub",
+      "✅ Permanent Storage - Our avatars on Arweave won't disappear",
+      "✅ Community-Driven - Anyone can submit collections",
+      "✅ Advanced Tools - VRM Inspector for detailed file analysis"
     ]
   },
   "development": {
     "title": "Development Story",
-    "description1": "This website was developed in just 4 days using AI tools like Claude, ChatGPT, and Bolt.new. Despite having no recent programming experience (last coded 12 years ago), this project demonstrates the power of modern AI tools in enabling non-programmers to create functional web applications.",
-    "description2": "The latest version was upgraded in a couple of days using Claude 3.7 Sonnet through Cursor, which I believe is one of the greatest tools for development. The project is available as open source on GitHub, continuing the spirit of openness and accessibility that drives the avatar collection itself."
+    "builtWithAI": {
+      "title": "Built With AI in 4 Days",
+      "description": "This platform was created in 4 days using AI coding assistants - despite the creator (ToxSam) having zero programming experience in 12 years."
+    },
+    "tools": {
+      "title": "The Tools",
+      "initialBuild": {
+        "title": "Initial Build (4 days - 2024)",
+        "list": [
+          "Claude, ChatGPT, and Bolt.new",
+          "Went from concept to live website"
+        ]
+      },
+      "recentUpgrades": {
+        "title": "Recent Upgrades (2 days - 2026)",
+        "list": [
+          "Claude 3.7 Sonnet through Cursor",
+          "Added multi-collection support, improved UI, VRM Inspector"
+        ]
+      }
+    },
+    "whatThisProves": {
+      "title": "What This Proves",
+      "description": "Modern AI has democratized web development. You don't need to be a programmer anymore - you need:",
+      "requirements": [
+        "A clear vision",
+        "The right AI tools",
+        "Willingness to iterate"
+      ],
+      "conclusion": "This project is proof that \"I'm not a developer\" is no longer a barrier to building real software."
+    },
+    "openSource": {
+      "title": "Open Source Everything",
+      "description": "Both the website code and avatar data are fully open source.",
+      "techStack": "Tech Stack: Next.js, React, Tailwind CSS, ArDrive, GitHub",
+      "aiAssistants": "AI Assistants: Claude, ChatGPT, Cursor, Bolt.new",
+      "learnMore": "Want to build something similar? All the code is there to learn from!"
+    }
   },
   "future": {
     "title": "Future Plans",
     "list": [
-      "Continue adding more open source avatars",
-      "Spanish translations",
-      "Upload Grifters collection",
-      "Upload Vipes collection",
-      "Begin incorporating CC0 avatars from other creators",
-      "Improve the 3D gallery viewer with smaller tools"
+      "🔄 Spanish translations",
+      "🔄 Streamlined collection submission via GitHub PR",
+      "🔄 More collections from community creators",
+      "🔄 Enhanced 3D viewer tools",
+      "🔄 Advanced filtering options"
     ]
   },
-  "contact": {
-    "title": "Get in Touch",
-    "twitter": "Follow on Twitter",
-    "website": "Visit ToxSam.com"
+  "getInvolved": {
+    "title": "Get Involved",
+    "submitCollection": {
+      "title": "Submit a Collection",
+      "description": "Created VRM avatars with an open license? We'd love to list them!",
+      "requirements": {
+        "title": "Requirements:",
+        "list": [
+          "Open source license (CC0, CC-BY, etc.)",
+          "VRM format",
+          "Permanent hosting (IPFS, Arweave, stable URLs)"
+        ]
+      },
+      "submitVia": "Submit via: [GitHub Discussions](https://github.com/ToxSam/osa-gallery/discussions)"
+    },
+    "contributeCode": {
+      "title": "Contribute Code",
+      "description": "Found a bug? Want to add features?",
+      "link": "Open an Issue → [GitHub Issues](https://github.com/ToxSam/osa-gallery/issues)"
+    },
+    "giveFeedback": {
+      "title": "Give Feedback",
+      "description": "Ideas for improvements? Let us know!",
+      "link": "Share Feedback → [GitHub Issues](https://github.com/ToxSam/osa-gallery/issues)"
+    }
+  },
+  "connect": {
+    "title": "Connect",
+    "twitter": "Twitter",
+    "twitterUrl": "https://twitter.com/toxsam",
+    "website": "Website",
+    "websiteUrl": "https://toxsam.com"
   }
 } 

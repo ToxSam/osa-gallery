@@ -14,18 +14,19 @@
   },
   "about": {
     "section_title": "About the Project",
-    "title": "Free & Open Source 3D Avatars",
-    "description": "Open Source Avatars is a platform dedicated to providing high-quality, freely available 3D avatars for creators, developers, and users worldwide. Our collection of over 300 avatars is permanently stored on Arweave's blockchain technology, ensuring perpetual availability and accessibility.",
-    "github_description": "Download avatars directly from our gallery for immediate use in your projects, or for developers, access our",
-    "github_link": "open JSON database on GitHub",
-    "github_description_2": "for programmatic integration. Whether you're building applications, creating content, or just want a cool avatar for yourself, you can use these avatars with complete freedom under permissive licenses."
+    "title": "Find VRM Avatars You Can Actually Use",
+    "description": "Open Source Avatars helps you discover 3D avatars with clear licensing. Whether you need characters for a game, VR project, or just want a cool avatar - we've collected thousands of VRM files from multiple sources so you don't have to hunt them down yourself.",
+    "description_2": "4,200+ avatars across different collections - some are CC0 (use however you want), others require attribution. We make the licenses crystal clear so you know exactly what you can do.",
+    "github_description": "No gatekeeping. Download directly from our gallery, or if you're a developer, grab our",
+    "github_link": "JSON database from GitHub",
+    "github_description_2": "and build your own tools with it."
   },
   "features": {
     "section_title": "Tools & Features",
     "title": "Awesome Free Tools for Everyone",
     "browse": {
       "title": "Avatar Gallery",
-      "description": "Browse our extensive collection of 300+ avatars with advanced filtering options:",
+      "description": "Browse our extensive collection of 4,200+ avatars with advanced filtering options:",
       "bulletPoints": {
         "preview": "Preview avatars in 3D before downloading",
         "filter": "Filter by style, features, and format",

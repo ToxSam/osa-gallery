@@ -93,7 +93,7 @@ export const AvatarHeader: React.FC<AvatarHeaderProps> = ({
                   </svg>
                 </a>
                 <a 
-                  href="https://github.com/ToxSam"
+                  href="https://github.com/ToxSam/osa-gallery"
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex items-center justify-center"
@@ -180,7 +180,7 @@ export const AvatarHeader: React.FC<AvatarHeaderProps> = ({
                   </svg>
                 </a>
                 <a 
-                  href="https://github.com/ToxSam"
+                  href="https://github.com/ToxSam/osa-gallery"
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex items-center justify-center"

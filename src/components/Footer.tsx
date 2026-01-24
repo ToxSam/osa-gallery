@@ -81,12 +81,22 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a 
-                  href="https://github.com/toxsam/open-source-avatars"
+                  href="https://github.com/ToxSam/osa-gallery"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-small text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors link-hover"
                 >
-                  GitHub Repo
+                  Gallery GitHub Repo
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://github.com/ToxSam/open-source-avatars"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-small text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors link-hover"
+                >
+                  Avatars Github Repo
                 </a>
               </li>
               <li>
@@ -173,7 +183,7 @@ export const Footer: React.FC = () => {
                 </svg>
               </a>
               <a 
-                href="https://github.com/ToxSam"
+                href="https://github.com/ToxSam/osa-gallery"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex items-center justify-center"

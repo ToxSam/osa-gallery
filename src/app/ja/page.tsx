@@ -141,6 +141,10 @@ export default function Home() {
                 {t('home.about.description')}
               </p>
               
+              <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-20">
+                {t('home.about.description_2')}
+              </p>
+              
               <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
                 {t('home.about.github_description')} <a href="https://github.com/toxsam/open-source-avatars" className="text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 dark:text-gray-300 underline">{t('home.about.github_link')}</a> {t('home.about.github_description_2')}
               </p>
