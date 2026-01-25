@@ -345,8 +345,8 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
   const [vrmMetadata, setVrmMetadata] = useState<VRMMetadata | null>(null);
   const [vrmVersion, setVrmVersion] = useState<string | null>(null);
   const [modelStats, setModelStats] = useState<ModelStats>({
-    fileSize: t('finder.common.unknown'),
-    format: t('finder.common.unknown'),
+    fileSize: t('finder.common.unknown') as string,
+    format: t('finder.common.unknown') as string,
     height: 0,
     vertices: 0,
     triangles: 0,
@@ -577,25 +577,25 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
         ...prev,
         triangles: data.triangleCount || 0,
         materials: data.materialCount || 0,
-        format: data.format || t('finder.common.unknown'),
+        format: data.format || (t('finder.common.unknown') as string),
         height: data.avatarHeight || 0,
-        fileSize: data.fileSize || t('finder.common.unknown'),
+        fileSize: data.fileSize || (t('finder.common.unknown') as string),
         vertices: data.vertexCount || 0,
         textures: data.textureCount || 0,
         bones: data.boneCount || 0,
       }));
       
       // Set VRM version
-      setVrmVersion(data.vrmVersion || t('finder.common.unknown'));
+      setVrmVersion(data.vrmVersion || (t('finder.common.unknown') as string));
       
       // Process VRM metadata if available
       if (data.rawMetadata) {
         try {
           const rawMeta = data.rawMetadata;
           const cleanedMetadata: VRMMetadata = {
-            title: rawMeta.title || t('finder.common.unknown'),
-            version: data.version || rawMeta.version || rawMeta.specVersion || t('finder.common.unknown'),
-            author: rawMeta.author || rawMeta.authors?.[0] || t('finder.common.unknown'),
+            title: rawMeta.title || (t('finder.common.unknown') as string),
+            version: data.version || rawMeta.version || rawMeta.specVersion || (t('finder.common.unknown') as string),
+            author: rawMeta.author || rawMeta.authors?.[0] || (t('finder.common.unknown') as string),
             contactInformation: data.contactInformation || rawMeta.contactInformation || '',
             reference: data.reference || rawMeta.reference || '',
             licenseType: rawMeta.licenseType,
@@ -630,8 +630,8 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
     setActiveTab('model'); // Reset to model tab when switching avatars/files
     setModelFileSize(null); // Reset model file size
     setModelStats({
-      fileSize: t('finder.common.unknown'),
-      format: t('finder.common.unknown'),
+      fileSize: t('finder.common.unknown') as string,
+      format: t('finder.common.unknown') as string,
       height: 0,
       vertices: 0,
       triangles: 0,
@@ -1036,7 +1036,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
             {extractedTextures.length > 0 ? (
               extractedTextures.map((texture, index) => {
                 const tex = texture.texture;
-                const dimensions = tex.image ? `${tex.image.width} × ${tex.image.height}` : t('finder.common.unknown');
+                const dimensions = tex.image ? `${tex.image.width} × ${tex.image.height}` : (t('finder.common.unknown') as string);
                 
                 return (
                   <div key={index} className="bg-cream dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
@@ -1088,7 +1088,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                       <button
                         onClick={() => downloadExtractedTexture(texture)}
                         className="mt-3 w-full inline-flex items-center justify-center p-2 border border-gray-300 dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 bg-cream dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-900 dark:hover:border-gray-100 transition-all"
-                        title={t('vrmviewer.texture.download')}
+                        title={t('vrmviewer.texture.download') as string}
                       >
                         <Download className="h-4 w-4" />
                       </button>
@@ -1280,7 +1280,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
               <div className="flex gap-x-3 items-start min-w-0 max-w-full w-full">
                 <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">Type:</span>
                 <span className="text-gray-900 dark:text-gray-100 truncate min-w-0 flex-1 text-right max-w-full">
-                  {selectedFile.category === 'thumbnail' ? t('finder.common.thumbnail') : t('finder.common.texture')}
+                  {selectedFile.category === 'thumbnail' ? (t('finder.common.thumbnail') as string) : (t('finder.common.texture') as string)}
                 </span>
               </div>
               {(correctedFilename || selectedFile.filename) && (
@@ -1324,7 +1324,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
               <>
                 {/* VRM Basic Information - from VRM file */}
                 {vrmMetadata && (
-                  <AccordionItem title={t('finder.sections.basicInformation')} defaultOpen>
+                  <AccordionItem title={t('finder.sections.basicInformation') as string} defaultOpen>
                     <div className="space-y-1 text-xs min-w-0 max-w-full w-full">
                       <div className="flex gap-x-3 items-start min-w-0 max-w-full w-full">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">Name:</span>
@@ -1353,7 +1353,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                 )}
 
                 {/* Model Information - merged with statistics */}
-                <AccordionItem title={t('finder.sections.modelInformation')} defaultOpen>
+                <AccordionItem title={t('finder.sections.modelInformation') as string} defaultOpen>
                   <div className="space-y-1 text-xs min-w-0">
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">Format:</span>
@@ -1452,7 +1452,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
 
                 {/* VRM License Information - from VRM file */}
                 {vrmMetadata && (vrmMetadata.licenseType !== undefined || vrmMetadata.licenseName || vrmMetadata.allowedUserName !== undefined || vrmMetadata.commercialUsageName !== undefined || vrmMetadata.violentUsageName !== undefined || vrmMetadata.sexualUsageName !== undefined) && (
-                  <AccordionItem title={t('finder.sections.licenseInformation')} defaultOpen>
+                  <AccordionItem title={t('finder.sections.licenseInformation') as string} defaultOpen>
                     <div className="space-y-1 text-xs min-w-0 max-w-full w-full">
                       <div className="flex gap-x-3 items-start min-w-0 max-w-full w-full">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.type')}:</span>
@@ -1498,7 +1498,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
 
                 {/* Available Files */}
                 {allFiles.length > 0 && (
-                  <AccordionItem title={t('finder.sections.availableFiles')} defaultOpen>
+                  <AccordionItem title={t('finder.sections.availableFiles') as string} defaultOpen>
                     <div className="space-y-2">
                       {allFiles.map((file) => (
                         <div
@@ -1576,7 +1576,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
 
                 {/* Description */}
                 {avatar.description && (
-                  <AccordionItem title={t('finder.sections.description')} defaultOpen={false}>
+                  <AccordionItem title={t('finder.sections.description') as string} defaultOpen={false}>
                     <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
                       {avatar.description}
                     </p>
@@ -1590,7 +1590,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
               <>
                 {/* VRM Basic Information - from VRM file */}
                 {vrmMetadata && (
-                  <AccordionItem title={t('finder.sections.basicInformation')} defaultOpen>
+                  <AccordionItem title={t('finder.sections.basicInformation') as string} defaultOpen>
                     <div className="space-y-1 text-xs min-w-0 max-w-full w-full">
                       <div className="flex gap-x-3 items-start min-w-0 max-w-full w-full">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">Name:</span>
@@ -1619,7 +1619,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                 )}
 
                 {/* File Information - merged with model statistics */}
-                <AccordionItem title={t('finder.sections.fileInformation')} defaultOpen>
+                <AccordionItem title={t('finder.sections.fileInformation') as string} defaultOpen>
                   <div className="space-y-1 text-xs min-w-0">
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">Format:</span>
@@ -1762,7 +1762,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
 
                 {/* VRM License Information - from VRM file */}
                 {vrmMetadata && (vrmMetadata.licenseType !== undefined || vrmMetadata.licenseName || vrmMetadata.allowedUserName !== undefined || vrmMetadata.commercialUsageName !== undefined || vrmMetadata.violentUsageName !== undefined || vrmMetadata.sexualUsageName !== undefined) && (
-                  <AccordionItem title={t('finder.sections.licenseInformation')} defaultOpen>
+                  <AccordionItem title={t('finder.sections.licenseInformation') as string} defaultOpen>
                     <div className="space-y-1 text-xs min-w-0 max-w-full w-full">
                       <div className="flex gap-x-3 items-start min-w-0 max-w-full w-full">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.type')}:</span>
