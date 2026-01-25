@@ -71,8 +71,8 @@ export default function ImageLightbox({
           <button
             onClick={handleDownload}
             className="p-2 rounded-full bg-black/30 hover:bg-black/50 text-white transition-all hover:scale-110"
-            aria-label={t('finder.lightbox.download')}
-            title={filename ? `${t('finder.lightbox.download')} ${filename}` : t('finder.lightbox.downloadImage')}
+            aria-label={t('finder.lightbox.download') as string}
+            title={filename ? `${t('finder.lightbox.download') as string} ${filename}` : t('finder.lightbox.downloadImage') as string}
           >
             <Download className="h-4 w-4" />
           </button>
@@ -82,7 +82,7 @@ export default function ImageLightbox({
         <button
           onClick={onClose}
           className="p-2 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
-          aria-label={t('finder.lightbox.close')}
+          aria-label={t('finder.lightbox.close') as string}
         >
           <X className="h-5 w-5" />
         </button>
