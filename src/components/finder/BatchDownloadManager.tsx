@@ -224,8 +224,8 @@ export default function BatchDownloadManager({
       
       // Verify we can actually use this folder by checking permission
       try {
-        if (handle.requestPermission) {
-          const permission = await handle.requestPermission({ mode: 'readwrite' });
+        if ('requestPermission' in handle && typeof (handle as any).requestPermission === 'function') {
+          const permission = await (handle as any).requestPermission({ mode: 'readwrite' });
           console.log('Folder permission:', permission);
           if (permission !== 'granted') {
             console.warn('Folder permission not granted:', permission);

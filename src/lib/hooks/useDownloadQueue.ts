@@ -97,9 +97,9 @@ export function useDownloadQueue(): UseDownloadQueueReturn {
       
       // Request permission if the method is available (for subsequent saves after page reload)
       // Permission is automatically granted on folder selection via showDirectoryPicker
-      if (handle.requestPermission) {
+      if ('requestPermission' in handle && typeof (handle as any).requestPermission === 'function') {
         try {
-          const permissionStatus = await handle.requestPermission({ mode: 'readwrite' });
+          const permissionStatus = await (handle as any).requestPermission({ mode: 'readwrite' });
           if (permissionStatus !== 'granted') {
             console.warn('Permission not granted for folder access:', permissionStatus);
             // Continue anyway - permission might already be granted from folder selection
