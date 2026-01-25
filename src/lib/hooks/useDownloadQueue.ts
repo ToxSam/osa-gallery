@@ -387,7 +387,7 @@ export function useDownloadQueue(): UseDownloadQueueReturn {
           }
           
           // If still no extension, try from URL (works for GitHub raw, IPFS, but not Arweave)
-          if ((extension === 'vrm' || (extension === 'png' && fileType.category === 'thumbnail')) && fileType.url.includes('.')) {
+          if ((extension === 'vrm' || (extension === 'png' && fileType.category === 'thumbnail')) && fileType.url && fileType.url.includes('.')) {
             const urlExt = fileType.url.split('.').pop()?.split('?')[0].toLowerCase();
             if (urlExt && ['vrm', 'fbx', 'glb', 'gltf', 'png', 'jpg', 'jpeg', 'webp', 'gif'].includes(urlExt)) {
               extension = urlExt;

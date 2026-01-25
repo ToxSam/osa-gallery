@@ -133,7 +133,7 @@ const getFileFormat = (file: FileTypeInfo | null): string => {
   
   // Check URL extension as last resort
   if (file.url) {
-    const urlExt = file.url.split('.').pop()?.toLowerCase();
+    const urlExt = file.url.split('.').pop()?.toLowerCase() || null;
     if (urlExt && urlExt.length <= 5) {
       const extMap: Record<string, string> = {
         'vrm': 'VRM',
@@ -436,7 +436,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
             setImageFormat(detectedFormat);
             
             // Update filename with correct extension if missing
-            const currentFilename = selectedFile.filename || selectedFile.url.split('/').pop() || 'image';
+            const currentFilename = selectedFile.filename || (selectedFile.url ? selectedFile.url.split('/').pop() : null) || 'image';
             const hasExtension = /\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff|ico)$/i.test(currentFilename);
             
             if (!hasExtension) {
@@ -459,6 +459,8 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
         })
         .catch(() => {
           // If HEAD fails, try to get size and type from the loaded image/blob
+          if (!selectedFile.url) return;
+          
           let detectedFormatFromResponse: string | null = null;
           
           fetch(selectedFile.url)
@@ -471,7 +473,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                 setImageFormat(detectedFormatFromResponse);
                 
                 // Update filename with correct extension if missing
-                const currentFilename = selectedFile.filename || selectedFile.url.split('/').pop() || 'image';
+                const currentFilename = selectedFile.filename || (selectedFile.url ? selectedFile.url.split('/').pop() : null) || 'image';
                 const hasExtension = /\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff|ico)$/i.test(currentFilename);
                 
                 if (!hasExtension) {
@@ -497,7 +499,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                 if (detectedFormat) {
                   setImageFormat(detectedFormat);
                   
-                  const currentFilename = selectedFile.filename || selectedFile.url.split('/').pop() || 'image';
+                  const currentFilename = selectedFile.filename || (selectedFile.url ? selectedFile.url.split('/').pop() : null) || 'image';
                   const hasExtension = /\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff|ico)$/i.test(currentFilename);
                   
                   if (!hasExtension) {
@@ -538,6 +540,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
               setModelFileSize(parseInt(contentLength, 10));
             } else {
               // If HEAD doesn't provide content-length, try fetching as blob
+              if (!selectedFile.url) return;
               fetch(selectedFile.url)
                 .then((response) => response.blob())
                 .then((blob) => {
@@ -550,6 +553,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
           })
           .catch(() => {
             // If HEAD fails, try to get size from fetching the blob
+            if (!selectedFile.url) return;
             fetch(selectedFile.url)
               .then((response) => response.blob())
               .then((blob) => {
@@ -663,7 +667,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
   // Only show tabs when actually previewing a VRM model, not when viewing images/thumbnails
   const isVRMFile = useMemo(() => {
     // Helper to check if a file is VRM
-    const checkIsVRM = (file: { id?: string; filename?: string; url?: string; label?: string } | null): boolean => {
+    const checkIsVRM = (file: { id?: string; filename?: string; url?: string | null; label?: string } | null): boolean => {
       if (!file) return false;
       
       // First, check file ID (most reliable indicator)
@@ -688,7 +692,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
       
       // Check URL extension (for IPFS and other URLs with extensions)
       if (file.url) {
-        const urlExt = file.url.split('.').pop()?.toLowerCase();
+        const urlExt = file.url.split('.').pop()?.toLowerCase() || null;
         if (urlExt === 'fbx' || urlExt === 'glb' || urlExt === 'gltf') {
           return false; // Explicitly not VRM
         }
@@ -773,7 +777,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
         
         // Determine filename - prefer correctedFilename (with detected extension), then selectedFile.filename, fallback to extracting from URL or avatar name
         let filename = correctedFilename || selectedFile.filename;
-        if (!filename) {
+        if (!filename && selectedFile.url) {
           // Try to extract from URL
           const urlParts = selectedFile.url.split('/');
           const urlFilename = urlParts[urlParts.length - 1];
@@ -783,11 +787,16 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
           } else {
             // Fallback: use avatar name with extension from detected format, label, or URL
             const extension = imageFormat ? getExtensionFromFormat(imageFormat) :
-                             selectedFile.url.split('.').pop()?.split('?')[0] || 
+                             (selectedFile.url ? selectedFile.url.split('.').pop()?.split('?')[0] : null) || 
                              selectedFile.label.split('.').pop()?.toLowerCase() || 
                              'bin';
             filename = `${avatar?.name || 'file'}.${extension}`;
           }
+        }
+        
+        // Ensure filename is defined
+        if (!filename) {
+          filename = selectedFile.filename || selectedFile.label || 'file';
         }
         
         link.download = filename;
@@ -816,7 +825,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = downloadUrl;
-      link.download = texture.filename || `${texture.label}.${texture.url.split('.').pop()}`;
+      link.download = texture.filename || `${texture.label}.${texture.url ? texture.url.split('.').pop() : 'png'}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -1136,7 +1145,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                   
                   // Check URL extension (for IPFS and other URLs with extensions)
                   if (previewFile.url) {
-                    const urlExt = previewFile.url.split('.').pop()?.toLowerCase();
+                    const urlExt = previewFile.url.split('.').pop()?.toLowerCase() || null;
                     if (urlExt === 'fbx' || urlExt === 'glb' || urlExt === 'gltf') {
                       return false; // Explicitly not VRM
                     }
@@ -1211,14 +1220,13 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                   alt={previewFile.label}
                   className="max-w-full max-h-full object-contain rounded cursor-pointer hover:opacity-90 transition-opacity"
                   onClick={() => {
+                    if (!previewFile.url) return;
                     setLightboxImage({
                       url: previewFile.url,
                       alt: previewFile.label,
                       filename: correctedFilename || previewFile.filename,
                       downloadHandler: () => {
-                        if (previewFile.url) {
-                          handleDownload();
-                        }
+                        handleDownload();
                       },
                     });
                   }}
