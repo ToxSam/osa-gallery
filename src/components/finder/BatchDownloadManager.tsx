@@ -713,7 +713,7 @@ export default function BatchDownloadManager({
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto p-6">
                 <Accordion>
-                  <AccordionItem title={t('finder.batchDownload.selectedAvatars') || 'Selected Avatars'} defaultOpen={false}>
+                  <AccordionItem title={getTranslationString(t('finder.batchDownload.selectedAvatars')) || 'Selected Avatars'} defaultOpen={false}>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
                       {selectedAvatars.map((avatar) => (
                         <div
@@ -735,7 +735,7 @@ export default function BatchDownloadManager({
                     </div>
                   </AccordionItem>
 
-                  <AccordionItem title={t('finder.batchDownload.downloadOptions') || 'Download Options'} defaultOpen={false}>
+                  <AccordionItem title={getTranslationString(t('finder.batchDownload.downloadOptions')) || 'Download Options'} defaultOpen={false}>
                     <div className="space-y-2">
                       <div className="text-sm text-gray-600 dark:text-gray-400">
                         {downloadVrms && (
@@ -773,7 +773,7 @@ export default function BatchDownloadManager({
                   </AccordionItem>
 
                   <AccordionItem
-                    title={t('finder.batchDownload.downloadProgress') || 'Download Progress'}
+                    title={getTranslationString(t('finder.batchDownload.downloadProgress')) || 'Download Progress'}
                     defaultOpen={true}
                   >
                     <div className="space-y-3">
