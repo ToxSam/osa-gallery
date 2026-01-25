@@ -265,6 +265,11 @@ export default function BatchDownloadManager({
     });
   };
 
+  // Helper function to ensure translation result is a string
+  const getTranslationString = (value: string | string[]): string => {
+    return Array.isArray(value) ? value[0] : value;
+  };
+
   // Helper function to interpolate translation strings
   const interpolate = (str: string, params: Record<string, number | string>): string => {
     return str.replace(/\{(\w+)\}/g, (match, key) => {
@@ -510,7 +515,7 @@ export default function BatchDownloadManager({
                           className="w-full"
                         >
                           {interpolate(
-                            t('finder.common.loadMore') || 'Load More ({count} remaining)',
+                            getTranslationString(t('finder.common.loadMore')) || 'Load More ({count} remaining)',
                             { count: selectedAvatars.length - visibleCount }
                           )}
                         </Button>
@@ -856,7 +861,7 @@ export default function BatchDownloadManager({
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                       {interpolate(
-                        t('finder.downloadQueue.overallProgress') || '{completed} of {total} complete',
+                        getTranslationString(t('finder.downloadQueue.overallProgress')) || '{completed} of {total} complete',
                         { completed: completedCount, total: downloadQueue.length }
                       )}
                     </span>
@@ -887,7 +892,7 @@ export default function BatchDownloadManager({
             <div className="flex items-center justify-between gap-4">
               <div className="text-sm text-gray-600 dark:text-gray-400 flex-shrink-0">
                 {interpolate(
-                  t('finder.downloadQueue.progress') || 'Downloading {current} of {total} files',
+                  getTranslationString(t('finder.downloadQueue.progress')) || 'Downloading {current} of {total} files',
                   { current: downloadingCount, total: downloadQueue.length }
                 )}
               </div>
