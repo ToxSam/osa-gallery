@@ -10,7 +10,7 @@ import { SkeletonHelper } from 'three';
 import { useI18n } from '@/lib/i18n';
 import { Progress } from '@/components/ui/progress';
 
-export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, showInfoPanel = true, onToggleInfoPanel }) => {
+export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, onTexturesLoad, showInfoPanel = true, onToggleInfoPanel, hideControls = false, cameraDistanceMultiplier = 0.85 }) => {
   const { t } = useI18n();
   const canvasRef = useRef(null);
   const rendererRef = useRef(null);
@@ -52,6 +52,7 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
   const avatarOriginalPositionRef = useRef(new THREE.Vector3(0, 0, 0));
   const hipsOriginalPositionRef = useRef(null);
   const loadingBarTimeoutRef = useRef(null);
+  const prevProcessedUrlRef = useRef(null);
 
   // Process URL when it changes
   useEffect(() => {
@@ -195,13 +196,84 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
       // Get model info
       const scene = vrm.scene;
       let triangleCount = 0;
+      let vertexCount = 0;
       let materialCount = 0;
+      let boneCount = 0;
+      let avatarHeight = 0;
       const materials = new Set();
       
-      // Count triangles and materials
+      // Calculate avatar height using bounding box
+      const bbox = new THREE.Box3().setFromObject(vrm.scene);
+      avatarHeight = bbox.max.y - bbox.min.y;
+      
+      // Function to count bones recursively
+      const countBonesRecursively = (node) => {
+        let count = 0;
+        if (node.isBone) {
+          count++;
+        }
+        if (node.children && node.children.length > 0) {
+          node.children.forEach(child => {
+            count += countBonesRecursively(child);
+          });
+        }
+        return count;
+      };
+      
+      // Count bones from VRM humanoid if available
+      if (vrm && vrm.humanoid) {
+        // Check if it's a structure with humanBones property
+        if (vrm.humanoid.humanBones) {
+          boneCount = Object.keys(vrm.humanoid.humanBones).length;
+        } 
+        // Or if it has a getNormalizedBoneNode method
+        else if (typeof vrm.humanoid.getNormalizedBoneNode === 'function') {
+          // Try to count bones by checking all possible humanoid bone names
+          const humanoidBones = [
+            'hips', 'spine', 'chest', 'upperChest', 'neck', 'head',
+            'leftShoulder', 'leftUpperArm', 'leftLowerArm', 'leftHand',
+            'rightShoulder', 'rightUpperArm', 'rightLowerArm', 'rightHand',
+            'leftUpperLeg', 'leftLowerLeg', 'leftFoot', 'rightUpperLeg',
+            'rightLowerLeg', 'rightFoot', 'leftToes', 'rightToes',
+            'leftEye', 'rightEye', 'jaw',
+            // Fingers
+            'leftThumbMetacarpal', 'leftThumbProximal', 'leftThumbDistal',
+            'leftIndexProximal', 'leftIndexIntermediate', 'leftIndexDistal',
+            'leftMiddleProximal', 'leftMiddleIntermediate', 'leftMiddleDistal',
+            'leftRingProximal', 'leftRingIntermediate', 'leftRingDistal',
+            'leftLittleProximal', 'leftLittleIntermediate', 'leftLittleDistal',
+            'rightThumbMetacarpal', 'rightThumbProximal', 'rightThumbDistal',
+            'rightIndexProximal', 'rightIndexIntermediate', 'rightIndexDistal',
+            'rightMiddleProximal', 'rightMiddleIntermediate', 'rightMiddleDistal',
+            'rightRingProximal', 'rightRingIntermediate', 'rightRingDistal',
+            'rightLittleProximal', 'rightLittleIntermediate', 'rightLittleDistal'
+          ];
+          
+          // Count bones that exist in this model
+          boneCount = humanoidBones.filter(boneName => {
+            try {
+              return vrm.humanoid.getNormalizedBoneNode(boneName) !== null;
+            } catch (e) {
+              return false;
+            }
+          }).length;
+        }
+      }
+      
+      // If no humanoid bones, try to count manually
+      if (boneCount === 0) {
+        boneCount = countBonesRecursively(gltf.scene);
+      }
+      
+      // Count triangles, vertices, and materials
       scene.traverse((obj) => {
         if (obj.isMesh) {
           if (obj.geometry) {
+            // Count vertices
+            if (obj.geometry.attributes.position) {
+              vertexCount += obj.geometry.attributes.position.count;
+            }
+            
             // Count triangles
             if (obj.geometry.index) {
               triangleCount += obj.geometry.index.count / 3;
@@ -229,6 +301,20 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
       // Check if this is VRM 0.x by checking metaVersion
       const isVRM0 = vrmMeta.metaVersion === 0;
       
+      // Detect VRM version
+      let vrmVersion;
+      if (gltf.parser?.json?.extensions?.VRM) {
+        vrmVersion = 'VRM 0.x';
+      } else if (gltf.parser?.json?.extensions?.VRMC_vrm) {
+        vrmVersion = 'VRM 1.0';
+      } else if (vrmMeta.metaVersion === 0) {
+        vrmVersion = 'VRM 0.x';
+      } else if (vrmMeta.specVersion) {
+        vrmVersion = `VRM ${vrmMeta.specVersion}`;
+      } else {
+        vrmVersion = isVRM0 ? 'VRM 0.x' : (vrm.meta?.version || 'Unknown');
+      }
+      
       // Detect license type based on different naming schemes
       let licenseType = vrmMeta.licenseType;
       let licenseName = vrmMeta.licenseName;
@@ -251,9 +337,12 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
       // Create metadata object with all possible fields
       const metadata = {
         triangleCount: Math.round(triangleCount),
+        vertexCount: vertexCount,
+        boneCount: boneCount,
+        avatarHeight: avatarHeight,
         materialCount,
         format: 'VRM',
-        vrmVersion: isVRM0 ? 0 : (vrm.meta?.version || 'Unknown'),
+        vrmVersion: vrmVersion,
         title: vrmMeta.title || vrmMeta.name,
         version: vrmMeta.version,
         author: vrmMeta.author || vrmMeta.authors?.[0],
@@ -290,6 +379,107 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
     } catch (err) {
       console.error('Error extracting VRM metadata:', err);
       return null;
+    }
+  };
+
+  // Extract textures from VRM
+  const extractTextures = (vrm, gltf) => {
+    try {
+      if (!vrm) return [];
+      
+      const extractedTextures = [];
+      const uniqueTextures = new Set();
+      
+      // Helper to format file size
+      const formatFileSize = (sizeInBytes) => {
+        if (sizeInBytes < 1024) {
+          return `${sizeInBytes} B`;
+        } else if (sizeInBytes < 1024 * 1024) {
+          return `${(sizeInBytes / 1024).toFixed(1)} KB`;
+        } else {
+          return `${(sizeInBytes / (1024 * 1024)).toFixed(1)} MB`;
+        }
+      };
+      
+      // Traverse scene to find textures
+      vrm.scene.traverse((node) => {
+        if (node.isMesh) {
+          const materials = Array.isArray(node.material) ? node.material : [node.material];
+          materials.forEach(material => {
+            if (material) {
+              // Check all possible texture properties
+              const textureProperties = [
+                'map', 'normalMap', 'emissiveMap', 'metalnessMap', 
+                'roughnessMap', 'aoMap', 'displacementMap', 'alphaMap'
+              ];
+              
+              textureProperties.forEach(prop => {
+                if (material[prop] && material[prop].image) {
+                  // Only add textures we haven't seen before
+                  if (!uniqueTextures.has(material[prop].uuid)) {
+                    uniqueTextures.add(material[prop].uuid);
+                    
+                    // Generate a meaningful name for the texture
+                    const textureName = material[prop].name || 
+                                     `${material.name ? material.name + '_' : ''}${prop}`;
+                    
+                    // Calculate approximate file size
+                    let fileSize = 'Unknown';
+                    try {
+                      if (material[prop].image) {
+                        const { width, height } = material[prop].image;
+                        let bytesPerPixel = 4; // Default to RGBA
+                        
+                        if (material[prop].format === THREE.RedFormat) {
+                          bytesPerPixel = 1;
+                        } else if (material[prop].format === THREE.RGFormat) {
+                          bytesPerPixel = 2;
+                        } else if (material[prop].format === THREE.RGBAFormat) {
+                          bytesPerPixel = 4;
+                        }
+                        
+                        const sizeInBytes = width * height * bytesPerPixel;
+                        fileSize = formatFileSize(sizeInBytes);
+                      }
+                    } catch (e) {
+                      console.warn('Error calculating texture size:', e);
+                    }
+                    
+                    // Add human-readable texture type
+                    const textureTypeMap = {
+                      'map': 'Albedo/Diffuse',
+                      'normalMap': 'Normal',
+                      'emissiveMap': 'Emissive',
+                      'metalnessMap': 'Metalness',
+                      'roughnessMap': 'Roughness',
+                      'aoMap': 'Ambient Occlusion',
+                      'displacementMap': 'Displacement/Height',
+                      'alphaMap': 'Alpha/Transparency'
+                    };
+                    
+                    const readableType = textureTypeMap[prop] || prop;
+                    
+                    extractedTextures.push({
+                      name: textureName,
+                      type: readableType,
+                      mapType: prop,
+                      texture: material[prop],
+                      material: material.name || 'unnamed',
+                      fileSize: fileSize
+                    });
+                  }
+                }
+              });
+            }
+          });
+        }
+      });
+      
+      console.log(`Extracted ${extractedTextures.length} textures`);
+      return extractedTextures;
+    } catch (err) {
+      console.error('Error extracting textures:', err);
+      return [];
     }
   };
 
@@ -1322,6 +1512,15 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
       return;
     }
     
+    // Prevent reloading if the URL hasn't actually changed
+    if (prevProcessedUrlRef.current === processedUrl) {
+      console.log('Skipping reload - URL has not changed:', processedUrl);
+      return;
+    }
+    
+    // Update the stored URL
+    prevProcessedUrlRef.current = processedUrl;
+    
     setIsLoading(true);
     setLoadingProgress(0);
     setShowLoadingBar(false);
@@ -1467,8 +1666,8 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
               const fov = cameraRef.current.fov * (Math.PI / 180);
               
               // Calculate optimal camera distance to fit the avatar
-              // Use tight multiplier (0.85x) to bring avatars much closer
-              const cameraDistance = Math.abs(maxDimension / Math.sin(fov / 2)) * 0.85;
+              // Use configurable multiplier to adjust camera distance (smaller = closer)
+              const cameraDistance = Math.abs(maxDimension / Math.sin(fov / 2)) * cameraDistanceMultiplier;
               
               // Clamp distance to reasonable values - closer now
               const minDistance = 0.6;
@@ -1549,8 +1748,63 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
           
           // Extract and share metadata
             const metadata = extractVRMMetadata(vrm, gltf);
-            if (metadata && typeof onMetadataLoad === 'function') {
-              onMetadataLoad(metadata);
+            
+            // Fetch file size and then call onMetadataLoad with complete data
+            const fetchFileSizeAndNotify = async () => {
+              let fileSize = 'Unknown';
+              
+              try {
+                // Try HEAD request first (more efficient)
+                const response = await fetch(processedUrl, { method: 'HEAD' });
+                const contentLength = response.headers.get('content-length');
+                if (contentLength) {
+                  const fileSizeBytes = parseInt(contentLength, 10);
+                  // Format file size
+                  const formatFileSize = (bytes) => {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                  };
+                  
+                  fileSize = formatFileSize(fileSizeBytes);
+                } else {
+                  // If HEAD doesn't provide content-length, try GET
+                  const getResponse = await fetch(processedUrl);
+                  const blob = await getResponse.blob();
+                  const fileSizeBytes = blob.size;
+                  const formatFileSize = (bytes) => {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                  };
+                  
+                  fileSize = formatFileSize(fileSizeBytes);
+                }
+              } catch (err) {
+                console.warn('Could not fetch file size:', err);
+                // Keep fileSize as 'Unknown'
+              }
+              
+              // Update metadata with file size and notify
+              if (metadata) {
+                metadata.fileSize = fileSize;
+                if (typeof onMetadataLoad === 'function') {
+                  onMetadataLoad(metadata);
+                }
+              }
+            };
+            
+            // Fetch file size and notify with complete metadata
+            fetchFileSizeAndNotify();
+            
+            // Extract and share textures
+            const textures = extractTextures(vrm, gltf);
+            if (textures.length > 0 && typeof onTexturesLoad === 'function') {
+              onTexturesLoad(textures);
             }
 
             // Load animation if provided
@@ -1605,7 +1859,7 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
         clearTimeout(loadingBarTimeoutRef.current);
       }
     };
-  }, [processedUrl, animationUrl, onMetadataLoad, skeletonMode, wireframeMode]);
+  }, [processedUrl, animationUrl, onMetadataLoad, onTexturesLoad, skeletonMode, wireframeMode]);
 
   // Update loading indicator visibility
   useEffect(() => {
@@ -1678,8 +1932,8 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, sh
         </div>
       )}
       
-      {/* Control buttons group - hide on mobile */}
-      {window.innerWidth >= 768 && (
+      {/* Control buttons group - hide on mobile or if hideControls is true */}
+      {window.innerWidth >= 768 && !hideControls && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
           <div className="bg-cream/90 dark:bg-gray-900/90 rounded-md p-2 flex items-center space-x-2 border border-gray-200 dark:border-gray-700 shadow-md" style={{ backdropFilter: 'blur(4px)' }}>
             {/* Info panel toggle button */}

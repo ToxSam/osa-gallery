@@ -19,7 +19,7 @@ export default function VRMInspectorPage() {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-cream">
+      <div className="min-h-screen bg-cream dark:bg-cream-dark transition-colors">
         {/* Header - Higher z-index to stay on top */}
         <div className="relative z-50">
           <AvatarHeader 
@@ -31,56 +31,56 @@ export default function VRMInspectorPage() {
         </div>
 
         {/* Desktop Only Notice - Lower z-index */}
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-cream bg-opacity-90 backdrop-blur-sm">
-          <div className="max-w-md p-8 text-center">
-            <Computer className="w-16 h-16 mx-auto mb-6 text-blue-600" />
-            <h2 className="text-2xl font-bold mb-4">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-cream/95 dark:bg-cream-dark/95 backdrop-blur-md">
+          <div className="max-w-md p-8 text-center border border-gray-300 dark:border-gray-700 rounded-lg bg-cream dark:bg-gray-900 shadow-lg mx-4">
+            <Computer className="w-16 h-16 mx-auto mb-6 text-gray-900 dark:text-gray-100" />
+            <h2 className="text-title mb-4 text-gray-900 dark:text-gray-100">
               {t('vrmviewer.mobile.desktopOnly.title')}
             </h2>
-            <p className="text-gray-600">
+            <p className="text-body text-gray-500 dark:text-gray-400">
               {t('vrmviewer.mobile.desktopOnly.description')}
             </p>
           </div>
         </div>
 
         {/* Mobile Content (shown behind overlay) */}
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-2xl font-bold mb-4">{t('vrmviewer.mobile.intro.title')}</h1>
-          <p className="text-gray-600 mb-8">
+        <div className="container-custom py-8">
+          <h1 className="text-title mb-4 text-gray-900 dark:text-gray-100">{t('vrmviewer.mobile.intro.title')}</h1>
+          <p className="text-body text-gray-500 dark:text-gray-400 mb-8">
             {t('vrmviewer.mobile.intro.description')}
           </p>
 
           {/* Feature List */}
           <div className="space-y-8">
             <div>
-              <h2 className="text-lg font-semibold mb-4">{t('vrmviewer.mobile.features.title')}</h2>
+              <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('vrmviewer.mobile.features.title')}</h2>
               <div className="grid gap-6">
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg border border-gray-300 dark:border-gray-700">
                   <div className="flex items-start gap-4">
-                    <Info className="w-6 h-6 text-blue-600 mt-1" />
+                    <Info className="w-6 h-6 text-gray-900 dark:text-gray-100 mt-1" />
                     <div>
-                      <h3 className="font-medium">{t('vrmviewer.mobile.features.modelInfo.title')}</h3>
-                      <p className="text-sm text-gray-600">{t('vrmviewer.mobile.features.modelInfo.description')}</p>
+                      <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">{t('vrmviewer.mobile.features.modelInfo.title')}</h3>
+                      <p className="text-small text-gray-500 dark:text-gray-400">{t('vrmviewer.mobile.features.modelInfo.description')}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg border border-gray-300 dark:border-gray-700">
                   <div className="flex items-start gap-4">
-                    <Smile className="w-6 h-6 text-blue-600 mt-1" />
+                    <Smile className="w-6 h-6 text-gray-900 dark:text-gray-100 mt-1" />
                     <div>
-                      <h3 className="font-medium">{t('vrmviewer.mobile.features.expressionControl.title')}</h3>
-                      <p className="text-sm text-gray-600">{t('vrmviewer.mobile.features.expressionControl.description')}</p>
+                      <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">{t('vrmviewer.mobile.features.expressionControl.title')}</h3>
+                      <p className="text-small text-gray-500 dark:text-gray-400">{t('vrmviewer.mobile.features.expressionControl.description')}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-lg border border-gray-300 dark:border-gray-700">
                   <div className="flex items-start gap-4">
-                    <Image className="w-6 h-6 text-blue-600 mt-1" />
+                    <Image className="w-6 h-6 text-gray-900 dark:text-gray-100 mt-1" />
                     <div>
-                      <h3 className="font-medium">{t('vrmviewer.mobile.features.textureAnalysis.title')}</h3>
-                      <p className="text-sm text-gray-600">{t('vrmviewer.mobile.features.textureAnalysis.description')}</p>
+                      <h3 className="font-medium mb-2 text-gray-900 dark:text-gray-100">{t('vrmviewer.mobile.features.textureAnalysis.title')}</h3>
+                      <p className="text-small text-gray-500 dark:text-gray-400">{t('vrmviewer.mobile.features.textureAnalysis.description')}</p>
                     </div>
                   </div>
                 </div>
@@ -88,11 +88,11 @@ export default function VRMInspectorPage() {
             </div>
 
             {/* Coming Soon */}
-            <div className="bg-blue-50 p-6 rounded-xl">
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">
+            <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-xl border border-gray-300 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 {t('vrmviewer.mobile.comingSoon.title')}
               </h3>
-              <p className="text-blue-700">
+              <p className="text-body text-gray-500 dark:text-gray-400">
                 {t('vrmviewer.mobile.comingSoon.description')}
               </p>
             </div>

@@ -6,6 +6,7 @@ import { Github, Database, ExternalLink } from "lucide-react";
 import { AvatarHeader } from "@/components/avatar/AvatarHeader";
 import { Footer } from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
+import { LoadingScreen } from "@/components/ui/loading-screen";
 
 interface CommunityCollection {
   id: string;
@@ -14,7 +15,7 @@ interface CommunityCollection {
   license: string;
   source_type: string;
   source_network?: string | string[];
-  storage_type: string;
+  storage_type: string | string[];
   opensea_url?: string;
   avatar_data_file?: string;
 }
@@ -47,7 +48,7 @@ export default function ResourcesPage() {
   }, []);
 
   if (isLoading) {
-    return <div className="min-h-screen bg-cream dark:bg-gray-950 flex items-center justify-center">Loading...</div>;
+    return <LoadingScreen />;
   }
 
   const vrmReasons = t('resources.vrm.why.reasons', { returnObjects: true }) as any;
@@ -152,9 +153,18 @@ export default function ResourcesPage() {
                           : 'Website';
                         
                         // Format storage type
-                        const storageLabel = collection.storage_type === 'ipfs' 
-                          ? 'IPFS' 
-                          : collection.storage_type.charAt(0).toUpperCase() + collection.storage_type.slice(1);
+                        const formatStorageType = (storage: string | string[]): string => {
+                          if (Array.isArray(storage)) {
+                            return storage.map(s => {
+                              if (s === 'ipfs') return 'IPFS';
+                              return s.charAt(0).toUpperCase() + s.slice(1);
+                            }).join(', ');
+                          }
+                          return storage === 'ipfs' 
+                            ? 'IPFS' 
+                            : storage.charAt(0).toUpperCase() + storage.slice(1);
+                        };
+                        const storageLabel = formatStorageType(collection.storage_type);
                         
                         // Format license
                         const licenseLabel = collection.license === 'CC0' 

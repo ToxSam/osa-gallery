@@ -11,6 +11,7 @@ import { VRMLoaderPlugin } from '@pixiv/three-vrm';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import TextureRenderer from './TextureRenderer';
+import ImageLightbox from '@/components/finder/ImageLightbox';
 import { useI18n } from '@/lib/i18n';
 import { I18nProvider } from '@/lib/i18n';
 
@@ -23,6 +24,56 @@ const formatFileSize = (bytes) => {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+// Helper to check if a string is a URL
+const isUrl = (str) => {
+  if (!str || typeof str !== 'string') return false;
+  const urlPattern = /^(https?:\/\/|ipfs:\/\/|ar:\/\/)/i;
+  return urlPattern.test(str.trim());
+};
+
+// Helper to extract URLs from text and make them clickable
+const renderLinkableText = (text) => {
+  if (!text) return text;
+  
+  // Check if the entire text is a URL
+  if (isUrl(text)) {
+    const url = text.trim();
+    const displayUrl = url.length > 50 ? `${url.substring(0, 47)}...` : url;
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 dark:text-blue-400 hover:underline break-all"
+      >
+        {displayUrl}
+      </a>
+    );
+  }
+  
+  // Check if text contains URLs
+  const urlRegex = /(https?:\/\/[^\s]+|ipfs:\/\/[^\s]+|ar:\/\/[^\s]+)/gi;
+  const parts = text.split(urlRegex);
+  
+  return parts.map((part, index) => {
+    if (isUrl(part)) {
+      const displayUrl = part.length > 50 ? `${part.substring(0, 47)}...` : part;
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 dark:text-blue-400 hover:underline break-all"
+        >
+          {displayUrl}
+        </a>
+      );
+    }
+    return <span key={index}>{part}</span>;
+  });
 };
 
 // Helper to get license type name
@@ -397,9 +448,72 @@ const VRMInspector = React.memo(() => {
   });
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Lightbox state
+  const [lightboxImage, setLightboxImage] = useState(null);
 
   // Create a reference to the VRM instance
   const vrmRef = useRef(null);
+
+  // Helper function to convert THREE.Texture to data URL for lightbox
+  const textureToDataURL = (texture) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        if (!texture.image || !ctx) {
+          reject(new Error('Texture has no image data'));
+          return;
+        }
+        
+        const img = texture.image;
+        canvas.width = img.width || 512;
+        canvas.height = img.height || 512;
+        
+        // Handle different image types
+        if (img instanceof HTMLImageElement || 
+            img instanceof HTMLCanvasElement || 
+            img instanceof ImageBitmap ||
+            img instanceof OffscreenCanvas) {
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        } else {
+          // Use WebGL rendering for complex texture types
+          const scene = new THREE.Scene();
+          const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+          
+          const renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            alpha: true,
+            antialias: false,
+            preserveDrawingBuffer: true
+          });
+          renderer.setSize(canvas.width, canvas.height);
+          
+          const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            side: THREE.DoubleSide,
+            transparent: true
+          });
+          const geometry = new THREE.PlaneGeometry(2, 2);
+          const plane = new THREE.Mesh(geometry, material);
+          
+          scene.add(plane);
+          renderer.render(scene, camera);
+          
+          resolve(canvas.toDataURL('image/png'));
+          
+          // Clean up
+          geometry.dispose();
+          material.dispose();
+          renderer.dispose();
+        }
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
 
   // Helper function to download texture as image
   const downloadTextureAsImage = (texture, filename) => {
@@ -777,7 +891,7 @@ const VRMInspector = React.memo(() => {
       author: rawMeta.author || rawMeta.authors?.[0] || 'Unknown',
       contactInformation: rawMeta.contactInformation || '',
       reference: rawMeta.reference || '',
-      thumbnail: rawMeta.texture?.image || null,
+      thumbnail: rawMeta.thumbnail || rawMeta.texture || (rawMeta.texture?.image || null),
       otherPermissions: rawMeta.otherPermissionUrl || rawMeta.otherPermissions || ''
     };
     
@@ -1082,6 +1196,314 @@ const VRMInspector = React.memo(() => {
               
               if (rawMetadata) {
                 console.log('VRM metadata found:', rawMetadata, 'Version:', vrmVersion);
+                
+                // Extract thumbnail if available (async function)
+                const extractThumbnail = async () => {
+                  let thumbnail = null;
+                  try {
+                    // Get VRM instance first
+                    const vrm = gltf.userData.vrm;
+                    
+                    console.log('🔍 DEBUG - Raw metadata texture field:', rawMetadata.texture, 'type:', typeof rawMetadata.texture);
+                    console.log('🔍 DEBUG - Raw metadata thumbnailImage field:', rawMetadata.thumbnailImage);
+                    console.log('🔍 DEBUG - VRM instance:', vrm);
+                    console.log('🔍 DEBUG - VRM meta object:', vrm?.meta);
+                    console.log('🔍 DEBUG - GLTF parser available:', !!gltf.parser);
+                    console.log('🔍 DEBUG - GLTF textures array:', gltf.textures?.length);
+                    console.log('🔍 DEBUG - GLTF parser json textures:', gltf.parser?.json?.textures?.length);
+                    console.log('🔍 DEBUG - GLTF parser json images:', gltf.parser?.json?.images?.length);
+                    
+                    // First, check if VRM library has already processed the thumbnail
+                    if (vrm && vrm.meta && vrm.meta.texture && vrm.meta.texture instanceof THREE.Texture) {
+                      thumbnail = vrm.meta.texture;
+                      console.log('🔍 DEBUG - Found thumbnail directly in vrm.meta.texture:', thumbnail);
+                      return thumbnail;
+                    }
+                    
+                    if (rawMetadata.texture !== undefined && rawMetadata.texture !== null && !thumbnail) {
+                    const textureIndex = typeof rawMetadata.texture === 'number' ? rawMetadata.texture : rawMetadata.texture;
+                    console.log('🔍 DEBUG - Processing texture index:', textureIndex);
+                    
+                    // If it's already a THREE.Texture, use it directly
+                    if (textureIndex instanceof THREE.Texture) {
+                      console.log('🔍 DEBUG - Texture index is already a THREE.Texture');
+                      thumbnail = textureIndex;
+                    } else if (typeof textureIndex === 'number') {
+                      // Try multiple methods to get the texture
+                      
+                      // Method 1: Try to find in gltf.textures array first (most direct)
+                      if (!thumbnail && gltf.textures && Array.isArray(gltf.textures) && gltf.textures[textureIndex]) {
+                        thumbnail = gltf.textures[textureIndex];
+                        console.log('🔍 DEBUG - Got thumbnail from gltf.textures array:', thumbnail);
+                      }
+                      
+                      // Method 2: Use GLTF parser's getDependency if available (it's async!)
+                      if (!thumbnail && gltf.parser && typeof gltf.parser.getDependency === 'function') {
+                        try {
+                          const textureResult = gltf.parser.getDependency('texture', textureIndex);
+                          // Check if it's a promise
+                          if (textureResult && typeof textureResult.then === 'function') {
+                            // It's async - await it
+                            thumbnail = await textureResult;
+                            console.log('🔍 DEBUG - Got thumbnail via getDependency (async):', thumbnail);
+                          } else {
+                            thumbnail = textureResult;
+                            console.log('🔍 DEBUG - Got thumbnail via getDependency (sync):', thumbnail);
+                          }
+                        } catch (err) {
+                          console.warn('🔍 DEBUG - getDependency failed:', err);
+                        }
+                      }
+                      
+                      // Method 3: Access through GLTF JSON structure and load the texture explicitly
+                      if (!thumbnail && gltf.parser && gltf.parser.json) {
+                        const textures = gltf.parser.json.textures || [];
+                        if (textures[textureIndex]) {
+                          const textureInfo = textures[textureIndex];
+                          const imageIndex = textureInfo.source;
+                          console.log('🔍 DEBUG - Texture info from JSON:', textureInfo, 'imageIndex:', imageIndex);
+                          
+                          // Try to get the image first
+                          if (gltf.parser.json.images && gltf.parser.json.images[imageIndex]) {
+                            const imageData = gltf.parser.json.images[imageIndex];
+                            console.log('🔍 DEBUG - Image data from JSON:', imageData);
+                            
+                            // Try to get the actual image element from various sources
+                            let image = null;
+                            
+                            // Check parser cache
+                            if (gltf.parser.cache && gltf.parser.cache.images && gltf.parser.cache.images[imageIndex]) {
+                              image = gltf.parser.cache.images[imageIndex];
+                              console.log('🔍 DEBUG - Found image in parser cache:', image);
+                            }
+                            
+                            // Try getDependency for image
+                            if (!image && typeof gltf.parser.getDependency === 'function') {
+                              try {
+                                image = gltf.parser.getDependency('image', imageIndex);
+                                console.log('🔍 DEBUG - Got image via getDependency:', image);
+                              } catch (err) {
+                                console.warn('🔍 DEBUG - getDependency failed for image:', err);
+                              }
+                            }
+                            
+                            // Search through the scene to find a texture using this image
+                            if (!image) {
+                              gltf.scene.traverse((obj) => {
+                                if (obj.isMesh && obj.material && !image) {
+                                  const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+                                  materials.forEach(material => {
+                                    if (material && material.map && material.map.image) {
+                                      const texture = material.map;
+                                      // Check various ways the image index might be stored
+                                      if (texture.userData && texture.userData.gltfImageIndex === imageIndex) {
+                                        image = texture.image;
+                                        console.log('🔍 DEBUG - Found image from scene texture:', image);
+                                      } else if (texture.image && texture.image.userData && texture.image.userData.gltfImageIndex === imageIndex) {
+                                        image = texture.image;
+                                        console.log('🔍 DEBUG - Found image from scene texture image userData:', image);
+                                      }
+                                    }
+                                  });
+                                }
+                              });
+                            }
+                            
+                            // If we found an image, create a texture from it
+                            if (image) {
+                              // Check if there's already a texture using this image in the scene
+                              gltf.scene.traverse((obj) => {
+                                if (obj.isMesh && obj.material && !thumbnail) {
+                                  const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+                                  materials.forEach(material => {
+                                    if (material && material.map && material.map.image === image) {
+                                      thumbnail = material.map;
+                                      console.log('🔍 DEBUG - Found existing texture using this image:', thumbnail);
+                                    }
+                                  });
+                                }
+                              });
+                              
+                              // If no existing texture found, create a new one
+                              if (!thumbnail) {
+                                thumbnail = new THREE.Texture(image);
+                                thumbnail.flipY = false;
+                                thumbnail.needsUpdate = true;
+                                console.log('🔍 DEBUG - Created new texture from image:', thumbnail);
+                              }
+                            } else if (!image && imageData.uri) {
+                              // Last resort: try to load from URI if it's a data URI or external URL
+                              const imageElement = new Image();
+                              imageElement.crossOrigin = 'anonymous';
+                              imageElement.onload = () => {
+                                const newThumbnail = new THREE.Texture(imageElement);
+                                newThumbnail.flipY = false;
+                                newThumbnail.needsUpdate = true;
+                                console.log('🔍 DEBUG - Created texture from loaded image element:', newThumbnail);
+                                rawMetadata.thumbnail = newThumbnail;
+                                setVrmMetadata(prev => prev ? { ...prev, thumbnail: newThumbnail } : prev);
+                              };
+                              imageElement.onerror = () => {
+                                console.warn('🔍 DEBUG - Failed to load image from URI:', imageData.uri);
+                              };
+                              imageElement.src = imageData.uri;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  } else if (rawMetadata.thumbnailImage !== undefined && rawMetadata.thumbnailImage !== null) {
+                    // VRM 1.0: thumbnailImage is an index into the GLTF images array
+                    const thumbnailImageIndex = rawMetadata.thumbnailImage;
+                    console.log('🔍 DEBUG - Processing thumbnailImage index:', thumbnailImageIndex);
+                    
+                    if (typeof thumbnailImageIndex === 'number' && gltf.parser) {
+                      try {
+                        // Method 1: Use getDependency if available (it's async!)
+                        if (typeof gltf.parser.getDependency === 'function') {
+                          try {
+                            const imageResult = gltf.parser.getDependency('image', thumbnailImageIndex);
+                            // Check if it's a promise
+                            if (imageResult && typeof imageResult.then === 'function') {
+                              // It's async - await it
+                              imageResult.then((image) => {
+                                console.log('🔍 DEBUG - Got thumbnail image via getDependency (async):', image);
+                                
+                                if (image) {
+                                  // Check if there's already a texture using this image
+                                  const textures = gltf.parser.json.textures || [];
+                                  const textureIndex = textures.findIndex(tex => tex.source === thumbnailImageIndex);
+                                  if (textureIndex !== -1) {
+                                    try {
+                                      const textureResult = gltf.parser.getDependency('texture', textureIndex);
+                                      if (textureResult && typeof textureResult.then === 'function') {
+                                        textureResult.then((texture) => {
+                                          thumbnail = texture;
+                                          console.log('🔍 DEBUG - Got thumbnail texture from image index (async):', thumbnail);
+                                          // Update the metadata with the thumbnail
+                                          if (thumbnail) {
+                                            rawMetadata.thumbnail = thumbnail;
+                                            setVrmMetadata(prev => prev ? { ...prev, thumbnail } : prev);
+                                          }
+                                        });
+                                      } else {
+                                        thumbnail = textureResult;
+                                        console.log('🔍 DEBUG - Got thumbnail texture from image index (sync):', thumbnail);
+                                      }
+                                    } catch (err) {
+                                      console.warn('Failed to get texture from image index, creating new texture:', err);
+                                      // Create a new texture from the image
+                                      thumbnail = new THREE.Texture(image);
+                                      thumbnail.needsUpdate = true;
+                                      rawMetadata.thumbnail = thumbnail;
+                                      setVrmMetadata(prev => prev ? { ...prev, thumbnail } : prev);
+                                    }
+                                  } else {
+                                    // Create a new texture from the image
+                                    thumbnail = new THREE.Texture(image);
+                                    thumbnail.needsUpdate = true;
+                                    rawMetadata.thumbnail = thumbnail;
+                                    setVrmMetadata(prev => prev ? { ...prev, thumbnail } : prev);
+                                  }
+                                }
+                              }).catch((err) => {
+                                console.warn('🔍 DEBUG - getDependency promise failed for image:', err);
+                              });
+                            } else {
+                              const image = imageResult;
+                              console.log('🔍 DEBUG - Got thumbnail image via getDependency (sync):', image);
+                              
+                              if (image) {
+                                // Check if there's already a texture using this image
+                                const textures = gltf.parser.json.textures || [];
+                                const textureIndex = textures.findIndex(tex => tex.source === thumbnailImageIndex);
+                                if (textureIndex !== -1) {
+                                  try {
+                                    const textureResult = gltf.parser.getDependency('texture', textureIndex);
+                                    if (textureResult && typeof textureResult.then === 'function') {
+                                      textureResult.then((texture) => {
+                                        thumbnail = texture;
+                                        console.log('🔍 DEBUG - Got thumbnail texture from image index (async):', thumbnail);
+                                        rawMetadata.thumbnail = thumbnail;
+                                        setVrmMetadata(prev => prev ? { ...prev, thumbnail } : prev);
+                                      });
+                                    } else {
+                                      thumbnail = textureResult;
+                                      console.log('🔍 DEBUG - Got thumbnail texture from image index (sync):', thumbnail);
+                                    }
+                                  } catch (err) {
+                                    console.warn('Failed to get texture from image index, creating new texture:', err);
+                                    thumbnail = new THREE.Texture(image);
+                                    thumbnail.needsUpdate = true;
+                                  }
+                                } else {
+                                  thumbnail = new THREE.Texture(image);
+                                  thumbnail.needsUpdate = true;
+                                }
+                              }
+                            }
+                          } catch (err) {
+                            console.warn('🔍 DEBUG - getDependency failed for image:', err);
+                          }
+                        }
+                        
+                        // Method 2: Try parser cache
+                        if (!thumbnail && gltf.parser.cache && gltf.parser.cache.images && gltf.parser.cache.images[thumbnailImageIndex]) {
+                          const image = gltf.parser.cache.images[thumbnailImageIndex];
+                          console.log('🔍 DEBUG - Found image in parser cache:', image);
+                          thumbnail = new THREE.Texture(image);
+                          thumbnail.needsUpdate = true;
+                        }
+                        
+                        // Method 3: Search scene for textures using this image
+                        if (!thumbnail && gltf.parser.json && gltf.parser.json.images && gltf.parser.json.images[thumbnailImageIndex]) {
+                          gltf.scene.traverse((obj) => {
+                            if (obj.isMesh && obj.material && !thumbnail) {
+                              const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+                              materials.forEach(material => {
+                                if (material && material.map && material.map.image) {
+                                  const texture = material.map;
+                                  if (texture.userData && texture.userData.gltfImageIndex === thumbnailImageIndex) {
+                                    thumbnail = texture;
+                                    console.log('🔍 DEBUG - Found thumbnail texture in scene:', thumbnail);
+                                  }
+                                }
+                              });
+                            }
+                          });
+                        }
+                      } catch (err) {
+                        console.warn('Failed to get thumbnail image:', err);
+                      }
+                    }
+                  }
+                  
+                      console.log('🔍 DEBUG - Final thumbnail result:', thumbnail);
+                      return thumbnail;
+                    } catch (error) {
+                      console.warn('Error extracting thumbnail:', error);
+                      return null;
+                    }
+                  };
+                  
+                  // Extract thumbnail asynchronously and update state when done
+                  extractThumbnail().then((extractedThumbnail) => {
+                    if (extractedThumbnail) {
+                      rawMetadata.thumbnail = extractedThumbnail;
+                      console.log('🔍 DEBUG - Thumbnail extracted successfully, updating state');
+                      // Update state if metadata was already set
+                      setVrmMetadata(prev => {
+                        if (prev) {
+                          return { ...prev, thumbnail: extractedThumbnail };
+                        }
+                        return prev;
+                      });
+                    } else {
+                      console.log('🔍 DEBUG - No thumbnail found');
+                    }
+                  }).catch((err) => {
+                    console.error('🔍 DEBUG - Error in thumbnail extraction:', err);
+                  });
                 
                 // Create a clean metadata object
                 const cleanMetadata = createCleanMetadataObject(rawMetadata, vrmVersion);
@@ -1487,6 +1909,11 @@ const VRMInspector = React.memo(() => {
         cleanedMetadata.contactInformation = data.contactInformation || cleanedMetadata.contactInformation;
         cleanedMetadata.reference = data.reference || cleanedMetadata.reference;
         
+          // Preserve thumbnail if it was extracted
+          if (data.thumbnail) {
+            cleanedMetadata.thumbnail = data.thumbnail;
+          }
+        
           // Handle license info - prioritize licenseName when available
           if (data.licenseName) {
             console.log('🔍 DEBUG - Using provided licenseName:', data.licenseName);
@@ -1638,30 +2065,125 @@ const VRMInspector = React.memo(() => {
                   <FileIcon className="h-4 w-4" />
                   {t('vrmviewer.metadata.basicInfo')}
                 </h3>
-                <div className="grid gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-24 text-xs text-gray-500 dark:text-gray-400">{t('vrmviewer.metadata.title')}</div>
-                    <div className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100">{vrmMetadata.title || 'undefined'}</div>
-                </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-24 text-xs text-gray-500 dark:text-gray-400">{t('vrmviewer.metadata.author')}</div>
-                    <div className="flex-1 text-sm font-medium break-all text-gray-900 dark:text-gray-100">{vrmMetadata.author || 'undefined'}</div>
-                </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-24 text-xs text-gray-500 dark:text-gray-400">{t('vrmviewer.metadata.version')}</div>
-                    <div className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100">
-                      {vrmMetadata?.version && vrmMetadata.version !== 'Unknown' ? `v${vrmMetadata.version}` : 'undefined'}
-                </div>
-                </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-24 text-xs text-gray-500 dark:text-gray-400">{t('vrmviewer.metadata.contactInfo')}</div>
-                    <div className="flex-1 text-sm text-gray-900 dark:text-gray-100">{vrmMetadata.contactInformation || 'undefined'}</div>
-                </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-24 text-xs text-gray-500 dark:text-gray-400">{t('vrmviewer.metadata.references')}</div>
-                    <div className="flex-1 text-sm text-gray-900 dark:text-gray-100">{vrmMetadata.reference || 'undefined'}</div>
-                </div>
+                <div className="space-y-1 text-xs min-w-0 max-w-full w-full">
+                  {/* Thumbnail Image Display */}
+                  <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex gap-x-3 items-start min-w-0 max-w-full w-full mb-2">
+                      <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">Thumbnail:</span>
+                      <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full"></span>
+                    </div>
+                    <div 
+                      className="w-32 h-32 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 p-2 cursor-pointer hover:opacity-90 transition-opacity"
+                      onClick={async () => {
+                        if (!vrmMetadata.thumbnail) return;
+                        
+                        let imageUrl = '';
+                        let thumbnail = vrmMetadata.thumbnail;
+                        
+                        // Handle different thumbnail types
+                        if (thumbnail instanceof THREE.Texture) {
+                          imageUrl = await textureToDataURL(thumbnail);
+                        } else if (thumbnail instanceof HTMLImageElement) {
+                          imageUrl = thumbnail.src;
+                        } else if (thumbnail instanceof HTMLCanvasElement) {
+                          imageUrl = thumbnail.toDataURL('image/png');
+                        } else if (thumbnail.image) {
+                          if (thumbnail.image instanceof THREE.Texture) {
+                            imageUrl = await textureToDataURL(thumbnail.image);
+                          } else if (thumbnail.image instanceof HTMLImageElement) {
+                            imageUrl = thumbnail.image.src;
+                          }
+                        }
+                        
+                        if (imageUrl) {
+                          setLightboxImage({
+                            url: imageUrl,
+                            alt: 'VRM Thumbnail',
+                            filename: 'thumbnail.png',
+                            downloadHandler: () => {
+                              if (thumbnail instanceof THREE.Texture) {
+                                downloadTextureAsImage(thumbnail, 'thumbnail.png');
+                              } else if (thumbnail.image instanceof THREE.Texture) {
+                                downloadTextureAsImage(thumbnail.image, 'thumbnail.png');
+                              } else {
+                                // Download as regular image
+                                const link = document.createElement('a');
+                                link.href = imageUrl;
+                                link.download = 'thumbnail.png';
+                                link.click();
+                              }
+                            }
+                          });
+                        }
+                      }}
+                    >
+                      {vrmMetadata.thumbnail ? (
+                        vrmMetadata.thumbnail instanceof THREE.Texture ? (
+                          <TextureRenderer texture={vrmMetadata.thumbnail} size={120} />
+                        ) : vrmMetadata.thumbnail instanceof HTMLImageElement || vrmMetadata.thumbnail instanceof HTMLCanvasElement ? (
+                          <img 
+                            src={vrmMetadata.thumbnail instanceof HTMLImageElement ? vrmMetadata.thumbnail.src : vrmMetadata.thumbnail.toDataURL()} 
+                            alt="VRM Thumbnail"
+                            className="max-w-full max-h-full object-contain rounded"
+                          />
+                        ) : vrmMetadata.thumbnail.image ? (
+                          // Handle case where thumbnail is an object with an image property
+                          vrmMetadata.thumbnail.image instanceof THREE.Texture ? (
+                            <TextureRenderer texture={vrmMetadata.thumbnail.image} size={120} />
+                          ) : vrmMetadata.thumbnail.image instanceof HTMLImageElement ? (
+                            <img 
+                              src={vrmMetadata.thumbnail.image.src} 
+                              alt="VRM Thumbnail"
+                              className="max-w-full max-h-full object-contain rounded"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 dark:text-gray-500 text-center px-1">
+                              No thumbnail on this model
+                            </div>
+                          )
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 dark:text-gray-500 text-center px-1">
+                            No thumbnail on this model
+                          </div>
+                        )
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 dark:text-gray-500 text-center px-1">
+                          No thumbnail on this model
+                        </div>
+                      )}
+                    </div>
                   </div>
+                  <div className="flex gap-x-3 items-start min-w-0 max-w-full w-full">
+                    <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.metadata.title')}:</span>
+                    <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">{vrmMetadata.title || 'undefined'}</span>
+                  </div>
+                  <div className="flex gap-x-3 items-start min-w-0">
+                    <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.metadata.author')}:</span>
+                    <span className="text-gray-900 dark:text-gray-100 break-all min-w-0 flex-1 text-right max-w-full">{vrmMetadata.author || 'undefined'}</span>
+                  </div>
+                  <div className="flex gap-x-3 items-start min-w-0">
+                    <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.metadata.version')}:</span>
+                    <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
+                      {vrmMetadata?.version && vrmMetadata.version !== 'Unknown' ? `v${vrmMetadata.version}` : 'undefined'}
+                    </span>
+                  </div>
+                  <div className="flex gap-x-3 items-start min-w-0">
+                    <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.metadata.contactInfo')}:</span>
+                    <span className="text-gray-900 dark:text-gray-100 break-all min-w-0 flex-1 text-right max-w-full">
+                      {vrmMetadata.contactInformation && isUrl(vrmMetadata.contactInformation) 
+                        ? renderLinkableText(vrmMetadata.contactInformation)
+                        : (vrmMetadata.contactInformation || 'undefined')}
+                    </span>
+                  </div>
+                  <div className="flex gap-x-3 items-start min-w-0">
+                    <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.metadata.references')}:</span>
+                    <span className="text-gray-900 dark:text-gray-100 break-all min-w-0 flex-1 text-right max-w-full">
+                      {vrmMetadata.reference && isUrl(vrmMetadata.reference)
+                        ? renderLinkableText(vrmMetadata.reference)
+                        : (vrmMetadata.reference || 'undefined')}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1672,52 +2194,42 @@ const VRMInspector = React.memo(() => {
                   <FileText className="h-4 w-4" />
                   {t('vrmviewer.license.title')}
                 </h3>
-                <div className="space-y-4">
-                  {/* License Type */}
-                  <div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t('vrmviewer.license.type')}</div>
-                    <div className="inline-flex px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
-                    {getLicenseTypeName(vrmMetadata.licenseType, vrmMetadata.licenseName)}
-                </div>
+                <div className="space-y-1 text-xs min-w-0 max-w-full w-full">
+                  <div className="flex gap-x-3 items-start min-w-0 max-w-full w-full">
+                    <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.type')}:</span>
+                    <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
+                      {getLicenseTypeName(vrmMetadata.licenseType, vrmMetadata.licenseName)}
+                    </span>
                   </div>
-
-                  {/* Usage Grid */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t('vrmviewer.license.allowedUsers')}</div>
-                      <div className="inline-flex px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
-                        {getAllowedUserName(vrmMetadata.allowedUserName)}
+                  <div className="flex gap-x-3 items-start min-w-0">
+                    <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.allowedUsers')}:</span>
+                    <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
+                      {getAllowedUserName(vrmMetadata.allowedUserName)}
+                    </span>
                   </div>
-                    </div>
-
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t('vrmviewer.license.commercialUse')}</div>
-                      <div className="inline-flex px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
-                        {getUsageName(vrmMetadata.commercialUsageName)}
-                      </div>
-                </div>
-                
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t('vrmviewer.license.violentUsage')}</div>
-                      <div className="inline-flex px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
-                    {getUsageName(vrmMetadata.violentUsageName)}
-                      </div>
-                </div>
-                
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t('vrmviewer.license.sexualUsage')}</div>
-                      <div className="inline-flex px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
-                        {getUsageName(vrmMetadata.sexualUsageName)}
-                      </div>
-                    </div>
+                  <div className="flex gap-x-3 items-start min-w-0">
+                    <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.commercialUse')}:</span>
+                    <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
+                      {getUsageName(vrmMetadata.commercialUsageName)}
+                    </span>
                   </div>
-
-                  {/* Other Permissions Section */}
+                  <div className="flex gap-x-3 items-start min-w-0">
+                    <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.violentUsage')}:</span>
+                    <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
+                      {getUsageName(vrmMetadata.violentUsageName)}
+                    </span>
+                  </div>
+                  <div className="flex gap-x-3 items-start min-w-0">
+                    <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.sexualUsage')}:</span>
+                    <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
+                      {getUsageName(vrmMetadata.sexualUsageName)}
+                    </span>
+                  </div>
                   {vrmMetadata.otherPermissions && (
-                    <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">{t('vrmviewer.metadata.otherPermissions')}</div>
-                      <div className="text-sm text-gray-900 dark:text-gray-100 break-words bg-gray-50 dark:bg-gray-800 p-3 rounded border border-gray-300 dark:border-gray-700">
-                        {vrmMetadata.otherPermissions}
+                    <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('vrmviewer.metadata.otherPermissions')}</div>
+                      <div className="text-xs text-gray-900 dark:text-gray-100 break-words">
+                        {renderLinkableText(vrmMetadata.otherPermissions)}
                       </div>
                     </div>
                   )}
@@ -1732,60 +2244,67 @@ const VRMInspector = React.memo(() => {
                   <Layers className="h-4 w-4" />
                   {t('vrmviewer.statistics.title')}
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {/* File Stats */}
-                  <div className="space-y-3">
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('vrmviewer.statistics.fileSize')}</div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{modelStats.fileSize}</div>
+                <div className="space-y-1 text-xs min-w-0">
+                  {vrmVersion && (
+                    <div className="flex gap-x-3 items-start min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">VRM Type:</span>
+                      <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
+                        {vrmVersion}
+                      </span>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('vrmviewer.statistics.format')}</div>
-                      <div className="inline-flex px-3 py-1.5 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
-                        {vrmVersion || 'Unknown'}
-                      </div>
+                  )}
+                  {modelStats.fileSize !== '0 Bytes' && (
+                    <div className="flex gap-x-3 items-start min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.statistics.fileSize')}:</span>
+                      <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">{modelStats.fileSize}</span>
                     </div>
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('vrmviewer.statistics.height')}</div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {modelStats.height > 0 ? `${modelStats.height.toFixed(2)}m` : 'Unknown'}
-                </div>
-              </div>
-            </div>
-
-                  {/* Mesh Stats */}
-                  <div className="space-y-3">
-            <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('vrmviewer.statistics.geometry')}</div>
-                      <div className="grid gap-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400">{t('vrmviewer.statistics.vertices')}</span>
-                          <span className="font-medium text-gray-900 dark:text-gray-100">{modelStats.vertices.toLocaleString()}</span>
-                </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400">{t('vrmviewer.statistics.triangles')}</span>
-                          <span className="font-medium text-gray-900 dark:text-gray-100">{modelStats.triangles.toLocaleString()}</span>
-                </div>
-                </div>
-                </div>
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{t('vrmviewer.statistics.assets')}</div>
-                      <div className="grid gap-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400">{t('vrmviewer.statistics.materials')}</span>
-                          <span className="font-medium text-gray-900 dark:text-gray-100">{modelStats.materials}</span>
-                </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400">{t('vrmviewer.statistics.textures')}</span>
-                          <span className="font-medium text-gray-900 dark:text-gray-100">{modelStats.textures}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600 dark:text-gray-400">{t('vrmviewer.statistics.bones')}</span>
-                          <span className="font-medium text-gray-900 dark:text-gray-100">{modelStats.bones}</span>
-                        </div>
-                      </div>
+                  )}
+                  {modelStats.height > 0 && (
+                    <div className="flex gap-x-3 items-start min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.statistics.height')}:</span>
+                      <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
+                        {modelStats.height.toFixed(2)}m
+                      </span>
                     </div>
-                  </div>
+                  )}
+                  {modelStats.vertices > 0 && (
+                    <div className="flex gap-x-3 items-start min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.statistics.vertices')}:</span>
+                      <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
+                        {modelStats.vertices.toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  {modelStats.triangles > 0 && (
+                    <div className="flex gap-x-3 items-start min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.statistics.triangles')}:</span>
+                      <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
+                        {modelStats.triangles.toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  {modelStats.materials > 0 && (
+                    <div className="flex gap-x-3 items-start min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.statistics.materials')}:</span>
+                      <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
+                        {modelStats.materials}
+                      </span>
+                    </div>
+                  )}
+                  {modelStats.textures > 0 && (
+                    <div className="flex gap-x-3 items-start min-w-0 max-w-full w-full">
+                      <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.statistics.textures')}:</span>
+                      <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
+                        {modelStats.textures}
+                      </span>
+                    </div>
+                  )}
+                  {modelStats.bones > 0 && (
+                    <div className="flex gap-x-3 items-start min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.statistics.bones')}:</span>
+                      <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">{modelStats.bones}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1812,7 +2331,21 @@ const VRMInspector = React.memo(() => {
               return (
                 <div key={index} className="bg-cream dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden transition-colors">
                   {/* Compact Texture Preview - Fixed height container for uniform display */}
-                  <div className="w-full h-[240px] relative bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-center p-3">
+                  <div 
+                    className="w-full h-[240px] relative bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-center p-3 cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={async () => {
+                      const imageUrl = await textureToDataURL(tex);
+                      const filename = `${texture.name || `texture_${index}`}.png`;
+                      setLightboxImage({
+                        url: imageUrl,
+                        alt: texture.name || `Texture ${index + 1}`,
+                        filename: filename,
+                        downloadHandler: () => {
+                          downloadTextureAsImage(tex, filename);
+                        }
+                      });
+                    }}
+                  >
                     <TextureRenderer 
                       texture={tex} 
                       size={220}
@@ -2160,6 +2693,16 @@ const VRMInspector = React.memo(() => {
             </div>
           </div>
         )}
+        
+        {/* Image Lightbox */}
+        <ImageLightbox
+          isOpen={lightboxImage !== null}
+          imageUrl={lightboxImage?.url || ''}
+          imageAlt={lightboxImage?.alt || ''}
+          filename={lightboxImage?.filename}
+          onClose={() => setLightboxImage(null)}
+          onDownload={lightboxImage?.downloadHandler}
+        />
       </div>
     </div>
   );

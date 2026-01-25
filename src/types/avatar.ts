@@ -44,6 +44,7 @@ export interface Project {
   name: string;
   description: string;
   isPublic: boolean;
+  license?: string; // License type (e.g., "CC0", "CC-BY")
   createdAt: string;
   updatedAt: string;
   avatarCount?: number; // Will be computed from avatars

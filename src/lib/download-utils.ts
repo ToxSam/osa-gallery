@@ -8,6 +8,16 @@ export function isIPFSUrl(url: string): boolean {
   return url.includes('ipfs') || url.includes('dweb.link') || url.startsWith('ipfs://');
 }
 
+// Helper to check if a URL is a GitHub raw URL
+export function isGitHubRawUrl(url: string): boolean {
+  return url.includes('raw.githubusercontent.com') || url.includes('github.com') && url.includes('/raw/');
+}
+
+// Helper to check if a URL should be downloaded client-side (IPFS, GitHub raw, etc.)
+export function isClientSideDownloadUrl(url: string): boolean {
+  return isIPFSUrl(url) || isGitHubRawUrl(url);
+}
+
 // Helper to normalize IPFS URLs (convert ipfs:// to https://dweb.link/ipfs/)
 export function normalizeIPFSUrl(url: string): string {
   if (url.startsWith('ipfs://')) {
@@ -56,7 +66,7 @@ function getModelUrlForFormat(
 }
 
 /**
- * Client-side download function for IPFS URLs
+ * Client-side download function for IPFS and GitHub raw URLs
  * Fetches the file directly from the browser and triggers download
  */
 export async function downloadIPFSFile(
@@ -64,17 +74,17 @@ export async function downloadIPFSFile(
   filename: string
 ): Promise<void> {
   try {
-    console.log(`Downloading IPFS file: ${url}`);
+    console.log(`Downloading file: ${url}`);
     
-    // Normalize IPFS URL
-    const normalizedUrl = normalizeIPFSUrl(url);
+    // Normalize IPFS URL if needed
+    const normalizedUrl = isIPFSUrl(url) ? normalizeIPFSUrl(url) : url;
     
     // Fetch the file
     const response = await fetch(normalizedUrl);
     
     if (!response.ok) {
-      // Try alternative gateway if dweb.link fails
-      if (normalizedUrl.includes('dweb.link')) {
+      // Try alternative gateway if dweb.link fails (IPFS only)
+      if (isIPFSUrl(normalizedUrl) && normalizedUrl.includes('dweb.link')) {
         const alternativeUrl = normalizedUrl.replace('dweb.link', 'ipfs.io');
         console.log(`Retrying with alternative IPFS gateway: ${alternativeUrl}`);
         const retryResponse = await fetch(alternativeUrl);
@@ -111,7 +121,7 @@ export async function downloadIPFSFile(
     
     console.log(`Successfully downloaded: ${filename}`);
   } catch (error) {
-    console.error('IPFS download error:', error);
+    console.error('Download error:', error);
     throw error;
   }
 }
@@ -142,9 +152,9 @@ export async function downloadAvatar(
     throw new Error('Could not determine model URL');
   }
 
-  // Check if it's an IPFS URL
-  if (isIPFSUrl(modelUrl)) {
-    // Use client-side download for IPFS
+  // Check if it's a client-side downloadable URL (IPFS or GitHub raw)
+  if (isClientSideDownloadUrl(modelUrl)) {
+    // Use client-side download for IPFS and GitHub raw URLs
     const extension = getFileExtension(format || 'default');
     const cleanName = (avatar.name || avatar.metadata?.number || 'avatar').replace(/[^a-zA-Z0-9_-]/g, '_');
     const voxelPart = format && (format.includes('voxel') || format === 'voxel') ? '_voxel' : '';

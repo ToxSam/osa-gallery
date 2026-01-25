@@ -29,7 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const locales = ['en', 'ja'];
 
   // Static pages for both locales
-  const staticPages = ['', '/gallery', '/about', '/resources', '/vrminspector', '/test'];
+  const staticPages = ['', '/gallery', '/finder', '/about', '/resources', '/vrminspector', '/test'];
 
   const allRoutes: MetadataRoute.Sitemap = [];
 

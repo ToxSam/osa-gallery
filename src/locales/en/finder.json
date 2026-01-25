@@ -1,0 +1,183 @@
+{
+  "title": "Finder",
+  "description": "Browse and download multiple avatars at once",
+  "mobileNotice": "⚠️ Best experienced on desktop for batch downloads",
+  "mobile": {
+    "desktopOnly": {
+      "title": "Desktop Only Feature",
+      "description": "The Finder is currently optimized for desktop use. Please visit this page on a computer for the best experience."
+    }
+  },
+  "collections": {
+    "title": "Projects",
+    "expandAll": "Expand All",
+    "collapseAll": "Collapse All",
+    "avatarCount": "{count} avatars"
+  },
+  "avatarList": {
+    "title": "Avatars",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "searchPlaceholder": "Search avatars...",
+    "noResults": "No avatars found",
+    "hiddenSelectedWarning": "You have selected {count} {items} that are not being displayed right now",
+    "columns": {
+      "name": "Name",
+      "formats": "Formats",
+      "files": "Files",
+      "license": "License",
+      "collection": "Project"
+    },
+    "fileTypes": {
+      "vrm": "VRM",
+      "fbx": "FBX",
+      "voxelVrm": "Voxel VRM",
+      "voxelFbx": "Voxel FBX",
+      "thumbnail": "Thumbnail",
+      "texture": "Texture"
+    }
+  },
+  "fileList": {
+    "title": "Files",
+    "noSelection": "Select an avatar to view files",
+    "noFiles": "No files available",
+    "categories": {
+      "vrm": "VRM",
+      "glb": "GLB",
+      "fbx": "FBX",
+      "images": "IMAGES",
+      "models": "Models",
+      "thumbnails": "Thumbnails",
+      "textures": "Textures"
+    }
+  },
+  "preview": {
+    "title": "Preview",
+    "noSelection": "Select an avatar to preview",
+    "download": "Download",
+    "fbxNotSupported": {
+      "title": "FBX Preview Not Supported",
+      "message": "FBX preview is not supported at this time, but you can still download the file using the download button below."
+    },
+    "metadata": {
+      "name": "Name",
+      "collection": "Project",
+      "license": "License",
+      "formats": "Available Formats",
+      "currentFile": "Current File"
+    }
+  },
+  "downloadQueue": {
+    "title": "Download Queue",
+    "minimize": "Minimize",
+    "maximize": "Maximize",
+    "clear": "Clear Queue",
+    "downloadAll": "Download All Selected",
+    "status": {
+      "queued": "Queued",
+      "downloading": "Downloading",
+      "complete": "Complete",
+      "failed": "Failed"
+    },
+    "progress": "Downloading {current} of {total} files",
+    "overallProgress": "{completed} of {total} complete",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "empty": "No files in queue"
+  },
+  "batchDownload": {
+    "title": "Batch Download Manager",
+    "selectedAvatars": "Selected Avatars",
+    "selectedFiles": "Selected Files",
+    "downloadOptions": "Download Options",
+    "downloadVrms": "Download VRM Files",
+    "downloadFbx": "Download FBX Files",
+    "downloadGlb": "Download GLB Files",
+    "downloadImages": "Download Images",
+    "extractTextures": "Extract Textures (Experimental)",
+    "comingSoon": "Coming Soon",
+    "startDownload": "Start Download",
+    "selectOption": "Please select at least one download option",
+    "downloadProgress": "Download Progress",
+    "downloadFolder": "Download Folder",
+    "selectFolder": "Select Folder",
+    "changeFolder": "Change Folder",
+    "folderHint": "Select a folder to save files directly without prompts. If not selected, you'll be prompted to select a folder when starting the download.",
+    "folderNotSupported": "Folder selection is not supported in this browser. Files will download to your default download folder.",
+    "folderRequired": "Please select a download folder to avoid save prompts for each file. Folder selection is required for batch downloads.",
+    "folderSelectionError": "Error selecting folder. Please try again.",
+    "selectFolderAndDownload": "Select Folder & Download",
+    "folderRecommended": "Selecting a folder will prevent save prompts for each file",
+    "required": "Required",
+    "folderSelected": "Files will save here automatically",
+    "openFolder": "Open folder in file manager",
+    "open": "Open",
+    "filesDownloadedTo": "Files downloaded to:",
+    "selectFolderFirst": "Please select a download folder first"
+  },
+  "filters": {
+    "title": "Filters",
+    "fileTypes": {
+      "title": "File Types",
+      "hasVrm": "Has VRM",
+      "hasFbx": "Has FBX",
+      "hasVoxel": "Has Voxel"
+    }
+  },
+  "errors": {
+    "loadError": "Failed to load avatars",
+    "downloadError": "Download failed",
+    "retryError": "Retry failed"
+  },
+  "common": {
+    "noImage": "No img",
+    "unknown": "Unknown",
+    "download": "Download",
+    "downloadAllFiles": "Download All Files",
+    "close": "Close",
+    "change": "Change",
+    "select": "Select",
+    "loadMore": "Load More ({count} remaining)",
+    "thumbnail": "Thumbnail",
+    "texture": "Texture"
+  },
+  "sections": {
+    "basicInformation": "BASIC INFORMATION",
+    "modelInformation": "MODEL INFORMATION",
+    "licenseInformation": "LICENSE INFORMATION",
+    "availableFiles": "AVAILABLE FILES",
+    "description": "DESCRIPTION",
+    "fileInformation": "FILE INFORMATION"
+  },
+  "fileSizeUnits": {
+    "bytes": "Bytes",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB"
+  },
+  "licenseTypes": {
+    "redistributionProhibited": "Redistribution Prohibited",
+    "cc0": "CC0",
+    "ccBy": "CC BY",
+    "ccByNc": "CC BY NC",
+    "ccBySa": "CC BY SA",
+    "ccByNcSa": "CC BY NC SA",
+    "ccByNd": "CC BY ND",
+    "ccByNcNd": "CC BY NC ND",
+    "other": "Other"
+  },
+  "permissions": {
+    "everyone": "Everyone",
+    "explicitUser": "Explicit User",
+    "onlyAuthor": "Only Author"
+  },
+  "usage": {
+    "allow": "Allow",
+    "disallow": "Disallow"
+  },
+  "lightbox": {
+    "download": "Download",
+    "downloadImage": "Download image",
+    "close": "Close"
+  }
+}

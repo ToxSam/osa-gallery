@@ -13,6 +13,7 @@ import { useI18n } from '@/lib/i18n';
 
 export const VRMInspectorViewer = ({ url, onMetadataLoad }) => {
   const { t } = useI18n();
+  const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const rendererRef = useRef(null);
   const sceneRef = useRef(null);
@@ -54,11 +55,12 @@ export const VRMInspectorViewer = ({ url, onMetadataLoad }) => {
 
   // Modify the initialization effect to not depend on t
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !containerRef.current) return;
   
     console.log('Initializing 3D scene');
     let isActive = true;
     const canvas = canvasRef.current;
+    let resizeObserver = null;
   
     try {
       // Initialize renderer
@@ -69,8 +71,7 @@ export const VRMInspectorViewer = ({ url, onMetadataLoad }) => {
         preserveDrawingBuffer: true,
         powerPreference: "high-performance"
       });
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       // Don't use tone mapping - it desaturates colors like pure white wireframes
       // renderer.outputColorSpace = THREE.SRGBColorSpace;
       // renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -90,25 +91,42 @@ export const VRMInspectorViewer = ({ url, onMetadataLoad }) => {
 
       rendererRef.current = renderer;
       
-      // Handle resizing
+      // Handle resizing - use containerRef for more reliable sizing
       const handleResize = () => {
-        if (!canvas.parentElement) return;
+        if (!containerRef.current || !rendererRef.current) return;
         
-        const width = canvas.parentElement.clientWidth;
-        const height = canvas.parentElement.clientHeight;
+        // Get dimensions from container element
+        const width = containerRef.current.clientWidth;
+        const height = containerRef.current.clientHeight;
+        
+        // Guard against invalid dimensions
+        if (width <= 0 || height <= 0) return;
+        
         const aspectRatio = width / height;
         
+        // Update camera aspect ratio and projection matrix
         if (cameraRef.current) {
           cameraRef.current.aspect = aspectRatio;
           cameraRef.current.updateProjectionMatrix();
         }
         
-        renderer.setSize(width, height, false);
+        // Update renderer size
+        rendererRef.current.setSize(width, height, false);
       };
   
-      handleResize();
-      const resizeObserver = new ResizeObserver(handleResize);
-      resizeObserver.observe(canvas.parentElement);
+      // Use ResizeObserver for container size changes (more reliable than window resize)
+      resizeObserver = new ResizeObserver(handleResize);
+      if (containerRef.current) {
+        resizeObserver.observe(containerRef.current);
+      }
+      
+      // Also listen to window resize as a fallback
+      window.addEventListener('resize', handleResize);
+      
+      // Initial resize call - defer to ensure container is laid out
+      requestAnimationFrame(() => {
+        handleResize();
+      });
 
       // Create scene
       const scene = new THREE.Scene();
@@ -847,6 +865,7 @@ export const VRMInspectorViewer = ({ url, onMetadataLoad }) => {
         canvas.removeEventListener('mousedown', handleMouseDown);
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('resize', handleResize);
         
         if (rendererRef.current) {
           rendererRef.current.dispose();
@@ -996,19 +1015,36 @@ export const VRMInspectorViewer = ({ url, onMetadataLoad }) => {
             }
           }
 
-          // Extract and send metadata
+          // Extract and send metadata (async)
           console.log('🔍 DEBUG - Extracting VRM metadata');
-          const metadata = extractVRMMetadata(vrm, gltf);
-          console.log('🔍 DEBUG - Extracted metadata:', metadata);
-          
-          if (metadata && onMetadataLoad) {
-            console.log('🔍 DEBUG - Calling onMetadataLoad with metadata and VRM instance');
-            onMetadataLoad({
-              ...metadata,
-              vrm,
-              gltf
-            });
-          }
+          extractVRMMetadata(vrm, gltf).then((metadata) => {
+            console.log('🔍 DEBUG - Extracted metadata:', metadata);
+            
+            if (metadata && onMetadataLoad) {
+              console.log('🔍 DEBUG - Calling onMetadataLoad with metadata and VRM instance');
+              onMetadataLoad({
+                ...metadata,
+                vrm,
+                gltf
+              });
+            }
+          }).catch((err) => {
+            console.error('🔍 DEBUG - Error extracting metadata:', err);
+            // Still call onMetadataLoad with basic data
+            if (onMetadataLoad) {
+              const basicMetadata = {
+                ...vrm.meta,
+                triangleCount: 0,
+                materialCount: 0,
+                avatarHeight: 0,
+                vrmVersion: 'Unknown',
+                thumbnail: null,
+                vrm,
+                gltf
+              };
+              onMetadataLoad(basicMetadata);
+            }
+          });
           
           // Setup the scene
           vrm.scene.traverse((object) => {
@@ -1257,14 +1293,24 @@ export const VRMInspectorViewer = ({ url, onMetadataLoad }) => {
   }, [skeletonMode]);
 
   // Extract VRM metadata - specialized for Inspector
-  const extractVRMMetadata = (vrm, gltf) => {
+  const extractVRMMetadata = async (vrm, gltf) => {
     try {
       console.log('🔍 DEBUG - Extracting metadata from VRM');
       
       // Get raw metadata from VRM instance
       const rawMetadata = vrm.meta;
       
-      if (!rawMetadata) {
+      // Also get raw metadata from GLTF JSON (VRM 0.x stores it there)
+      let gltfRawMetadata = null;
+      if (gltf.parser?.json?.extensions?.VRM?.meta) {
+        gltfRawMetadata = gltf.parser.json.extensions.VRM.meta;
+        console.log('🔍 DEBUG - Found metadata in GLTF JSON:', gltfRawMetadata);
+      }
+      
+      // Use GLTF JSON metadata if available (it has the texture index), otherwise use VRM meta
+      const metadataSource = gltfRawMetadata || rawMetadata;
+      
+      if (!metadataSource) {
         console.error('No metadata found in VRM');
         return null;
       }
@@ -1275,10 +1321,10 @@ export const VRMInspectorViewer = ({ url, onMetadataLoad }) => {
         vrmVersion = 'VRM 0.x';
       } else if (gltf.parser?.json?.extensions?.VRMC_vrm) {
         vrmVersion = 'VRM 1.0';
-      } else if (rawMetadata.metaVersion === 0) {
+      } else if (metadataSource.metaVersion === 0) {
         vrmVersion = 'VRM 0.x';
-      } else if (rawMetadata.specVersion) {
-        vrmVersion = `VRM ${rawMetadata.specVersion}`;
+      } else if (metadataSource.specVersion) {
+        vrmVersion = `VRM ${metadataSource.specVersion}`;
       } else {
         vrmVersion = 'Unknown';
       }
@@ -1316,13 +1362,268 @@ export const VRMInspectorViewer = ({ url, onMetadataLoad }) => {
       
       materialCount = materials.size;
       
+      // Extract thumbnail if available
+      let thumbnail = null;
+      try {
+        console.log('🔍 DEBUG - Metadata source texture field:', metadataSource.texture, 'type:', typeof metadataSource.texture);
+        console.log('🔍 DEBUG - Metadata source thumbnailImage field:', metadataSource.thumbnailImage);
+        console.log('🔍 DEBUG - VRM instance:', vrm);
+        console.log('🔍 DEBUG - VRM meta object:', vrm.meta);
+        console.log('🔍 DEBUG - GLTF parser available:', !!gltf.parser);
+        console.log('🔍 DEBUG - GLTF textures array:', gltf.textures?.length);
+        console.log('🔍 DEBUG - GLTF parser json textures:', gltf.parser?.json?.textures?.length);
+        console.log('🔍 DEBUG - GLTF parser json images:', gltf.parser?.json?.images?.length);
+        
+        // First, check if VRM library has already processed the thumbnail
+        if (vrm.meta && vrm.meta.texture && vrm.meta.texture instanceof THREE.Texture) {
+          thumbnail = vrm.meta.texture;
+          console.log('🔍 DEBUG - Found thumbnail directly in vrm.meta.texture:', thumbnail);
+        }
+        
+        // VRM 0.x: thumbnail is stored in meta.texture as a texture index
+        if (metadataSource.texture !== undefined && metadataSource.texture !== null && !thumbnail) {
+          const textureIndex = typeof metadataSource.texture === 'number' ? metadataSource.texture : metadataSource.texture;
+          console.log('🔍 DEBUG - Processing texture index:', textureIndex);
+          
+          // If it's already a THREE.Texture, use it directly
+          if (textureIndex instanceof THREE.Texture) {
+            console.log('🔍 DEBUG - Texture index is already a THREE.Texture');
+            thumbnail = textureIndex;
+          } else if (typeof textureIndex === 'number') {
+            // Try multiple methods to get the texture
+            
+            // Method 1: Use GLTF parser's getDependency if available (it's async!)
+            if (gltf.parser && typeof gltf.parser.getDependency === 'function') {
+              try {
+                const texturePromise = gltf.parser.getDependency('texture', textureIndex);
+                // Check if it's a promise
+                if (texturePromise && typeof texturePromise.then === 'function') {
+                  // It's async, we'll handle it below
+                  console.log('🔍 DEBUG - getDependency returned a Promise, will await it');
+                } else {
+                  thumbnail = texturePromise;
+                  console.log('🔍 DEBUG - Got thumbnail via getDependency (sync):', thumbnail);
+                }
+              } catch (err) {
+                console.warn('🔍 DEBUG - getDependency failed:', err);
+              }
+            }
+            
+            // Method 2: Try to find in gltf.textures array
+            if (!thumbnail && gltf.textures && Array.isArray(gltf.textures) && gltf.textures[textureIndex]) {
+              thumbnail = gltf.textures[textureIndex];
+              console.log('🔍 DEBUG - Got thumbnail from gltf.textures array:', thumbnail);
+            }
+            
+            // Method 3: Access through GLTF JSON structure and load the texture explicitly
+            if (!thumbnail && gltf.parser && gltf.parser.json) {
+              const textures = gltf.parser.json.textures || [];
+              if (textures[textureIndex]) {
+                const textureInfo = textures[textureIndex];
+                const imageIndex = textureInfo.source;
+                console.log('🔍 DEBUG - Texture info from JSON:', textureInfo, 'imageIndex:', imageIndex);
+                
+                // Try to get the image first
+                if (gltf.parser.json.images && gltf.parser.json.images[imageIndex]) {
+                  const imageData = gltf.parser.json.images[imageIndex];
+                  console.log('🔍 DEBUG - Image data from JSON:', imageData);
+                  
+                  // Try to get the actual image element from various sources
+                  let image = null;
+                  
+                  // Check parser cache
+                  if (gltf.parser.cache && gltf.parser.cache.images && gltf.parser.cache.images[imageIndex]) {
+                    image = gltf.parser.cache.images[imageIndex];
+                    console.log('🔍 DEBUG - Found image in parser cache:', image);
+                  }
+                  
+                  // Try getDependency for image
+                  if (!image && typeof gltf.parser.getDependency === 'function') {
+                    try {
+                      image = gltf.parser.getDependency('image', imageIndex);
+                      console.log('🔍 DEBUG - Got image via getDependency:', image);
+                    } catch (err) {
+                      console.warn('🔍 DEBUG - getDependency failed for image:', err);
+                    }
+                  }
+                  
+                  // Search through the scene to find a texture using this image
+                  if (!image) {
+                    gltf.scene.traverse((obj) => {
+                      if (obj.isMesh && obj.material && !image) {
+                        const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+                        materials.forEach(material => {
+                          if (material && material.map && material.map.image) {
+                            const texture = material.map;
+                            // Check various ways the image index might be stored
+                            if (texture.userData && texture.userData.gltfImageIndex === imageIndex) {
+                              image = texture.image;
+                              console.log('🔍 DEBUG - Found image from scene texture:', image);
+                            } else if (texture.image && texture.image.userData && texture.image.userData.gltfImageIndex === imageIndex) {
+                              image = texture.image;
+                              console.log('🔍 DEBUG - Found image from scene texture image userData:', image);
+                            }
+                          }
+                        });
+                      }
+                    });
+                  }
+                  
+                            // If we found an image, create a texture from it
+                            if (image) {
+                              // Check if there's already a texture using this image in the scene
+                              gltf.scene.traverse((obj) => {
+                                if (obj.isMesh && obj.material && !thumbnail) {
+                                  const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+                                  materials.forEach(material => {
+                                    if (material && material.map && material.map.image === image) {
+                                      thumbnail = material.map;
+                                      console.log('🔍 DEBUG - Found existing texture using this image:', thumbnail);
+                                    }
+                                  });
+                                }
+                              });
+                              
+                              // If no existing texture found, create a new one
+                              if (!thumbnail) {
+                                thumbnail = new THREE.Texture(image);
+                                thumbnail.needsUpdate = true;
+                                // Set proper texture settings
+                                thumbnail.flipY = false;
+                                thumbnail.format = THREE.RGBAFormat;
+                                console.log('🔍 DEBUG - Created new texture from image:', thumbnail);
+                              }
+                            } else {
+                              // Last resort: try to load the image directly from the buffer
+                              // This handles cases where the image isn't in the cache yet
+                              const imageInfo = gltf.parser.json.images[imageIndex];
+                              if (imageInfo && imageInfo.uri) {
+                                // Data URI or external URL
+                                const imageElement = new Image();
+                                imageElement.crossOrigin = 'anonymous';
+                                imageElement.onload = () => {
+                                  const texture = new THREE.Texture(imageElement);
+                                  texture.flipY = false;
+                                  texture.needsUpdate = true;
+                                  thumbnail = texture;
+                                  console.log('🔍 DEBUG - Created texture from loaded image element:', thumbnail);
+                                  // Update metadata
+                                  if (onMetadataLoad) {
+                                    const currentMetadata = {
+                                      ...metadataSource,
+                                      triangleCount,
+                                      materialCount,
+                                      avatarHeight,
+                                      vrmVersion,
+                                      thumbnail,
+                                      vrm,
+                                      gltf
+                                    };
+                                    onMetadataLoad(currentMetadata);
+                                  }
+                                };
+                                imageElement.onerror = () => {
+                                  console.warn('🔍 DEBUG - Failed to load image from URI:', imageInfo.uri);
+                                };
+                                imageElement.src = imageInfo.uri;
+                              } else if (imageInfo && imageInfo.bufferView !== undefined) {
+                                // Image is in binary buffer - need to extract it
+                                console.log('🔍 DEBUG - Image is in bufferView, would need to extract from binary');
+                              }
+                            }
+                }
+              }
+            }
+          }
+        } else if (metadataSource.thumbnailImage !== undefined && metadataSource.thumbnailImage !== null) {
+          // VRM 1.0: thumbnailImage is an index into the GLTF images array
+          const thumbnailImageIndex = rawMetadata.thumbnailImage;
+          console.log('🔍 DEBUG - Processing thumbnailImage index:', thumbnailImageIndex);
+          
+          if (typeof thumbnailImageIndex === 'number' && gltf.parser) {
+            try {
+              // Method 1: Use getDependency if available
+              if (typeof gltf.parser.getDependency === 'function') {
+                try {
+                  const image = gltf.parser.getDependency('image', thumbnailImageIndex);
+                  console.log('🔍 DEBUG - Got thumbnail image via getDependency:', image);
+                  
+                  if (image) {
+                    // Check if there's already a texture using this image
+                    const textures = gltf.parser.json.textures || [];
+                    const textureIndex = textures.findIndex(tex => tex.source === thumbnailImageIndex);
+                    if (textureIndex !== -1) {
+                      try {
+                        thumbnail = gltf.parser.getDependency('texture', textureIndex);
+                        console.log('🔍 DEBUG - Got thumbnail texture from image index:', thumbnail);
+                      } catch (err) {
+                        console.warn('Failed to get texture from image index, creating new texture:', err);
+                        // Create a new texture from the image
+                        thumbnail = new THREE.Texture(image);
+                        thumbnail.needsUpdate = true;
+                      }
+                    } else {
+                      // Create a new texture from the image
+                      thumbnail = new THREE.Texture(image);
+                      thumbnail.needsUpdate = true;
+                    }
+                  }
+                } catch (err) {
+                  console.warn('🔍 DEBUG - getDependency failed for image:', err);
+                }
+              }
+              
+              // Method 2: Try parser cache
+              if (!thumbnail && gltf.parser.cache && gltf.parser.cache.images && gltf.parser.cache.images[thumbnailImageIndex]) {
+                const image = gltf.parser.cache.images[thumbnailImageIndex];
+                console.log('🔍 DEBUG - Found image in parser cache:', image);
+                thumbnail = new THREE.Texture(image);
+                thumbnail.needsUpdate = true;
+              }
+              
+              // Method 3: Search scene for textures using this image
+              if (!thumbnail && gltf.parser.json && gltf.parser.json.images && gltf.parser.json.images[thumbnailImageIndex]) {
+                gltf.scene.traverse((obj) => {
+                  if (obj.isMesh && obj.material && !thumbnail) {
+                    const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+                    materials.forEach(material => {
+                      if (material && material.map && material.map.image) {
+                        const texture = material.map;
+                        if (texture.userData && texture.userData.gltfImageIndex === thumbnailImageIndex) {
+                          thumbnail = texture;
+                          console.log('🔍 DEBUG - Found thumbnail texture in scene:', thumbnail);
+                        }
+                      }
+                    });
+                  }
+                });
+              }
+            } catch (err) {
+              console.warn('Failed to get thumbnail image:', err);
+            }
+          }
+        }
+        
+        console.log('🔍 DEBUG - Final thumbnail result:', thumbnail);
+      } catch (error) {
+        console.warn('Error extracting thumbnail:', error);
+      }
+      
+      // If we have a pending promise from getDependency, await it
+      if (thumbnail && typeof thumbnail.then === 'function') {
+        console.log('🔍 DEBUG - Awaiting thumbnail promise...');
+        thumbnail = await thumbnail;
+        console.log('🔍 DEBUG - Got thumbnail from promise:', thumbnail);
+      }
+      
       // Create metadata object to return
       const metadata = {
-        ...rawMetadata,
+        ...metadataSource,
         triangleCount,
         materialCount,
         avatarHeight,
         vrmVersion, // Add the detected version
+        thumbnail, // Add thumbnail
         vrm, // Pass the VRM instance
         gltf // Pass the GLTF instance
       };
@@ -1796,11 +2097,14 @@ export const VRMInspectorViewer = ({ url, onMetadataLoad }) => {
   });
 
   return (
-    <div className="relative w-full h-full">
+    <div ref={containerRef} className="relative w-full h-full">
       <canvas 
         ref={canvasRef} 
         className="w-full h-full"
-        style={{ touchAction: "none" }}
+        style={{ 
+          display: 'block',
+          touchAction: "none" 
+        }}
       />
       
       {/* Control buttons group - hide on mobile, lower z-index when no avatar loaded */}

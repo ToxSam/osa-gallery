@@ -2,8 +2,23 @@ import * as React from "react";
 // Adjust the import path to match your project structure
 import { cn } from "../../lib/utils";
 
-const Checkbox = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
-  ({ className, ...props }, ref) => {
+interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
+  onCheckedChange?: (checked: boolean) => void;
+}
+
+const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
+  ({ className, onCheckedChange, onChange, ...props }, ref) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      // Call onCheckedChange if provided
+      if (onCheckedChange) {
+        onCheckedChange(e.target.checked);
+      }
+      // Also call onChange if provided (for backward compatibility)
+      if (onChange) {
+        onChange(e);
+      }
+    };
+
     return (
       <input
         type="checkbox"
@@ -12,6 +27,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HT
           className
         )}
         ref={ref}
+        onChange={handleChange}
         {...props}
       />
     );

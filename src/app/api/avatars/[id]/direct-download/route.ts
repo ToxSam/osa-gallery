@@ -42,6 +42,10 @@ function getModelFilenameForFormat(
     return alternateModels['fbx'] || null;
   }
   
+  if (format === 'glb') {
+    return alternateModels['glb'] || null;
+  }
+  
   if (format === 'voxel') {
     return alternateModels['voxel_vrm'] || null;
   }
@@ -58,12 +62,20 @@ function getFileExtension(format: string): string {
   if (format === 'fbx' || format === 'voxel-fbx' || format === 'voxel_fbx') {
     return '.fbx';
   }
+  if (format === 'glb') {
+    return '.glb';
+  }
   return '.vrm'; // Default to VRM for any other format
 }
 
 // Helper to check if a URL is an IPFS URL
 function isIPFSUrl(url: string): boolean {
   return url.includes('ipfs') || url.includes('dweb.link') || url.startsWith('ipfs://');
+}
+
+// Helper to check if a URL is a GitHub raw URL
+function isGitHubRawUrl(url: string): boolean {
+  return url.includes('raw.githubusercontent.com') || (url.includes('github.com') && url.includes('/raw/'));
 }
 
 // Helper to normalize IPFS URLs (convert ipfs:// to https://dweb.link/ipfs/)
@@ -130,14 +142,32 @@ export async function GET(
     // Normalize IPFS URLs if needed
     const normalizedUrl = normalizeIPFSUrl(modelUrl);
     const isIPFS = isIPFSUrl(normalizedUrl);
+    const isGitHub = isGitHubRawUrl(normalizedUrl);
     
     // Create a proper filename
-    const extension = getFileExtension(actualFormat);
-    const cleanName = (avatar.name || avatar.metadata?.number || 'avatar').replace(/[^a-zA-Z0-9_-]/g, '_');
-    const voxelPart = actualFormat && (actualFormat.includes('voxel') || actualFormat === 'voxel') ? '_voxel' : '';
-    const filename = `${cleanName}${voxelPart}${extension}`;
+    // For GitHub URLs, try to extract filename from URL
+    let filename: string;
+    if (isGitHub) {
+      const urlFilename = normalizedUrl.split('/').pop() || '';
+      const urlExt = urlFilename.split('.').pop()?.toLowerCase();
+      if (urlExt && ['vrm', 'fbx', 'glb', 'gltf'].includes(urlExt)) {
+        const cleanName = (avatar.name || avatar.metadata?.number || 'avatar').replace(/[^a-zA-Z0-9_-]/g, '_');
+        filename = `${cleanName}.${urlExt}`;
+      } else {
+        // Fallback to format-based extension
+        const extension = getFileExtension(actualFormat);
+        const cleanName = (avatar.name || avatar.metadata?.number || 'avatar').replace(/[^a-zA-Z0-9_-]/g, '_');
+        const voxelPart = actualFormat && (actualFormat.includes('voxel') || actualFormat === 'voxel') ? '_voxel' : '';
+        filename = `${cleanName}${voxelPart}${extension}`;
+      }
+    } else {
+      const extension = getFileExtension(actualFormat);
+      const cleanName = (avatar.name || avatar.metadata?.number || 'avatar').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const voxelPart = actualFormat && (actualFormat.includes('voxel') || actualFormat === 'voxel') ? '_voxel' : '';
+      filename = `${cleanName}${voxelPart}${extension}`;
+    }
     
-    console.log(`Downloading ${filename} from ${normalizedUrl}${isIPFS ? ' (IPFS)' : ''}`);
+    console.log(`Downloading ${filename} from ${normalizedUrl}${isIPFS ? ' (IPFS)' : isGitHub ? ' (GitHub)' : ''}`);
     
     try {
       // Fetch the file directly
@@ -219,7 +249,7 @@ export async function GET(
                 return new NextResponse(buffer, {
                   status: 200,
                   headers: {
-                    'Content-Type': actualFormat === 'fbx' ? 'application/octet-stream' : 'model/vrm',
+                    'Content-Type': (actualFormat === 'fbx' || actualFormat === 'glb') ? 'application/octet-stream' : 'model/vrm',
                     'Content-Disposition': `attachment; filename="${filename}"`,
                     'Cache-Control': 'public, max-age=86400',
                   }
@@ -259,7 +289,7 @@ export async function GET(
       return new NextResponse(buffer, {
         status: 200,
         headers: {
-          'Content-Type': actualFormat === 'fbx' ? 'application/octet-stream' : 'model/vrm',
+          'Content-Type': (actualFormat === 'fbx' || actualFormat === 'glb') ? 'application/octet-stream' : 'model/vrm',
           'Content-Disposition': `attachment; filename="${filename}"`,
           'Cache-Control': 'public, max-age=86400',
         }

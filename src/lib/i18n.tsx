@@ -35,14 +35,15 @@ const loadTranslations = async (locale: Locale) => {
   if (Object.keys(translations[locale]).length > 0) return;
   
   try {
-    const [common, header, avatar, about, resources, vrmviewer, home] = await Promise.all([
+    const [common, header, avatar, about, resources, vrmviewer, home, finder] = await Promise.all([
       import(`../locales/${locale}/common.json`),
       import(`../locales/${locale}/header.json`),
       import(`../locales/${locale}/avatar.json`),
       import(`../locales/${locale}/about.json`),
       import(`../locales/${locale}/resources.json`),
       import(`../locales/${locale}/vrmviewer.json`),
-      import(`../locales/${locale}/home.json`)
+      import(`../locales/${locale}/home.json`),
+      import(`../locales/${locale}/finder.json`)
     ]);
 
     translations[locale] = {
@@ -53,7 +54,8 @@ const loadTranslations = async (locale: Locale) => {
       about: about.default,
       resources: resources.default,
       vrmviewer: vrmviewer.default,
-      home: home.default
+      home: home.default,
+      finder: finder.default
     };
   } catch (error) {
     console.error(`Error loading translations for ${locale}:`, error);

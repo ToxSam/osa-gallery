@@ -25,6 +25,7 @@ export const AvatarHeader: React.FC<AvatarHeaderProps> = ({
   const navigationLinks = [
     { href: `/${locale}`, label: 'Home' },
     { href: `/${locale}/gallery`, label: t('header.navigation.avatars') },
+    { href: `/${locale}/finder`, label: t('header.navigation.finder') },
     { href: `/${locale}/vrminspector`, label: t('header.navigation.viewer') },
     { href: `/${locale}/resources`, label: t('header.navigation.resources') },
     { href: `/${locale}/about`, label: t('header.navigation.about') },

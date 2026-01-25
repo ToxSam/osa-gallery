@@ -48,10 +48,26 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link 
+                  href={`/${locale}/finder`}
+                  className="text-small text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors link-hover"
+                >
+                  Finder
+                </Link>
+              </li>
+              <li>
+                <Link 
                   href={`/${locale}/vrminspector`}
                   className="text-small text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors link-hover"
                 >
                   VRM Inspector
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href={`/${locale}/finder`}
+                  className="text-small text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors link-hover"
+                >
+                  Finder
                 </Link>
               </li>
               <li>

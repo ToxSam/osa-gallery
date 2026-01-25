@@ -118,6 +118,7 @@ export async function GET(req: NextRequest) {
         name: project.name,
         description: project.description,
         isPublic: project.isPublic,
+        license: project.license || 'CC0', // Include license, default to CC0
         createdAt: project.createdAt,
         updatedAt: project.updatedAt,
         avatarCount: transformedAvatars.filter((a: any) => a.projectId === project.id).length

@@ -303,6 +303,41 @@ input:-webkit-autofill:focus {
 }
 
 @layer utilities {
+  /* File list scrollbar styling */
+  .file-list-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(203, 213, 225, 0.5) transparent;
+  }
+
+  .file-list-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .file-list-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .file-list-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(203, 213, 225, 0.5);
+    border-radius: 3px;
+  }
+
+  .file-list-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(203, 213, 225, 0.7);
+  }
+
+  .dark .file-list-scroll {
+    scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
+  }
+
+  .dark .file-list-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(75, 85, 99, 0.5);
+  }
+
+  .dark .file-list-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(75, 85, 99, 0.7);
+  }
+
   /* Animation Delays */
   .animation-delay-100 {
     animation-delay: 100ms;

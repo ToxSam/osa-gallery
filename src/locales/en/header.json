@@ -1,6 +1,7 @@
 {
   "navigation": {
     "avatars": "Avatars",
+    "finder": "Finder",
     "about": "About",
     "resources": "Resources",
     "viewer": "Inspector"

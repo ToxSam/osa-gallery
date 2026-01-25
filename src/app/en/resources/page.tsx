@@ -14,7 +14,7 @@ interface CommunityCollection {
   license: string;
   source_type: string;
   source_network?: string | string[];
-  storage_type: string;
+  storage_type: string | string[];
   opensea_url?: string;
   avatar_data_file?: string;
 }
@@ -183,9 +183,18 @@ export default function ResourcesPage() {
                           : 'Website';
                         
                         // Format storage type
-                        const storageLabel = collection.storage_type === 'ipfs' 
-                          ? 'IPFS' 
-                          : collection.storage_type.charAt(0).toUpperCase() + collection.storage_type.slice(1);
+                        const formatStorageType = (storage: string | string[]): string => {
+                          if (Array.isArray(storage)) {
+                            return storage.map(s => {
+                              if (s === 'ipfs') return 'IPFS';
+                              return s.charAt(0).toUpperCase() + s.slice(1);
+                            }).join(', ');
+                          }
+                          return storage === 'ipfs' 
+                            ? 'IPFS' 
+                            : storage.charAt(0).toUpperCase() + storage.slice(1);
+                        };
+                        const storageLabel = formatStorageType(collection.storage_type);
                         
                         // Format license
                         const licenseLabel = collection.license === 'CC0' 

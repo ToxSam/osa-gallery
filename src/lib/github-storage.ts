@@ -266,6 +266,7 @@ async function getProjects() {
     creatorId: project.creator_id,
     description: project.description,
     isPublic: project.is_public,
+    license: project.license || 'CC0', // Default to CC0 if not specified
     createdAt: project.created_at,
     updatedAt: project.updated_at,
     // Support new avatar_data_file field from open-source-avatars structure

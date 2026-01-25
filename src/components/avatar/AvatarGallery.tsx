@@ -14,6 +14,9 @@ import { AvatarHeader } from './AvatarHeader';
 import { useI18n } from '@/lib/i18n';
 import { useIsMobile } from '@/lib/hooks/useIsMobile';
 import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
+import { LoadingScreen } from '@/components/ui/loading-screen';
+import { CrescentSpinner } from '@/components/ui/crescent-spinner';
 
 // Utility function to format camelCase or PascalCase names with spaces
 const formatName = (name: string): string => {
@@ -320,25 +323,53 @@ export const AvatarGallery: React.FC = () => {
     return 5;
   }, [sidebarWidth]);
 
+  // Show header even when loading, with loading state in content area
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-cream dark:bg-cream-dark">
-        <div className="text-body-lg text-gray-500 dark:text-gray-400">Welcome to the home of truly free avatars.</div>
+      <div className="h-screen max-h-screen w-screen max-w-screen overflow-hidden bg-cream dark:bg-cream-dark flex flex-col transition-colors">
+        <div className="flex-none">
+          <AvatarHeader 
+            title="Open Source Avatars"
+            description="A collection of CC0 and open source avatars created by ToxSam"
+            socialLink="https://x.com/toxsam"
+          />
+        </div>
+        
+        {/* Loading content area */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <CrescentSpinner size="md" className="mx-auto mb-4" />
+            <p className="text-white dark:text-white text-sm font-medium">
+              {t('common.loading')}
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center gap-4 bg-cream dark:bg-cream-dark">
-        <div className="text-body-lg text-red-500">Error: {error}</div>
-        <Button 
-          onClick={() => window.location.reload()}
-          variant="outline"
-          className="btn-outline"
-        >
-          Retry
-        </Button>
+      <div className="h-screen max-h-screen w-screen max-w-screen overflow-hidden bg-cream dark:bg-cream-dark flex flex-col transition-colors">
+        <div className="flex-none">
+          <AvatarHeader 
+            title="Open Source Avatars"
+            description="A collection of CC0 and open source avatars created by ToxSam"
+            socialLink="https://x.com/toxsam"
+          />
+        </div>
+        
+        {/* Error content area */}
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
+          <div className="text-body-lg text-red-500">Error: {error}</div>
+          <Button 
+            onClick={() => window.location.reload()}
+            variant="outline"
+            className="btn-outline"
+          >
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }
@@ -361,7 +392,7 @@ export const AvatarGallery: React.FC = () => {
         />
       </div>
   
-      <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row relative">
         {/* Avatar List - Left Side on desktop only */}
         {!isMobile && !sidebarCollapsed && (
           <>
@@ -495,8 +526,18 @@ export const AvatarGallery: React.FC = () => {
                 
                 {/* End of list indicator */}
                 {!hasMore && displayedAvatars.length > 0 && (
-                  <div className="px-3 py-4 text-center text-xs text-gray-400 dark:text-gray-500">
-                    All {filteredAvatars.length} avatars displayed
+                  <div className="px-3 py-4 space-y-2">
+                    <div className="text-center text-xs text-gray-400 dark:text-gray-500">
+                      All {filteredAvatars.length} avatars displayed
+                    </div>
+                    <div className="text-center">
+                      <Link
+                        href={`/${currentLocale}/finder`}
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                      >
+                        Need to download multiple avatars? Try Finder
+                      </Link>
+                    </div>
                   </div>
                 )}
               </div>
@@ -513,7 +554,7 @@ export const AvatarGallery: React.FC = () => {
               {/* Collapse button */}
               <button
                 onClick={() => setSidebarCollapsed(true)}
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-12 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                className="absolute top-4 left-full w-6 h-12 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r-md flex items-center justify-center shadow-md transition-colors z-20"
                 aria-label="Collapse sidebar"
               >
                 <ChevronLeft className="h-4 w-4 text-gray-900 dark:text-gray-100" />
@@ -526,10 +567,10 @@ export const AvatarGallery: React.FC = () => {
         {!isMobile && sidebarCollapsed && (
           <button
             onClick={() => setSidebarCollapsed(false)}
-            className="absolute top-1/2 left-0 transform -translate-y-1/2 w-6 h-16 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r-md flex items-center justify-center z-20 shadow-md transition-colors"
+            className="absolute top-4 left-0 w-6 h-12 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 rounded-r-md flex items-center justify-center z-50 shadow-md transition-colors"
             aria-label="Expand sidebar"
           >
-            <ChevronRight className="h-5 w-5 text-gray-900 dark:text-gray-100" />
+            <ChevronRight className="h-4 w-4 text-gray-900 dark:text-gray-100" />
           </button>
         )}
 

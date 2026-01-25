@@ -1,0 +1,183 @@
+{
+  "title": "ファインダー",
+  "description": "複数のアバターを一度に閲覧・ダウンロード",
+  "mobileNotice": "⚠️ 一括ダウンロードはデスクトップでの利用を推奨します",
+  "mobile": {
+    "desktopOnly": {
+      "title": "デスクトップ専用機能",
+      "description": "ファインダーは現在デスクトップ用に最適化されています。最適な体験のためにパソコンでご利用ください。"
+    }
+  },
+  "collections": {
+    "title": "プロジェクト",
+    "expandAll": "すべて展開",
+    "collapseAll": "すべて折りたたむ",
+    "avatarCount": "{count}個のアバター"
+  },
+  "avatarList": {
+    "title": "アバター",
+    "selectAll": "すべて選択",
+    "deselectAll": "すべて解除",
+    "searchPlaceholder": "アバターを検索...",
+    "noResults": "アバターが見つかりません",
+    "hiddenSelectedWarning": "現在表示されていない{count}個のアイテムが選択されています",
+    "columns": {
+      "name": "名前",
+      "formats": "フォーマット",
+      "files": "ファイル",
+      "license": "ライセンス",
+      "collection": "プロジェクト"
+    },
+    "fileTypes": {
+      "vrm": "VRM",
+      "fbx": "FBX",
+      "voxelVrm": "ボクセルVRM",
+      "voxelFbx": "ボクセルFBX",
+      "thumbnail": "サムネイル",
+      "texture": "テクスチャ"
+    }
+  },
+  "fileList": {
+    "title": "ファイル",
+    "noSelection": "アバターを選択してファイルを表示",
+    "noFiles": "利用可能なファイルがありません",
+    "categories": {
+      "vrm": "VRM",
+      "glb": "GLB",
+      "fbx": "FBX",
+      "images": "画像",
+      "models": "モデル",
+      "thumbnails": "サムネイル",
+      "textures": "テクスチャ"
+    }
+  },
+  "preview": {
+    "title": "プレビュー",
+    "noSelection": "アバターを選択してプレビュー",
+    "download": "ダウンロード",
+    "fbxNotSupported": {
+      "title": "FBXプレビューは未対応",
+      "message": "現在、FBXファイルのプレビューには対応していませんが、下のダウンロードボタンからファイルをダウンロードできます。"
+    },
+    "metadata": {
+      "name": "名前",
+      "collection": "プロジェクト",
+      "license": "ライセンス",
+      "formats": "利用可能なフォーマット",
+      "currentFile": "現在のファイル"
+    }
+  },
+  "downloadQueue": {
+    "title": "ダウンロードキュー",
+    "minimize": "最小化",
+    "maximize": "最大化",
+    "clear": "キューをクリア",
+    "downloadAll": "選択したすべてをダウンロード",
+    "status": {
+      "queued": "待機中",
+      "downloading": "ダウンロード中",
+      "complete": "完了",
+      "failed": "失敗"
+    },
+    "progress": "{total}個中{current}個をダウンロード中",
+    "overallProgress": "{total}個中{completed}個完了",
+    "cancel": "キャンセル",
+    "retry": "再試行",
+    "empty": "キューにファイルがありません"
+  },
+  "batchDownload": {
+    "title": "一括ダウンロードマネージャー",
+    "selectedAvatars": "選択されたアバター",
+    "selectedFiles": "選択されたファイル",
+    "downloadOptions": "ダウンロードオプション",
+    "downloadVrms": "VRMファイルをダウンロード",
+    "downloadFbx": "FBXファイルをダウンロード",
+    "downloadGlb": "GLBファイルをダウンロード",
+    "downloadImages": "画像をダウンロード",
+    "extractTextures": "テクスチャを抽出（実験的）",
+    "comingSoon": "近日公開",
+    "startDownload": "ダウンロード開始",
+    "selectOption": "少なくとも1つのダウンロードオプションを選択してください",
+    "downloadProgress": "ダウンロード進捗",
+    "downloadFolder": "ダウンロードフォルダ",
+    "selectFolder": "フォルダを選択",
+    "changeFolder": "フォルダを変更",
+    "folderHint": "フォルダを選択すると、プロンプトなしでファイルを直接保存できます。選択しない場合、ダウンロード開始時にフォルダの選択を求められます。",
+    "folderNotSupported": "このブラウザではフォルダ選択がサポートされていません。ファイルはデフォルトのダウンロードフォルダに保存されます。",
+    "folderRequired": "各ファイルの保存プロンプトを避けるために、ダウンロードフォルダを選択してください。一括ダウンロードにはフォルダ選択が必要です。",
+    "folderSelectionError": "フォルダの選択中にエラーが発生しました。もう一度お試しください。",
+    "selectFolderAndDownload": "フォルダを選択してダウンロード",
+    "folderRecommended": "フォルダを選択すると、各ファイルの保存プロンプトが表示されません",
+    "required": "必須",
+    "folderSelected": "ファイルはここに自動的に保存されます",
+    "openFolder": "ファイルマネージャーでフォルダを開く",
+    "open": "開く",
+    "filesDownloadedTo": "ファイルのダウンロード先:",
+    "selectFolderFirst": "まずダウンロードフォルダを選択してください"
+  },
+  "filters": {
+    "title": "フィルター",
+    "fileTypes": {
+      "title": "ファイルタイプ",
+      "hasVrm": "VRMあり",
+      "hasFbx": "FBXあり",
+      "hasVoxel": "ボクセルあり"
+    }
+  },
+  "errors": {
+    "loadError": "アバターの読み込みに失敗しました",
+    "downloadError": "ダウンロードに失敗しました",
+    "retryError": "再試行に失敗しました"
+  },
+  "common": {
+    "noImage": "画像なし",
+    "unknown": "不明",
+    "download": "ダウンロード",
+    "downloadAllFiles": "すべてのファイルをダウンロード",
+    "close": "閉じる",
+    "change": "変更",
+    "select": "選択",
+    "loadMore": "さらに読み込む（残り{count}件）",
+    "thumbnail": "サムネイル",
+    "texture": "テクスチャ"
+  },
+  "sections": {
+    "basicInformation": "基本情報",
+    "modelInformation": "モデル情報",
+    "licenseInformation": "ライセンス情報",
+    "availableFiles": "利用可能なファイル",
+    "description": "説明",
+    "fileInformation": "ファイル情報"
+  },
+  "fileSizeUnits": {
+    "bytes": "バイト",
+    "kb": "KB",
+    "mb": "MB",
+    "gb": "GB"
+  },
+  "licenseTypes": {
+    "redistributionProhibited": "再配布禁止",
+    "cc0": "CC0",
+    "ccBy": "CC BY",
+    "ccByNc": "CC BY NC",
+    "ccBySa": "CC BY SA",
+    "ccByNcSa": "CC BY NC SA",
+    "ccByNd": "CC BY ND",
+    "ccByNcNd": "CC BY NC ND",
+    "other": "その他"
+  },
+  "permissions": {
+    "everyone": "全員",
+    "explicitUser": "明示的なユーザー",
+    "onlyAuthor": "作者のみ"
+  },
+  "usage": {
+    "allow": "許可",
+    "disallow": "禁止"
+  },
+  "lightbox": {
+    "download": "ダウンロード",
+    "downloadImage": "画像をダウンロード",
+    "close": "閉じる"
+  }
+}
