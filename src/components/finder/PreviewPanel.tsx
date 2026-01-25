@@ -337,6 +337,17 @@ interface ExtractedTexture {
 
 function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
   const { t } = useI18n();
+  
+  // Helper function to ensure translation result is a string
+  const getTranslationString = (value: string | string[]): string => {
+    return Array.isArray(value) ? value[0] : value;
+  };
+  
+  // Wrapper function to convert t() to the signature expected by helper functions
+  const tString = (key: string): string => {
+    return getTranslationString(t(key));
+  };
+  
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
   const [imageFileSize, setImageFileSize] = useState<number | null>(null);
   const [imageFormat, setImageFormat] = useState<string | null>(null); // Detected format from Content-Type
@@ -991,7 +1002,8 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
     if (texture.format === THREE.RGBAFormat) {
       return 'PNG (inferred)';
     }
-    return t('finder.common.unknown');
+    const translation = t('finder.common.unknown');
+    return Array.isArray(translation) ? translation[0] : translation;
   };
 
   // Calculate vertices from polygonCount (approximate: vertices ≈ triangles * 2/3)
@@ -1317,7 +1329,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                 <div className="flex gap-x-3 items-start min-w-0 max-w-full w-full">
                   <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">File Size:</span>
                   <span className="text-gray-900 dark:text-gray-100 truncate min-w-0 flex-1 text-right max-w-full">
-                    {formatFileSize(imageFileSize, t)}
+                    {formatFileSize(imageFileSize, tString)}
                   </span>
                 </div>
               )}
@@ -1345,7 +1357,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.metadata.version')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                          {vrmMetadata?.version && vrmMetadata.version !== t('finder.common.unknown') ? `v${vrmMetadata.version}` : 'undefined'}
+                          {vrmMetadata?.version && vrmMetadata.version !== getTranslationString(t('finder.common.unknown')) ? `v${vrmMetadata.version}` : 'undefined'}
                         </span>
                       </div>
                       <div className="flex gap-x-3 items-start min-w-0">
@@ -1383,7 +1395,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                         </span>
                       </div>
                     )}
-                    {modelStats.fileSize !== t('finder.common.unknown') && (
+                    {modelStats.fileSize !== getTranslationString(t('finder.common.unknown')) && (
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.statistics.fileSize')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">{modelStats.fileSize}</span>
@@ -1465,31 +1477,31 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                       <div className="flex gap-x-3 items-start min-w-0 max-w-full w-full">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.type')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                          {getLicenseTypeName(vrmMetadata.licenseType, vrmMetadata.licenseName, vrmMetadata.otherPermissions, t)}
+                          {getLicenseTypeName(vrmMetadata.licenseType, vrmMetadata.licenseName, vrmMetadata.otherPermissions, tString)}
                         </span>
                       </div>
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.allowedUsers')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                          {getAllowedUserName(vrmMetadata.allowedUserName, t)}
+                          {getAllowedUserName(vrmMetadata.allowedUserName, tString)}
                         </span>
                       </div>
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.commercialUse')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                          {getUsageName(vrmMetadata.commercialUsageName, t)}
+                          {getUsageName(vrmMetadata.commercialUsageName, tString)}
                         </span>
                       </div>
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.violentUsage')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                          {getUsageName(vrmMetadata.violentUsageName, t)}
+                          {getUsageName(vrmMetadata.violentUsageName, tString)}
                         </span>
                       </div>
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.sexualUsage')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                          {getUsageName(vrmMetadata.sexualUsageName, t)}
+                          {getUsageName(vrmMetadata.sexualUsageName, tString)}
                         </span>
                       </div>
                       {vrmMetadata.otherPermissions && (
@@ -1611,7 +1623,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.metadata.version')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                          {vrmMetadata?.version && vrmMetadata.version !== t('finder.common.unknown') ? `v${vrmMetadata.version}` : 'undefined'}
+                          {vrmMetadata?.version && vrmMetadata.version !== getTranslationString(t('finder.common.unknown')) ? `v${vrmMetadata.version}` : 'undefined'}
                         </span>
                       </div>
                       <div className="flex gap-x-3 items-start min-w-0">
@@ -1653,7 +1665,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                           <div className="flex gap-x-3 items-start min-w-0">
                             <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.statistics.fileSize')}:</span>
                             <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                              {formatFileSizeInMB(modelFileSize, t)}
+                              {formatFileSizeInMB(modelFileSize, tString)}
                             </span>
                           </div>
                         );
@@ -1663,7 +1675,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                     {/* Only show other fields if we have loaded data (not in initial loading state) */}
                     {(() => {
                       // Check if we're still loading - if fileSize is still 'unknown' and all stats are 0, we're loading
-                      const isLoading = modelStats.fileSize === t('finder.common.unknown') && 
+                      const isLoading = modelStats.fileSize === getTranslationString(t('finder.common.unknown')) && 
                                        modelStats.height === 0 && 
                                        modelStats.vertices === 0 && 
                                        modelStats.triangles === 0 && 
@@ -1690,7 +1702,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                               </span>
                             </div>
                           )}
-                          {modelStats.fileSize !== t('finder.common.unknown') && (
+                          {modelStats.fileSize !== getTranslationString(t('finder.common.unknown')) && (
                             <div className="flex gap-x-3 items-start min-w-0">
                               <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.statistics.fileSize')}:</span>
                               <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">{modelStats.fileSize}</span>
@@ -1775,31 +1787,31 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
                       <div className="flex gap-x-3 items-start min-w-0 max-w-full w-full">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.type')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                          {getLicenseTypeName(vrmMetadata.licenseType, vrmMetadata.licenseName, vrmMetadata.otherPermissions, t)}
+                          {getLicenseTypeName(vrmMetadata.licenseType, vrmMetadata.licenseName, vrmMetadata.otherPermissions, tString)}
                         </span>
                       </div>
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.allowedUsers')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                          {getAllowedUserName(vrmMetadata.allowedUserName, t)}
+                          {getAllowedUserName(vrmMetadata.allowedUserName, tString)}
                         </span>
                       </div>
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.commercialUse')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                          {getUsageName(vrmMetadata.commercialUsageName, t)}
+                          {getUsageName(vrmMetadata.commercialUsageName, tString)}
                         </span>
                       </div>
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.violentUsage')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                          {getUsageName(vrmMetadata.violentUsageName, t)}
+                          {getUsageName(vrmMetadata.violentUsageName, tString)}
                         </span>
                       </div>
                       <div className="flex gap-x-3 items-start min-w-0">
                         <span className="text-gray-500 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">{t('vrmviewer.license.sexualUsage')}:</span>
                         <span className="text-gray-900 dark:text-gray-100 break-words min-w-0 flex-1 text-right max-w-full">
-                          {getUsageName(vrmMetadata.sexualUsageName, t)}
+                          {getUsageName(vrmMetadata.sexualUsageName, tString)}
                         </span>
                       </div>
                       {vrmMetadata.otherPermissions && (
@@ -1828,7 +1840,7 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
               className="w-full min-w-0"
             >
               <Download className="h-4 w-4 mr-2 flex-shrink-0" />
-              <span className="truncate min-w-0">{getDownloadButtonText(selectedFile, avatar, t)}</span>
+              <span className="truncate min-w-0">{getDownloadButtonText(selectedFile, avatar, tString)}</span>
             </Button>
           </div>
         </>
