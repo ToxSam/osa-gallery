@@ -40,6 +40,18 @@ export default function DownloadQueue({
 }: DownloadQueueProps) {
   const { t } = useI18n();
 
+  // Helper function to ensure translation result is a string
+  const getTranslationString = (value: string | string[]): string => {
+    return Array.isArray(value) ? value[0] : value;
+  };
+
+  // Helper function to interpolate translation strings
+  const interpolate = (str: string, params: Record<string, number | string>): string => {
+    return str.replace(/\{(\w+)\}/g, (match, key) => {
+      return params[key] !== undefined ? String(params[key]) : match;
+    });
+  };
+
   const completedCount = queue.filter((item) => item.status === 'complete').length;
   const failedCount = queue.filter((item) => item.status === 'failed').length;
   const downloadingCount = queue.filter((item) => item.status === 'downloading').length;
@@ -60,10 +72,10 @@ export default function DownloadQueue({
               {t('finder.downloadQueue.title')}
             </button>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              {t('finder.downloadQueue.overallProgress', {
-                completed: completedCount,
-                total: queue.length,
-              })}
+              {interpolate(
+                getTranslationString(t('finder.downloadQueue.overallProgress')) || '{completed} of {total} complete',
+                { completed: completedCount, total: queue.length }
+              )}
             </span>
           </div>
           <div className="w-32">
@@ -83,22 +95,22 @@ export default function DownloadQueue({
             {t('finder.downloadQueue.title')}
           </h3>
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            {t('finder.downloadQueue.progress', {
-              current: downloadingCount,
-              total: queue.length,
-            })}
+            {interpolate(
+              getTranslationString(t('finder.downloadQueue.progress')) || 'Downloading {current} of {total} files',
+              { current: downloadingCount, total: queue.length }
+            )}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant="secondary"
+            variant="outline"
             size="sm"
             onClick={onMinimize}
           >
             <ChevronDown className="h-4 w-4" />
           </Button>
           <Button
-            variant="secondary"
+            variant="outline"
             size="sm"
             onClick={onClear}
           >
@@ -146,7 +158,7 @@ export default function DownloadQueue({
                   <div className="flex items-center gap-2 ml-4">
                     {item.status === 'queued' && onCancel && (
                       <Button
-                        variant="secondary"
+                        variant="outline"
                         size="sm"
                         onClick={() => onCancel(item.id)}
                       >
@@ -155,7 +167,7 @@ export default function DownloadQueue({
                     )}
                     {item.status === 'failed' && onRetry && (
                       <Button
-                        variant="secondary"
+                        variant="outline"
                         size="sm"
                         onClick={() => onRetry(item.id)}
                       >
@@ -188,10 +200,10 @@ export default function DownloadQueue({
       <div className="px-4 py-3 border-t border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm text-gray-600 dark:text-gray-400">
-            {t('finder.downloadQueue.overallProgress', {
-              completed: completedCount,
-              total: queue.length,
-            })}
+            {interpolate(
+              getTranslationString(t('finder.downloadQueue.overallProgress')) || '{completed} of {total} complete',
+              { completed: completedCount, total: queue.length }
+            )}
           </span>
           <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
             {Math.round(overallProgress)}%
