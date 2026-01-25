@@ -705,7 +705,7 @@ export default function AvatarListView({
                         style={{ top: '41px' }}
                       >
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {t('finder.avatarList.hiddenSelectedWarning')
+                          {(t('finder.avatarList.hiddenSelectedWarning') as string)
                             .replace('{count}', hiddenSelectedCount.toString())
                             .replace('{items}', hiddenSelectedCount === 1 ? 'item' : 'items')}
                         </p>
