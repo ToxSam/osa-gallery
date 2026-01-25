@@ -7,6 +7,7 @@ const badgeVariants = {
   secondary: "bg-gray-500 text-white", // Example secondary variant
   success: "bg-green-500 text-white",
   danger: "bg-red-500 text-white",
+  outline: "border border-gray-300 dark:border-gray-700 bg-transparent text-gray-700 dark:text-gray-300",
   // Add more variants as needed
 };
 
