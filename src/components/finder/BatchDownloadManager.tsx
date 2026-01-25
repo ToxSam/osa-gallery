@@ -814,7 +814,7 @@ export default function BatchDownloadManager({
                                 <div className="flex items-center gap-2 ml-4">
                                   {item.status === 'queued' && onCancel && (
                                     <Button
-                                      variant="secondary"
+                                      variant="outline"
                                       size="sm"
                                       onClick={() => onCancel(item.id)}
                                     >
@@ -823,7 +823,7 @@ export default function BatchDownloadManager({
                                   )}
                                   {item.status === 'failed' && onRetry && (
                                     <Button
-                                      variant="secondary"
+                                      variant="outline"
                                       size="sm"
                                       onClick={() => onRetry(item.id)}
                                     >
@@ -909,7 +909,7 @@ export default function BatchDownloadManager({
                   </div>
                 </div>
               )}
-              <Button variant="secondary" size="sm" onClick={onClear} className="flex-shrink-0">
+              <Button variant="outline" size="sm" onClick={onClear} className="flex-shrink-0">
                 {t('finder.downloadQueue.clear') || 'Clear Queue'}
               </Button>
             </div>
