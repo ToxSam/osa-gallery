@@ -399,7 +399,8 @@ export default function Finder() {
         }
       } catch (err) {
         console.error('Error fetching data:', err);
-        setError(t('finder.errors.loadError'));
+        const errorMessage = t('finder.errors.loadError');
+        setError(Array.isArray(errorMessage) ? errorMessage[0] : errorMessage);
       } finally {
         setIsLoading(false);
       }
