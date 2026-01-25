@@ -637,8 +637,8 @@ export default function Finder() {
         {/* Header */}
         <div className="flex-none">
           <AvatarHeader 
-            title={t('finder.title')}
-            description={t('finder.description')}
+            title={t('finder.title') as string}
+            description={t('finder.description') as string}
             socialLink="https://x.com/toxsam"
           />
         </div>
@@ -662,8 +662,8 @@ export default function Finder() {
         {/* Header */}
         <div className="flex-none">
           <AvatarHeader 
-            title={t('finder.title')}
-            description={t('finder.description')}
+            title={t('finder.title') as string}
+            description={t('finder.description') as string}
             socialLink="https://x.com/toxsam"
           />
         </div>
@@ -685,8 +685,8 @@ export default function Finder() {
         {/* Header - Higher z-index to stay on top */}
         <div className="relative z-50">
           <AvatarHeader 
-            title={t('finder.title')}
-            description={t('finder.description')}
+            title={t('finder.title') as string}
+            description={t('finder.description') as string}
             socialLink="https://x.com/toxsam"
             showWarningButton={true}
           />
@@ -713,8 +713,8 @@ export default function Finder() {
       {/* Header */}
       <div className="flex-none">
         <AvatarHeader 
-          title={t('finder.title')}
-          description={t('finder.description')}
+          title={t('finder.title') as string}
+          description={t('finder.description') as string}
           socialLink="https://x.com/toxsam"
         />
       </div>
