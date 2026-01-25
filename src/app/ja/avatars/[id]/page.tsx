@@ -218,6 +218,7 @@ export default function AvatarDetailPage() {
                   animationUrl={null}
                   backgroundGLB={null}
                   onMetadataLoad={() => {}}
+                  onTexturesLoad={() => {}}
                   showInfoPanel={false}
                   onToggleInfoPanel={() => {}}
                 />

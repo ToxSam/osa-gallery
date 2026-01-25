@@ -358,6 +358,7 @@ export const AvatarViewer: React.FC<ExtendedAvatarViewerProps> = ({
         animationUrl={DEFAULT_ANIMATION}
         backgroundGLB={null}
         onMetadataLoad={onMetadataLoad}
+        onTexturesLoad={() => {}}
         showInfoPanel={showInfoPanel}
         onToggleInfoPanel={toggleInfoPanel}
       />
