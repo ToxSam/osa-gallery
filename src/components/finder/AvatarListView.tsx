@@ -575,7 +575,7 @@ export default function AvatarListView({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               type="text"
-              placeholder={t('finder.avatarList.searchPlaceholder')}
+              placeholder={t('finder.avatarList.searchPlaceholder') as string}
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-10"
