@@ -13,6 +13,9 @@ interface Avatar {
   [key: string]: any;
 }
 
+// Mark route as dynamic since it uses no-store fetch
+export const dynamic = 'force-dynamic';
+
 // Define expected standard format keys
 const STANDARD_KEYS = ['voxel', 'voxel_vrm', 'fbx', 'voxel_fbx', 'voxel-fbx'];
 
