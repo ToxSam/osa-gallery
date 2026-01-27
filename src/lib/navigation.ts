@@ -2,7 +2,7 @@ import { NavItem } from '@/components/docs/DocSidebar';
 
 // Import the nav structure from DocSidebar
 // We'll need to export it from there or duplicate it here
-const navStructure = [
+const navStructure: NavItem[] = [
   {
     id: 'overview',
     label: 'Overview',
@@ -67,13 +67,13 @@ const navStructure = [
 /**
  * Flatten navigation structure to get all pages in order
  */
-function flattenNav(items: any[]): Array<{ href: string; title: string }> {
+function flattenNav(items: NavItem[]): Array<{ href: string; title: string }> {
   const result: Array<{ href: string; title: string }> = [];
   
   items.forEach((item) => {
     result.push({ href: item.href, title: item.label });
     if (item.children) {
-      item.children.forEach((child: any) => {
+      item.children.forEach((child) => {
         result.push({ href: child.href, title: child.label });
       });
     }

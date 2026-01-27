@@ -6,7 +6,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { usePathname } from 'next/navigation';
 
-interface NavItem {
+export interface NavItem {
   id: string;
   label: string;
   href: string;
