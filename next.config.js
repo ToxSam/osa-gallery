@@ -43,8 +43,9 @@ const nextConfig = {
   output: 'standalone',
   
   // Include docs folder in standalone build for documentation pages
+  // This ensures all markdown files are available at runtime
   outputFileTracingIncludes: {
-    '/*': ['./docs/**/*'],
+    '/**': ['./docs/**/*'],
   },
   
   // Configure dynamic route handling
