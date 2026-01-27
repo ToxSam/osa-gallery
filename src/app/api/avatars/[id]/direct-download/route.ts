@@ -111,7 +111,7 @@ export async function GET(
       return NextResponse.json({ error: 'Avatar not found' }, { status: 404 });
     }
 
-    if (!avatarToUse.modelFileUrl) {
+    if (!avatar.modelFileUrl) {
       return NextResponse.json({ error: 'No model file available' }, { status: 400 });
     }
 
