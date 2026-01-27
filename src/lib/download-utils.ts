@@ -1,24 +1,27 @@
 /**
  * Download utilities for handling avatar downloads
- * Supports both server-side (Arweave) and client-side (IPFS) downloads
+ * All downloads are routed through the server-side API to preserve user gesture chain
  */
 
-// Helper to check if a URL is an IPFS URL
+// Helper to check if a URL is an IPFS URL (used for normalization in server-side API)
 export function isIPFSUrl(url: string): boolean {
   return url.includes('ipfs') || url.includes('dweb.link') || url.startsWith('ipfs://');
 }
 
-// Helper to check if a URL is a GitHub raw URL
+// Helper to check if a URL is a GitHub raw URL (used for normalization in server-side API)
 export function isGitHubRawUrl(url: string): boolean {
   return url.includes('raw.githubusercontent.com') || url.includes('github.com') && url.includes('/raw/');
 }
 
-// Helper to check if a URL should be downloaded client-side (IPFS, GitHub raw, etc.)
+// Helper to check if a URL should be downloaded client-side (DEPRECATED - kept for backward compatibility)
+// NOTE: All downloads should now go through server-side API to preserve user gesture chain
 export function isClientSideDownloadUrl(url: string): boolean {
-  return isIPFSUrl(url) || isGitHubRawUrl(url);
+  // Always return false - we route everything through server-side API now
+  return false;
 }
 
 // Helper to normalize IPFS URLs (convert ipfs:// to https://dweb.link/ipfs/)
+// This is still used by the server-side API for handling IPFS URLs
 export function normalizeIPFSUrl(url: string): string {
   if (url.startsWith('ipfs://')) {
     const ipfsHash = url.replace('ipfs://', '').replace('ipfs/', '');
@@ -66,77 +69,29 @@ function getModelUrlForFormat(
 }
 
 /**
- * Client-side download function for IPFS and GitHub raw URLs
- * Fetches the file directly from the browser and triggers download
- * This function must be called directly from a user gesture handler to preserve the gesture chain
+ * DEPRECATED: Client-side download function for IPFS and GitHub raw URLs
+ * 
+ * This function is no longer used. All downloads are now routed through the
+ * server-side API endpoint (/api/avatars/[id]/direct-download) to preserve
+ * the user gesture chain and avoid Chrome security warnings.
+ * 
+ * The server-side API handles IPFS, GitHub, and Arweave URLs correctly.
  */
 export async function downloadIPFSFile(
   url: string,
   filename: string
 ): Promise<void> {
-  try {
-    console.log(`Downloading file: ${url}`);
-    
-    // Normalize IPFS URL if needed
-    const normalizedUrl = isIPFSUrl(url) ? normalizeIPFSUrl(url) : url;
-    
-    // Fetch the file
-    const response = await fetch(normalizedUrl);
-    
-    if (!response.ok) {
-      // Try alternative gateway if dweb.link fails (IPFS only)
-      if (isIPFSUrl(normalizedUrl) && normalizedUrl.includes('dweb.link')) {
-        const alternativeUrl = normalizedUrl.replace('dweb.link', 'ipfs.io');
-        console.log(`Retrying with alternative IPFS gateway: ${alternativeUrl}`);
-        const retryResponse = await fetch(alternativeUrl);
-        
-        if (!retryResponse.ok) {
-          throw new Error(`Failed to fetch file: ${retryResponse.status} ${retryResponse.statusText}`);
-        }
-        
-        const blob = await retryResponse.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
-        // Create download link with proper attributes to preserve user gesture
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = filename;
-        a.style.display = 'none';
-        a.setAttribute('rel', 'noopener noreferrer'); // Security best practice
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        // Revoke URL after a short delay to ensure download starts
-        setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 100);
-        return;
-      }
-      
-      throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`);
-    }
-
-    // Convert to blob and trigger download
-    const blob = await response.blob();
-    const downloadUrl = window.URL.createObjectURL(blob);
-    // Create download link with proper attributes to preserve user gesture
-    const a = document.createElement('a');
-    a.href = downloadUrl;
-    a.download = filename;
-    a.style.display = 'none';
-    a.setAttribute('rel', 'noopener noreferrer'); // Security best practice
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    // Revoke URL after a short delay to ensure download starts
-    setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 100);
-    
-    console.log(`Successfully downloaded: ${filename}`);
-  } catch (error) {
-    console.error('Download error:', error);
-    throw error;
-  }
+  // This function is deprecated - should not be called
+  // All downloads should go through downloadAvatar() which uses server-side API
+  console.warn('downloadIPFSFile is deprecated. Use downloadAvatar() instead.');
+  throw new Error('Client-side downloads are disabled. Use downloadAvatar() with server-side API instead.');
 }
 
 /**
- * Main download function that handles both IPFS (client-side) and Arweave (server-side) downloads
+ * Main download function that routes all downloads through the server-side API
+ * This preserves the user gesture chain and avoids Chrome security warnings.
+ * 
+ * The server-side API handles IPFS, GitHub, and Arweave URLs correctly.
  */
 export async function downloadAvatar(
   avatar: { 
@@ -154,35 +109,19 @@ export async function downloadAvatar(
     throw new Error('No model file available');
   }
 
-  // Get the model URL for the requested format
-  const modelUrl = getModelUrlForFormat(avatar, format);
+  // Always use server-side download API to preserve user gesture chain
+  // The server-side API handles IPFS, GitHub, and Arweave URLs correctly
+  const formatParam = format ? `?format=${format}` : '';
+  const directDownloadUrl = `/api/avatars/${avatar.id}/direct-download${formatParam}`;
   
-  if (!modelUrl) {
-    throw new Error('Could not determine model URL');
-  }
-
-  // Check if it's a client-side downloadable URL (IPFS or GitHub raw)
-  if (isClientSideDownloadUrl(modelUrl)) {
-    // Use client-side download for IPFS and GitHub raw URLs
-    const extension = getFileExtension(format || 'default');
-    const cleanName = (avatar.name || avatar.metadata?.number || 'avatar').replace(/[^a-zA-Z0-9_-]/g, '_');
-    const voxelPart = format && (format.includes('voxel') || format === 'voxel') ? '_voxel' : '';
-    const filename = `${cleanName}${voxelPart}${extension}`;
-    
-    await downloadIPFSFile(modelUrl, filename);
-  } else {
-    // Use server-side download for Arweave and other URLs
-    // Create a proper download link instead of window.open() to avoid security warnings
-    const formatParam = format ? `?format=${format}` : '';
-    const directDownloadUrl = `/api/avatars/${avatar.id}/direct-download${formatParam}`;
-    
-    // Create a temporary anchor element and click it to preserve user gesture chain
-    const link = document.createElement('a');
-    link.href = directDownloadUrl;
-    link.download = ''; // Let server set filename via Content-Disposition header
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
+  // Create a temporary anchor element and click it immediately to preserve user gesture chain
+  // This must happen synchronously without any async operations to maintain the gesture chain
+  const link = document.createElement('a');
+  link.href = directDownloadUrl;
+  link.download = ''; // Let server set filename via Content-Disposition header
+  link.style.display = 'none';
+  link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }

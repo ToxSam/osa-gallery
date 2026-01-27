@@ -175,16 +175,19 @@ export function useDownloadQueue(): UseDownloadQueueReturn {
     let downloadUrl = item.url;
     
     // Check if this is a thumbnail or texture (should be downloaded directly, not through API)
+    // These are small files and don't need to go through the API
     const isThumbnailOrTexture = item.fileTypeId.startsWith('thumbnail') || 
                                   item.fileTypeId.startsWith('texture') ||
                                   item.fileTypeId.startsWith('ardrive_thumbnail');
     
     // Check if this is a GLB or FBX file (these can be downloaded directly from Arweave URLs)
+    // For now, we'll download these directly, but they could also go through the API
     const isGlbOrFbx = item.fileTypeId === 'glb' || item.fileTypeId === 'fbx';
     
-    // For Arweave URLs (not IPFS, not GitHub), use the direct-download API endpoint
-    // BUT: thumbnails, textures, GLB, and FBX files should be downloaded directly from their URL
-    if (!isClientSideDownloadUrl(item.url) && !isThumbnailOrTexture && !isGlbOrFbx) {
+    // For VRM model files, always use the server-side API endpoint to preserve user gesture chain
+    // This ensures consistent behavior and avoids Chrome security warnings
+    // The API handles IPFS, GitHub, and Arweave URLs correctly
+    if (!isThumbnailOrTexture && !isGlbOrFbx && item.avatarId) {
       const avatarId = item.avatarId;
       
       // Determine format from file type ID
@@ -194,14 +197,24 @@ export function useDownloadQueue(): UseDownloadQueueReturn {
         format = 'voxel-fbx';
       } else if (fileTypeId === 'voxel_vrm' || fileTypeId === 'voxel') {
         format = 'voxel';
+      } else if (fileTypeId === 'fbx') {
+        format = 'fbx';
+      } else if (fileTypeId === 'glb') {
+        format = 'glb';
       }
+      // For default VRM files, format is null (default)
       
       const formatParam = format ? `?format=${format}` : '';
-      downloadUrl = `/api/avatars/${avatarId}/direct-download${formatParam}`;
+      // URL encode the avatar ID in case it contains special characters like slashes
+      const encodedAvatarId = encodeURIComponent(avatarId);
+      downloadUrl = `/api/avatars/${encodedAvatarId}/direct-download${formatParam}`;
     }
     
-    // Normalize IPFS URLs, but keep GitHub raw URLs, API URLs, and direct Arweave URLs as-is
-    const normalizedUrl = isIPFSUrl(item.url) ? normalizeIPFSUrl(item.url) : downloadUrl;
+    // For thumbnails, textures, and direct GLB/FBX files, use the original URL
+    // Normalize IPFS URLs if needed (for direct downloads of thumbnails/textures)
+    const normalizedUrl = (!isThumbnailOrTexture && !isGlbOrFbx && item.avatarId) 
+      ? downloadUrl // Already set to API URL above
+      : (isIPFSUrl(item.url) ? normalizeIPFSUrl(item.url) : item.url);
     
     try {
       const response = await fetch(normalizedUrl);

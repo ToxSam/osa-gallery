@@ -1521,6 +1521,8 @@ export const VRMViewer = ({ url, animationUrl, backgroundGLB, onMetadataLoad, on
     // Update the stored URL
     prevProcessedUrlRef.current = processedUrl;
     
+    // Clear any previous error state when loading a new model
+    setError(null);
     setIsLoading(true);
     setLoadingProgress(0);
     setShowLoadingBar(false);

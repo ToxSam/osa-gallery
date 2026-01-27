@@ -55,6 +55,33 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // Security headers for all pages
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' blob: https://*.ipfs.io https://dweb.link https://*.dweb.link https://gateway.pinata.cloud https://*.arweave.net https://arweave.net https://raw.githubusercontent.com https://api.github.com https://*.githubusercontent.com https://assets.opensourceavatars.com; frame-ancestors 'self';"
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'geolocation=(), microphone=(), camera=()'
+          }
+        ],
+      },
+      {
+        // CORS headers for API routes (keep existing)
         source: '/api/:path*',
         headers: [
           { key: 'Access-Control-Allow-Credentials', value: 'true' },

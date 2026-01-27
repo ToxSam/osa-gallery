@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Download, ArrowLeft, Share2, Github, Box, Layers, Image as ImageIcon } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { AvatarProductSchema, BreadcrumbSchema } from '@/components/StructuredData';
+import { downloadAvatar } from '@/lib/download-utils';
 
 interface Avatar {
   id: string;
@@ -107,18 +108,9 @@ export default function AvatarDetailPage() {
     if (!avatar) return;
     
     try {
-      const response = await fetch(`/api/avatars/${avatar.id}/direct-download`);
-      if (!response.ok) throw new Error('Download failed');
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${avatar.name}.${avatar.format}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      // Use the centralized downloadAvatar utility which routes through server-side API
+      // This preserves user gesture chain and avoids Chrome security warnings
+      await downloadAvatar(avatar, null);
     } catch (error) {
       console.error('Download error:', error);
       alert('ダウンロードに失敗しました');
