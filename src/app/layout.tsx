@@ -92,7 +92,7 @@ export default function RootLayout({
     >
       <head>
         {/* Google Search Console Verification */}
-        <meta name="google-site-verification" content="v3KoyVXiQjh-m7jIw3PNBRvkxitaBPnz6_s8jQ2Ownk" />
+        <meta name="google-site-verification" content="t4Qn-su363dOXOqODpU2eZWgSmBhbU1QgatUeWuiHgA" />
         
         {/* Theme initialization script to prevent flash */}
         <script
