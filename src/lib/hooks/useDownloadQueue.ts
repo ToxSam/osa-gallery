@@ -1,12 +1,26 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { DownloadItem } from '@/components/finder/DownloadQueue';
-import { downloadAvatar } from '@/lib/download-utils';
 import { Avatar } from '@/types/avatar';
-import { getAvailableFileTypes, getAllAvatarFiles } from '@/components/finder/utils/fileTypes';
-import { isIPFSUrl, normalizeIPFSUrl, isClientSideDownloadUrl, isGitHubRawUrl } from '@/lib/download-utils';
+import { getAllAvatarFiles } from '@/components/finder/utils/fileTypes';
+import { isIPFSUrl, normalizeIPFSUrl, isClientSideDownloadUrl } from '@/lib/download-utils';
+import JSZip from 'jszip';
 
-const MAX_CONCURRENT_DOWNLOADS = 6;
+const MAX_CONCURRENT_FETCHES = 5;
 const MAX_RETRIES = 3;
+
+// Generate time-based filename for ZIP downloads
+function generateZipFilename(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  
+  // Format: osa-avatars-2026-01-27-153045.zip
+  return `osa-avatars-${year}-${month}-${day}-${hours}${minutes}${seconds}.zip`;
+}
 
 // Sanitize filename to remove invalid characters for file systems
 function sanitizeFileName(fileName: string): string {
@@ -53,6 +67,8 @@ export function useDownloadQueue(): UseDownloadQueueReturn {
   const activeDownloadsRef = useRef<Set<string>>(new Set());
   const retryCountsRef = useRef<Record<string, number>>({});
   const folderHandleRef = useRef<FileSystemDirectoryHandle | null>(null);
+  const isProcessingZipRef = useRef<boolean>(false);
+  const zipProgressRef = useRef<{ fetched: number; total: number; failed: string[] }>({ fetched: 0, total: 0, failed: [] });
 
   // Save file to folder using File System Access API
   const saveFileToFolder = useCallback(async (
@@ -70,10 +86,13 @@ export function useDownloadQueue(): UseDownloadQueueReturn {
       const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
+      a.style.display = 'none';
+      a.setAttribute('rel', 'noopener noreferrer'); // Security best practice
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      // Revoke URL after a short delay to ensure download starts
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
       return;
     }
 
@@ -85,10 +104,13 @@ export function useDownloadQueue(): UseDownloadQueueReturn {
       const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
+      a.style.display = 'none';
+      a.setAttribute('rel', 'noopener noreferrer'); // Security best practice
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      // Revoke URL after a short delay to ensure download starts
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
       return;
     }
 
@@ -135,78 +157,110 @@ export function useDownloadQueue(): UseDownloadQueueReturn {
       const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
+      a.style.display = 'none';
+      a.setAttribute('rel', 'noopener noreferrer'); // Security best practice
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      // Revoke URL after a short delay to ensure download starts
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
     }
   }, []);
 
-  // Download a single file
-  const downloadFile = useCallback(async (item: DownloadItem, folderHandle?: FileSystemDirectoryHandle | null): Promise<void> => {
-    const handle = folderHandle || folderHandleRef.current;
+  // Fetch a single file with retry logic
+  const fetchFileWithRetry = useCallback(async (
+    item: DownloadItem,
+    retryCount: number = 0
+  ): Promise<{ blob: Blob; item: DownloadItem }> => {
+    let downloadUrl = item.url;
     
-    if (handle) {
-      console.log('Downloading with folder handle:', handle.name, 'File:', item.fileName);
-    } else {
-      console.warn('Downloading without folder handle - will trigger save prompts:', item.fileName);
+    // Check if this is a thumbnail or texture (should be downloaded directly, not through API)
+    const isThumbnailOrTexture = item.fileTypeId.startsWith('thumbnail') || 
+                                  item.fileTypeId.startsWith('texture') ||
+                                  item.fileTypeId.startsWith('ardrive_thumbnail');
+    
+    // Check if this is a GLB or FBX file (these can be downloaded directly from Arweave URLs)
+    const isGlbOrFbx = item.fileTypeId === 'glb' || item.fileTypeId === 'fbx';
+    
+    // For Arweave URLs (not IPFS, not GitHub), use the direct-download API endpoint
+    // BUT: thumbnails, textures, GLB, and FBX files should be downloaded directly from their URL
+    if (!isClientSideDownloadUrl(item.url) && !isThumbnailOrTexture && !isGlbOrFbx) {
+      const avatarId = item.avatarId;
+      
+      // Determine format from file type ID
+      let format: string | null = null;
+      const fileTypeId = item.fileTypeId;
+      if (fileTypeId === 'voxel_fbx' || fileTypeId === 'voxel-fbx') {
+        format = 'voxel-fbx';
+      } else if (fileTypeId === 'voxel_vrm' || fileTypeId === 'voxel') {
+        format = 'voxel';
+      }
+      
+      const formatParam = format ? `?format=${format}` : '';
+      downloadUrl = `/api/avatars/${avatarId}/direct-download${formatParam}`;
     }
-    return new Promise((resolve, reject) => {
-      // Update status to downloading
+    
+    // Normalize IPFS URLs, but keep GitHub raw URLs, API URLs, and direct Arweave URLs as-is
+    const normalizedUrl = isIPFSUrl(item.url) ? normalizeIPFSUrl(item.url) : downloadUrl;
+    
+    try {
+      const response = await fetch(normalizedUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const blob = await response.blob();
+      return { blob, item };
+    } catch (error: any) {
+      if (retryCount < MAX_RETRIES) {
+        const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return fetchFileWithRetry(item, retryCount + 1);
+      }
+      throw error;
+    }
+  }, []);
+
+  // Process ZIP download - fetch all files and create ZIP
+  const processZipDownload = useCallback(async (items: DownloadItem[]) => {
+    if (isProcessingZipRef.current) {
+      console.warn('ZIP download already in progress');
+      return;
+    }
+
+    isProcessingZipRef.current = true;
+    zipProgressRef.current = { fetched: 0, total: items.length, failed: [] };
+
+    // Initialize all items as queued - show each file individually
+    setQueue(items.map(item => ({ ...item, status: 'queued' as const, progress: 0 })));
+
+    const zip = new JSZip();
+    let completedFetches = 0;
+    const failedItems: { item: DownloadItem; error: string }[] = [];
+
+    // Process items with concurrency limit - update each file's status individually
+    const processBatch = async (batch: DownloadItem[]) => {
+      // Mark batch items as downloading
       setQueue((prev) =>
         prev.map((q) =>
-          q.id === item.id
+          batch.some(b => b.id === q.id)
             ? { ...q, status: 'downloading' as const, progress: 0 }
             : q
         )
       );
 
-      // Fetch all files (IPFS, GitHub raw, Arweave, images) and save them
-      let downloadUrl = item.url;
-      
-      // Check if this is a thumbnail or texture (should be downloaded directly, not through API)
-      const isThumbnailOrTexture = item.fileTypeId.startsWith('thumbnail') || 
-                                    item.fileTypeId.startsWith('texture') ||
-                                    item.fileTypeId.startsWith('ardrive_thumbnail');
-      
-      // Check if this is a GLB or FBX file (these can be downloaded directly from Arweave URLs)
-      const isGlbOrFbx = item.fileTypeId === 'glb' || item.fileTypeId === 'fbx';
-      
-      // For Arweave URLs (not IPFS, not GitHub), use the direct-download API endpoint
-      // BUT: thumbnails, textures, GLB, and FBX files should be downloaded directly from their URL
-      // (The API is mainly for VRM files that need special handling)
-      if (!isClientSideDownloadUrl(item.url) && !isThumbnailOrTexture && !isGlbOrFbx) {
-        const avatarId = item.avatarId;
-        
-        // Determine format from file type ID
-        let format: string | null = null;
-        const fileTypeId = item.fileTypeId;
-        if (fileTypeId === 'voxel_fbx' || fileTypeId === 'voxel-fbx') {
-          format = 'voxel-fbx';
-        } else if (fileTypeId === 'voxel_vrm' || fileTypeId === 'voxel') {
-          format = 'voxel';
-        }
-        // For 'vrm' (default), format stays null
-        // Note: GLB and FBX are now handled directly above
-        
-        const formatParam = format ? `?format=${format}` : '';
-        downloadUrl = `/api/avatars/${avatarId}/direct-download${formatParam}`;
-      }
-      
-      // Normalize IPFS URLs, but keep GitHub raw URLs, API URLs, and direct Arweave URLs as-is
-      const normalizedUrl = isIPFSUrl(item.url) ? normalizeIPFSUrl(item.url) : downloadUrl;
-      
-      fetch(normalizedUrl)
-        .then((response) => {
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return response.blob();
-        })
-        .then((blob) => {
-          // Save file to folder or download
-          return saveFileToFolder(blob, item.fileName, handle || null);
-        })
-        .then(() => {
-          // Mark as complete
+      const results = await Promise.allSettled(
+        batch.map(item => fetchFileWithRetry(item))
+      );
+
+      results.forEach((result, index) => {
+        const item = batch[index];
+        if (result.status === 'fulfilled') {
+          const { blob, item: fetchedItem } = result.value;
+          zip.file(fetchedItem.fileName, blob);
+          completedFetches++;
+          zipProgressRef.current.fetched = completedFetches;
+          
+          // Mark this specific file as complete
           setQueue((prev) =>
             prev.map((q) =>
               q.id === item.id
@@ -214,56 +268,115 @@ export function useDownloadQueue(): UseDownloadQueueReturn {
                 : q
             )
           );
-          activeDownloadsRef.current.delete(item.id);
-          resolve();
-        })
-        .catch((error) => {
-          const retryCount = retryCountsRef.current[item.id] || 0;
+        } else {
+          const error = result.reason?.message || 'Failed to fetch';
+          failedItems.push({
+            item,
+            error,
+          });
+          zipProgressRef.current.failed.push(item.fileName);
           
-          if (retryCount < MAX_RETRIES) {
-            // Retry with exponential backoff
-            retryCountsRef.current[item.id] = retryCount + 1;
-            const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
-            
-            setTimeout(() => {
-              downloadFile(item, handle).then(resolve).catch(reject);
-            }, delay);
-          } else {
-            // Mark as failed
-            setQueue((prev) =>
-              prev.map((q) =>
-                q.id === item.id
-                  ? {
-                      ...q,
-                      status: 'failed' as const,
-                      error: error.message || 'Download failed',
-                    }
-                  : q
-              )
-            );
-            activeDownloadsRef.current.delete(item.id);
-            reject(error);
-          }
-        });
-    });
-  }, [saveFileToFolder]);
-
-  // Process queue - start downloads up to max concurrent
-  useEffect(() => {
-    const queuedItems = queue.filter(
-      (item) => item.status === 'queued' && !activeDownloadsRef.current.has(item.id)
-    );
-
-    const availableSlots = MAX_CONCURRENT_DOWNLOADS - activeDownloadsRef.current.size;
-
-    for (let i = 0; i < Math.min(availableSlots, queuedItems.length); i++) {
-      const item = queuedItems[i];
-      activeDownloadsRef.current.add(item.id);
-      downloadFile(item, folderHandleRef.current).catch((error) => {
-        console.error('Download error:', error);
+          // Mark this specific file as failed
+          setQueue((prev) =>
+            prev.map((q) =>
+              q.id === item.id
+                ? { ...q, status: 'failed' as const, error }
+                : q
+            )
+          );
+        }
       });
+    };
+
+    // Process items in batches of MAX_CONCURRENT_FETCHES
+    for (let i = 0; i < items.length; i += MAX_CONCURRENT_FETCHES) {
+      const batch = items.slice(i, i + MAX_CONCURRENT_FETCHES);
+      await processBatch(batch);
     }
-  }, [queue, downloadFile]);
+
+    // All files fetched - now add ZIP generation item
+    const zipItemId = `zip-${Date.now()}`;
+    const zipFileName = generateZipFilename();
+    const zipItem: DownloadItem = {
+      id: zipItemId,
+      avatarId: '',
+      avatarName: 'ZIP Archive',
+      fileType: 'Archive',
+      fileTypeId: 'zip',
+      fileName: zipFileName,
+      url: '',
+      status: 'downloading',
+      progress: 0,
+    };
+
+    // Add ZIP item to queue
+    setQueue((prev) => [...prev, zipItem]);
+
+    // Generate ZIP file
+    try {
+      setQueue((prev) =>
+        prev.map((q) =>
+          q.id === zipItemId
+            ? { ...q, progress: 0, status: 'downloading' as const }
+            : q
+        )
+      );
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+        // Update progress during ZIP generation
+        const zipProgress = Math.round(metadata.percent);
+        setQueue((prev) =>
+          prev.map((q) =>
+            q.id === zipItemId
+              ? { ...q, progress: zipProgress }
+              : q
+          )
+        );
+      });
+
+      // Trigger single download
+      const url = window.URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = zipFileName;
+      a.style.display = 'none';
+      a.setAttribute('rel', 'noopener noreferrer');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => window.URL.revokeObjectURL(url), 100);
+
+      // Mark ZIP as complete
+      setQueue((prev) =>
+        prev.map((q) =>
+          q.id === zipItemId
+            ? {
+                ...q,
+                status: 'complete' as const,
+                progress: 100,
+              }
+            : q
+        )
+      );
+
+      console.log(`ZIP download complete: ${completedFetches} files, ${failedItems.length} failed`);
+    } catch (error: any) {
+      console.error('Error generating ZIP:', error);
+      setQueue((prev) =>
+        prev.map((q) =>
+          q.id === zipItemId
+            ? {
+                ...q,
+                status: 'failed' as const,
+                error: error.message || 'Failed to create ZIP file',
+              }
+            : q
+        )
+      );
+    } finally {
+      isProcessingZipRef.current = false;
+    }
+  }, [fetchFileWithRetry]);
 
   // Add avatars to download queue
   const addToQueue = useCallback(
@@ -423,9 +536,15 @@ export function useDownloadQueue(): UseDownloadQueueReturn {
         });
       });
 
-      setQueue((prev) => [...prev, ...newItems]);
+      // Instead of adding items to queue, process them as ZIP immediately
+      if (newItems.length > 0) {
+        // Clear any existing queue
+        setQueue([]);
+        // Process as ZIP download
+        processZipDownload(newItems);
+      }
     },
-    []
+    [processZipDownload]
   );
 
   const cancelItem = useCallback((itemId: string) => {

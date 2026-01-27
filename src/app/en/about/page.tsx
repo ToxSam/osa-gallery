@@ -128,14 +128,14 @@ export default function AboutPage() {
   const futureList = t('about.future.list', { returnObjects: true });
 
   return (
-    <div className="min-h-screen bg-cream dark:bg-gray-950 flex flex-col">
+    <div className="min-h-screen bg-cream dark:bg-cream-dark flex flex-col transition-colors">
       <AvatarHeader 
         title="Open Source Avatars"
         description="A collection of CC0 and open source avatars created by ToxSam"
         socialLink="https://x.com/toxsam"
       />
 
-      <main className="flex-1 py-16 md:py-24">
+      <main className="flex-1 pb-16 md:pb-24" style={{ marginTop: 'var(--osa-avatar-header-height)' }}>
         <div className="max-w-4xl mx-auto px-4">
           <div className="space-y-16">
             <div>

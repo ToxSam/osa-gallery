@@ -160,7 +160,7 @@ export default function AvatarDetailPage() {
           description="アバターが見つかりません"
           socialLink="https://x.com/toxsam"
         />
-        <main className="flex-1 flex items-center justify-center">
+        <main className="flex-1 flex items-center justify-center" style={{ marginTop: 'var(--osa-avatar-header-height)' }}>
           <div className="text-center">
             <h1 className="text-headline mb-4 text-gray-900 dark:text-gray-100">アバターが見つかりません</h1>
             <p className="text-body-lg text-gray-500 dark:text-gray-400 mb-8">
@@ -195,7 +195,7 @@ export default function AvatarDetailPage() {
         socialLink="https://x.com/toxsam"
       />
 
-      <main className="flex-1 section-padding">
+      <main className="flex-1 section-padding" style={{ marginTop: 'var(--osa-avatar-header-height)' }}>
         <div className="container-custom">
           {/* Breadcrumb */}
           <div className="mb-8">

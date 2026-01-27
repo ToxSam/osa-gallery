@@ -811,10 +811,13 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
         }
         
         link.download = filename;
+        link.style.display = 'none';
+        link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        window.URL.revokeObjectURL(downloadUrl);
+        // Revoke URL after a short delay to ensure download starts
+        setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 100);
       } else {
         // Default: download avatar
         await downloadAvatar(avatar, null);
@@ -837,10 +840,13 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = texture.filename || `${texture.label}.${texture.url ? texture.url.split('.').pop() : 'png'}`;
+      link.style.display = 'none';
+      link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(downloadUrl);
+      // Revoke URL after a short delay to ensure download starts
+      setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 100);
     } catch (error) {
       console.error('Texture download error:', error);
     }
@@ -971,6 +977,8 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
       const link = document.createElement('a');
       link.href = dataURL;
       link.download = `${texture.name || 'texture'}.png`;
+      link.style.display = 'none';
+      link.setAttribute('rel', 'noopener noreferrer'); // Security best practice
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

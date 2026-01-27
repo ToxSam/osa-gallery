@@ -392,7 +392,7 @@ export const AvatarGallery: React.FC = () => {
         />
       </div>
   
-      <div className="flex flex-1 overflow-hidden flex-col md:flex-row relative">
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row relative" style={{ marginTop: 'var(--osa-avatar-header-height)' }}>
         {/* Avatar List - Left Side on desktop only */}
         {!isMobile && !sidebarCollapsed && (
           <>

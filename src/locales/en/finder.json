@@ -113,7 +113,8 @@
     "openFolder": "Open folder in file manager",
     "open": "Open",
     "filesDownloadedTo": "Files downloaded to:",
-    "selectFolderFirst": "Please select a download folder first"
+    "selectFolderFirst": "Please select a download folder first",
+    "zipNote": "All selected files will be compressed into a single ZIP archive once they're ready"
   },
   "filters": {
     "title": "Filters",

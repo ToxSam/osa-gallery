@@ -100,7 +100,7 @@ export default function AboutPage() {
         socialLink="https://x.com/toxsam"
       />
 
-      <main className="flex-1 section-padding">
+      <main className="flex-1 pb-20 md:pb-32" style={{ marginTop: 'var(--osa-avatar-header-height)' }}>
         <div className="max-w-4xl mx-auto px-6 md:px-8 lg:px-12">
           <div className="space-y-16">
             <div>

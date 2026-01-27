@@ -34,6 +34,17 @@
     --ring: 0 0% 15%;
  
     --radius: 0.5rem;
+
+    /* Fixed header heights (used by docs/resources layout) */
+    --osa-avatar-header-height: 4rem; /* mobile: AvatarHeader h-16 */
+    --osa-doc-header-height: 6rem; /* mobile: DocHeader h-24 */
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --osa-avatar-header-height: 5rem; /* md+: AvatarHeader md:h-20 */
+      --osa-doc-header-height: 5rem; /* md+: DocHeader h-20 */
+    }
   }
  
   .dark {
@@ -383,5 +394,93 @@ input:-webkit-autofill:focus {
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
+  }
+
+  /* Doc main: reserve space for scrollbar so it never overlaps content */
+  [data-doc-main-content] {
+    scrollbar-gutter: stable;
+  }
+
+  /* Documentation Prose Styles */
+  .prose {
+    @apply text-gray-900 dark:text-gray-100 break-words min-w-0;
+  }
+
+  .prose h1 {
+    @apply text-headline mb-8 mt-12 first:mt-0;
+  }
+
+  .prose h2 {
+    @apply text-title mb-6 mt-12 first:mt-0 scroll-mt-20;
+    @apply relative;
+  }
+
+  .prose h3 {
+    @apply text-xl font-bold mb-4 mt-8 scroll-mt-20;
+    @apply relative;
+  }
+
+  .prose h4 {
+    @apply text-lg font-bold mb-3 mt-6 scroll-mt-20;
+    @apply relative;
+  }
+
+  .prose p {
+    @apply text-body text-gray-600 dark:text-gray-300 mb-6 leading-relaxed;
+  }
+
+  .prose ul,
+  .prose ol {
+    @apply mb-6 space-y-2;
+  }
+
+  .prose li {
+    @apply text-body text-gray-600 dark:text-gray-300;
+  }
+
+  .prose a {
+    @apply text-gray-900 dark:text-gray-100 underline decoration-gray-400 dark:decoration-gray-600;
+    @apply hover:text-gray-700 dark:hover:text-gray-200 hover:decoration-gray-600 dark:hover:decoration-gray-400;
+    @apply transition-colors;
+  }
+
+  .prose code {
+    @apply px-1.5 py-0.5 rounded text-sm font-mono;
+    @apply bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100;
+  }
+
+  .prose pre {
+    @apply bg-gray-900 dark:bg-gray-950 text-gray-100 dark:text-gray-200;
+    @apply p-4 rounded-lg overflow-x-auto;
+    @apply border border-gray-700 dark:border-gray-800;
+  }
+
+  .prose pre code {
+    @apply bg-transparent p-0 text-gray-100 dark:text-gray-200;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-gray-300 dark:border-gray-700 pl-4 italic;
+    @apply text-gray-600 dark:text-gray-400 my-6;
+  }
+
+  .prose table {
+    @apply w-full border-collapse my-6;
+  }
+
+  .prose th {
+    @apply border border-gray-300 dark:border-gray-700 px-4 py-2;
+    @apply bg-gray-100 dark:bg-gray-800 font-semibold text-left;
+  }
+
+  .prose td {
+    @apply border border-gray-300 dark:border-gray-700 px-4 py-2;
+  }
+
+  /* Heading anchor links */
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    @apply relative;
   }
 }

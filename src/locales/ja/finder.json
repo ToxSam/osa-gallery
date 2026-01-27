@@ -113,7 +113,8 @@
     "openFolder": "ファイルマネージャーでフォルダを開く",
     "open": "開く",
     "filesDownloadedTo": "ファイルのダウンロード先:",
-    "selectFolderFirst": "まずダウンロードフォルダを選択してください"
+    "selectFolderFirst": "まずダウンロードフォルダを選択してください",
+    "zipNote": "選択したすべてのファイルは準備が整い次第、1つのZIPアーカイブに圧縮されます"
   },
   "filters": {
     "title": "フィルター",

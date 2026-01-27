@@ -48,7 +48,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-cream dark:bg-gray-950">
+    <main className="min-h-screen bg-cream dark:bg-cream-dark transition-colors">
       <AvatarHeader 
         title={title} 
         description={description}
@@ -56,7 +56,7 @@ export default function Home() {
       />
       
       {/* Hero Section with Large Avatar Display */}
-      <section className="relative overflow-hidden bg-cream dark:bg-gray-950 min-h-[600px] lg:min-h-0">
+      <section className="relative overflow-hidden bg-cream dark:bg-cream-dark min-h-[600px] lg:min-h-0" style={{ marginTop: 'var(--osa-avatar-header-height)' }}>
         {/* 3D Viewer - behind text on mobile, positioned absolutely */}
         <div 
           className="absolute inset-0 pointer-events-none z-0 lg:hidden"
@@ -125,7 +125,7 @@ export default function Home() {
       </section>
 
       {/* Project Overview */}
-      <section className="py-32 bg-cream dark:bg-gray-950">
+      <section className="py-32 bg-cream dark:bg-cream-dark">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-4 mb-12">
@@ -217,7 +217,7 @@ export default function Home() {
       </section>
 
       {/* Technical Deep Dive */}
-      <section className="py-32 bg-cream dark:bg-gray-950">
+      <section className="py-32 bg-cream dark:bg-cream-dark">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-4 mb-12">
@@ -361,7 +361,7 @@ export default function Home() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-32 bg-cream dark:bg-gray-950">
+      <section className="py-32 bg-cream dark:bg-cream-dark">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-5xl md:text-6xl font-bold mb-8">{t('home.cta.title')}</h2>

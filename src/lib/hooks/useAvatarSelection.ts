@@ -45,20 +45,23 @@ export function useAvatarSelection() {
       // Get the first selected avatar ID
       const avatarId = Array.from(selectedAvatars)[0];
 
-      // Replace the entire download process with a simpler approach
-      // using the direct download endpoint
+      // Use the direct download endpoint with proper download link
+      // This preserves the user gesture chain and avoids security warnings
       const format = selectedFormat || null;
       const formatParam = format ? `?format=${format}` : '';
       const directDownloadUrl = `/api/avatars/${avatarId}/direct-download${formatParam}`;
       
-      // Create and open a download link
-      window.open(directDownloadUrl, '_blank');
+      // Create a proper download link instead of window.open() to avoid security warnings
+      const link = document.createElement('a');
+      link.href = directDownloadUrl;
+      link.download = ''; // Let server set filename via Content-Disposition header
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-      // Wait a bit before marking download as complete
-      setTimeout(() => {
-        setIsDownloading(false);
-        alert('Download started. If it doesn\'t appear, check your browser\'s download settings.');
-      }, 1000);
+      // Mark download as complete immediately since link click is synchronous
+      setIsDownloading(false);
     } catch (error) {
       setIsDownloading(false);
       console.error('Download error:', error);

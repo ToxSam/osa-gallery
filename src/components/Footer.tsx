@@ -4,12 +4,19 @@ import React from 'react';
 import Link from 'next/link';
 import { useI18n } from '@/lib/i18n';
 
-export const Footer: React.FC = () => {
+type FooterVariant = 'default' | 'compact';
+
+interface FooterProps {
+  variant?: FooterVariant;
+}
+
+export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
   const { locale } = useI18n();
   const currentYear = new Date().getFullYear();
+  const verticalPadding = variant === 'compact' ? 'py-10 md:py-14' : 'py-20 md:py-32';
 
   return (
-    <footer className="w-full border-t border-gray-300 dark:border-gray-700 bg-cream dark:bg-cream-dark py-20 md:py-32 transition-colors">
+    <footer className={`w-full border-t border-gray-300 dark:border-gray-700 bg-cream dark:bg-cream-dark ${verticalPadding} transition-colors`}>
       <div className="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}

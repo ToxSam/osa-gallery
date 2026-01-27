@@ -32,7 +32,7 @@ export const AvatarHeader: React.FC<AvatarHeaderProps> = ({
   ];
 
   return (
-    <header className="w-full bg-cream/90 dark:bg-cream-dark/90 backdrop-blur-md border-b border-gray-300/50 dark:border-gray-700/50 sticky top-0 z-50 transition-colors">
+    <header className="w-full bg-cream/90 dark:bg-cream-dark/90 backdrop-blur-md border-b border-gray-300/50 dark:border-gray-700/50 fixed top-0 left-0 right-0 z-50 transition-colors">
       <div className="max-w-7xl mx-auto px-6 md:px-8 lg:px-12">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo/Brand */}

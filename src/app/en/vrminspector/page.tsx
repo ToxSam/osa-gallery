@@ -77,7 +77,7 @@ export default function VRMInspectorPage() {
         </div>
 
         {/* Mobile Content (shown behind overlay) */}
-        <div className="container-custom py-8">
+        <div className="container-custom py-8" style={{ marginTop: 'var(--osa-avatar-header-height)' }}>
           <h1 className="text-title mb-4 text-gray-900 dark:text-gray-100">{t('vrmviewer.mobile.intro.title')}</h1>
           <p className="text-body text-gray-500 dark:text-gray-400 mb-8">
             {t('vrmviewer.mobile.intro.description')}

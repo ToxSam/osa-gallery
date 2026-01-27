@@ -56,7 +56,7 @@ export default function Home() {
       />
       
       {/* Hero Section with Large Avatar Display */}
-      <section className="relative overflow-hidden bg-cream dark:bg-cream-dark min-h-[600px] lg:min-h-0">
+      <section className="relative overflow-hidden bg-cream dark:bg-cream-dark min-h-[600px] lg:min-h-0" style={{ marginTop: 'var(--osa-avatar-header-height)' }}>
         {/* 3D Viewer - behind text on mobile, positioned absolutely */}
         <div 
           className="absolute inset-0 pointer-events-none z-0 lg:hidden"

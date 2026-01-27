@@ -2549,6 +2549,7 @@ const VRMInspector = React.memo(() => {
       {/* Main Content Area with Relative Positioning */}
       <div 
         className="flex-1 relative"
+        style={{ marginTop: 'var(--osa-avatar-header-height)' }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}

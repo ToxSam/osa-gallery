@@ -68,6 +68,7 @@ function getModelUrlForFormat(
 /**
  * Client-side download function for IPFS and GitHub raw URLs
  * Fetches the file directly from the browser and triggers download
+ * This function must be called directly from a user gesture handler to preserve the gesture chain
  */
 export async function downloadIPFSFile(
   url: string,
@@ -95,13 +96,17 @@ export async function downloadIPFSFile(
         
         const blob = await retryResponse.blob();
         const downloadUrl = window.URL.createObjectURL(blob);
+        // Create download link with proper attributes to preserve user gesture
         const a = document.createElement('a');
         a.href = downloadUrl;
         a.download = filename;
+        a.style.display = 'none';
+        a.setAttribute('rel', 'noopener noreferrer'); // Security best practice
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        window.URL.revokeObjectURL(downloadUrl);
+        // Revoke URL after a short delay to ensure download starts
+        setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 100);
         return;
       }
       
@@ -111,13 +116,17 @@ export async function downloadIPFSFile(
     // Convert to blob and trigger download
     const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
+    // Create download link with proper attributes to preserve user gesture
     const a = document.createElement('a');
     a.href = downloadUrl;
     a.download = filename;
+    a.style.display = 'none';
+    a.setAttribute('rel', 'noopener noreferrer'); // Security best practice
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    window.URL.revokeObjectURL(downloadUrl);
+    // Revoke URL after a short delay to ensure download starts
+    setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 100);
     
     console.log(`Successfully downloaded: ${filename}`);
   } catch (error) {
@@ -163,8 +172,17 @@ export async function downloadAvatar(
     await downloadIPFSFile(modelUrl, filename);
   } else {
     // Use server-side download for Arweave and other URLs
+    // Create a proper download link instead of window.open() to avoid security warnings
     const formatParam = format ? `?format=${format}` : '';
     const directDownloadUrl = `/api/avatars/${avatar.id}/direct-download${formatParam}`;
-    window.open(directDownloadUrl, '_blank');
+    
+    // Create a temporary anchor element and click it to preserve user gesture chain
+    const link = document.createElement('a');
+    link.href = directDownloadUrl;
+    link.download = ''; // Let server set filename via Content-Disposition header
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 }

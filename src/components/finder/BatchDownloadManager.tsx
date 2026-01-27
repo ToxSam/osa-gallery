@@ -212,11 +212,14 @@ export default function BatchDownloadManager({
   const handleFolderSelect = async () => {
     try {
       // Check if File System Access API is supported
+      // This is a user-initiated action triggered by explicit button click
       if (typeof window === 'undefined' || !('showDirectoryPicker' in window)) {
         alert(t('finder.batchDownload.folderNotSupported') || 'Folder selection is not supported in this browser. Please use Chrome, Edge, or another Chromium-based browser for automatic downloads without prompts.');
         return;
       }
 
+      // User-initiated folder selection - this will show a native browser dialog
+      // Permission is automatically granted when user selects a folder
       const handle = await (window as any).showDirectoryPicker();
       setSelectedFolder(handle);
       setFolderName(handle.name);
@@ -248,20 +251,15 @@ export default function BatchDownloadManager({
 
 
   const handleDownload = async () => {
-    // Folder should already be selected (button is disabled if not)
-    if (!selectedFolder) {
-      console.error('Download attempted without folder selection');
-      return;
-    }
-    
-    console.log('Starting download with folder:', selectedFolder.name);
+    // ZIP downloads don't require folder selection - files download to default download folder
+    console.log('Starting ZIP download');
     onStartDownload({
       downloadVrms,
       downloadFbx,
       downloadGlb,
       downloadImages,
       extractTextures,
-      folderHandle: selectedFolder,
+      folderHandle: null, // ZIP downloads don't use folder handle
     });
   };
 
@@ -631,62 +629,12 @@ export default function BatchDownloadManager({
                     </div>
                   </div>
 
-                  {/* Folder Selection */}
-                  <div className="mt-6">
-                    <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-5">
-                      {t('finder.batchDownload.downloadFolder') || 'Download Folder'}
-                    </h3>
-                    <div className="space-y-3">
-                      {selectedFolder ? (
-                        <div className="flex items-center gap-3 p-3.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                          <Folder className="h-5 w-5 text-gray-600 dark:text-gray-400 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                              {folderName}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                              {t('finder.batchDownload.folderSelected') || 'Files will save here automatically'}
-                            </p>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={handleFolderSelect}
-                            className="flex-shrink-0"
-                          >
-                            {t('finder.common.change')}
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-3 p-3.5 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600">
-                          <Folder className="h-5 w-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                              {t('finder.batchDownload.selectFolder') || 'No folder selected'}
-                            </p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                              {t('finder.batchDownload.required') || 'Required'}
-                            </p>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="default"
-                            size="sm"
-                            onClick={handleFolderSelect}
-                            className="flex-shrink-0"
-                          >
-                            {t('finder.common.select')}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  {/* Note: Folder selection removed - ZIP downloads go to default download folder */}
 
                   <div className="mt-6 space-y-3">
                     <Button
                       onClick={handleDownload}
-                      disabled={(!downloadVrms && !downloadFbx && !downloadGlb && !downloadImages) || !selectedFolder}
+                      disabled={!downloadVrms && !downloadFbx && !downloadGlb && !downloadImages}
                       className="w-full h-12 text-base font-semibold"
                       size="lg"
                     >
@@ -698,11 +646,9 @@ export default function BatchDownloadManager({
                         {t('finder.batchDownload.selectOption') || 'Please select at least one download option'}
                       </p>
                     )}
-                    {!selectedFolder && (downloadVrms || downloadFbx || downloadGlb || downloadImages) && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
-                        {t('finder.batchDownload.selectFolderFirst') || 'Please select a download folder first'}
-                      </p>
-                    )}
+                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
+                      {t('finder.batchDownload.zipNote') || 'All selected files will be compressed into a single ZIP archive once they\'re ready'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -807,7 +753,14 @@ export default function BatchDownloadManager({
                                       {item.fileName}
                                     </p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                      {item.avatarName} • {item.fileType}
+                                      {item.fileTypeId === 'zip' 
+                                        ? item.status === 'downloading' 
+                                          ? `Creating ZIP archive... ${item.progress}%`
+                                          : item.status === 'complete'
+                                            ? 'ZIP archive ready'
+                                            : item.avatarName
+                                        : `${item.avatarName} • ${item.fileType}`
+                                      }
                                     </p>
                                   </div>
                                 </div>
@@ -891,24 +844,40 @@ export default function BatchDownloadManager({
           <div className="p-4 border-t border-gray-300 dark:border-gray-700">
             <div className="flex items-center justify-between gap-4">
               <div className="text-sm text-gray-600 dark:text-gray-400 flex-shrink-0">
-                {interpolate(
-                  getTranslationString(t('finder.downloadQueue.progress')) || 'Downloading {current} of {total} files',
-                  { current: downloadingCount, total: downloadQueue.length }
-                )}
+                {(() => {
+                  const zipItem = downloadQueue.find(item => item.fileTypeId === 'zip');
+                  const fileItems = downloadQueue.filter(item => item.fileTypeId !== 'zip');
+                  
+                  if (zipItem) {
+                    // ZIP generation phase
+                    if (zipItem.status === 'downloading') {
+                      return `Creating ZIP archive... ${zipItem.progress}%`;
+                    } else if (zipItem.status === 'complete') {
+                      return 'ZIP download complete!';
+                    }
+                  }
+                  
+                  // File fetching phase
+                  if (fileItems.length > 0) {
+                    const completed = fileItems.filter(item => item.status === 'complete').length;
+                    const downloading = fileItems.filter(item => item.status === 'downloading').length;
+                    const failed = fileItems.filter(item => item.status === 'failed').length;
+                    
+                    if (downloading > 0) {
+                      return `Fetching files... ${completed + downloading} of ${fileItems.length} (${downloading} active)`;
+                    } else if (completed === fileItems.length) {
+                      return `All files ready! Creating ZIP...`;
+                    } else {
+                      return `Preparing download... ${completed} of ${fileItems.length} complete`;
+                    }
+                  }
+                  
+                  return interpolate(
+                    getTranslationString(t('finder.downloadQueue.progress')) || 'Downloading {current} of {total} files',
+                    { current: downloadingCount, total: downloadQueue.length }
+                  );
+                })()}
               </div>
-              {selectedFolder && folderName && (
-                <div className="flex items-center gap-2 flex-1 min-w-0 justify-center">
-                  <Folder className="h-4 w-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                      {t('finder.batchDownload.filesDownloadedTo') || 'Files downloaded to:'}
-                    </span>
-                    <span className="text-sm font-mono text-gray-900 dark:text-gray-100 truncate">
-                      {folderName}
-                    </span>
-                  </div>
-                </div>
-              )}
               <Button variant="outline" size="sm" onClick={onClear} className="flex-shrink-0">
                 {t('finder.downloadQueue.clear') || 'Clear Queue'}
               </Button>

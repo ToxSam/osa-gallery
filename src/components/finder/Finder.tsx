@@ -723,7 +723,7 @@ export default function Finder() {
       <div 
         ref={containerRef}
         className="flex flex-1 overflow-hidden min-h-0 w-full"
-        style={{ maxWidth: '100%' }}
+        style={{ maxWidth: '100%', marginTop: 'var(--osa-avatar-header-height)' }}
       >
         {/* Left Sidebar - Projects Tree */}
         <div 
