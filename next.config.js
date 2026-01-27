@@ -42,6 +42,11 @@ const nextConfig = {
   },
   output: 'standalone',
   
+  // Include docs folder in standalone build for documentation pages
+  outputFileTracingIncludes: {
+    '/*': ['./docs/**/*'],
+  },
+  
   // Configure dynamic route handling
   async rewrites() {
     return [
