@@ -1,4 +1,5 @@
-import { parseMarkdown, getDocsPath, fileExists, MarkdownContent } from './markdown';
+import { parseMarkdown, getDocsPath, fileExists, MarkdownContent, getProjectRoot } from './markdown';
+import path from 'path';
 
 export interface ContentResult {
   content: string;
@@ -24,6 +25,9 @@ export async function loadContent(
   let isTranslated = true;
   let actualLocale = locale;
   
+  // Get project root for logging
+  const projectRoot = getProjectRoot();
+  
   if (locale === defaultLocale) {
     // For English, always use English file
     if (!fileExists(requestedPath)) {
@@ -31,6 +35,8 @@ export async function loadContent(
       console.error(`[loadContent] Content not found for locale=${locale}, slug=${JSON.stringify(slug)}`);
       console.error(`[loadContent] Requested path: ${requestedPath}`);
       console.error(`[loadContent] Current working directory: ${process.cwd()}`);
+      console.error(`[loadContent] Project root: ${projectRoot}`);
+      console.error(`[loadContent] Expected docs path: ${path.join(projectRoot, 'docs', locale)}`);
       throw new Error(`Content not found: ${requestedPath}`);
     }
     content = await parseMarkdown(requestedPath);
@@ -51,6 +57,7 @@ export async function loadContent(
       console.error(`[loadContent] Requested path: ${requestedPath}`);
       console.error(`[loadContent] Fallback path: ${fallbackPath}`);
       console.error(`[loadContent] Current working directory: ${process.cwd()}`);
+      console.error(`[loadContent] Project root: ${projectRoot}`);
       throw new Error(`Content not found: ${requestedPath} or ${fallbackPath}`);
     }
   }

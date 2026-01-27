@@ -54,14 +54,18 @@ export function fileExists(filePath: string): boolean {
 export function getProjectRoot(): string {
   const cwd = process.cwd();
   
+  // In standalone builds, process.cwd() is typically .next/standalone
+  // The docs folder should be at .next/standalone/docs (copied by our script)
+  // In development, docs is at the project root
+  
   // Try multiple possible locations for the docs folder
   const possiblePaths = [
-    { docsPath: path.join(cwd, 'docs'), root: cwd }, // Standard location (development)
-    { docsPath: path.join(cwd, '..', 'docs'), root: path.join(cwd, '..') }, // If we're in .next/standalone, docs might be one level up
+    { docsPath: path.join(cwd, 'docs'), root: cwd }, // Standard location (development or standalone with our script)
+    { docsPath: path.join(cwd, '..', 'docs'), root: path.join(cwd, '..') }, // If we're in .next/standalone/node_modules or similar
     { docsPath: path.join(cwd, '..', '..', 'docs'), root: path.join(cwd, '..', '..') }, // If we're deeper in the structure
   ];
   
-  // Find the first path that exists
+  // Find the first path that exists and has the expected structure
   for (const { docsPath, root } of possiblePaths) {
     if (fileExists(docsPath)) {
       // Verify it's actually a directory and has the expected structure
@@ -72,6 +76,10 @@ export function getProjectRoot(): string {
           const enPath = path.join(docsPath, 'en');
           const jaPath = path.join(docsPath, 'ja');
           if (fileExists(enPath) || fileExists(jaPath)) {
+            // Log for debugging in production
+            if (process.env.NODE_ENV === 'production') {
+              console.log(`[getProjectRoot] Found docs at: ${docsPath}, using root: ${root}`);
+            }
             return root;
           }
         }
@@ -81,6 +89,10 @@ export function getProjectRoot(): string {
       }
     }
   }
+  
+  // Log warning if docs not found
+  console.warn(`[getProjectRoot] Docs folder not found. Current working directory: ${cwd}`);
+  console.warn(`[getProjectRoot] Tried paths:`, possiblePaths.map(p => p.docsPath));
   
   // Fallback to current working directory
   return cwd;

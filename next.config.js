@@ -44,13 +44,9 @@ const nextConfig = {
   
   // Include docs folder in standalone build for documentation pages
   // This ensures all markdown files are available at runtime
+  // Note: Using wildcard patterns to match all resource routes
   outputFileTracingIncludes: {
-    '/resources': ['./docs/**/*'],
-    '/resources/*': ['./docs/**/*'],
-    '/en/resources': ['./docs/**/*'],
-    '/en/resources/*': ['./docs/**/*'],
-    '/ja/resources': ['./docs/**/*'],
-    '/ja/resources/*': ['./docs/**/*'],
+    '/*': ['./docs/**/*'],
   },
   
   // Configure dynamic route handling
