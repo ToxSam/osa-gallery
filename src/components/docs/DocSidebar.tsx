@@ -167,7 +167,7 @@ const NavItemComponent: React.FC<NavItemComponentProps> = ({
 
       {hasChildren && isOpen && (
         <div className="mt-0.5 space-y-0.5">
-          {item.children.map((child) => (
+          {(item.children || []).map((child) => (
             <NavItemComponent
               key={child.id}
               item={child}
