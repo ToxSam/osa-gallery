@@ -49,62 +49,32 @@ export function fileExists(filePath: string): boolean {
 }
 
 /**
- * Get the base docs directory path, handling both dev and standalone builds
- */
-export function getDocsBasePath(): string {
-  const cwd = process.cwd();
-  
-  // Try standalone build path first (for production)
-  const standalonePath = path.join(cwd, 'docs');
-  if (fileExists(standalonePath)) {
-    return standalonePath;
-  }
-  
-  // Try project root (for development)
-  const rootPath = path.join(cwd, 'docs');
-  if (fileExists(rootPath)) {
-    return rootPath;
-  }
-  
-  // Fallback: try going up one level (in case we're in .next/standalone)
-  const parentPath = path.join(cwd, '..', 'docs');
-  if (fileExists(parentPath)) {
-    return parentPath;
-  }
-  
-  // Last resort: use cwd (will throw error if not found)
-  return path.join(cwd, 'docs');
-}
-
-/**
  * Get the full path to a markdown file in the docs directory
  * Tries readme.md first, then index.md, then file.md
  */
 export function getDocsPath(locale: string, slug: string[]): string {
-  const docsBase = getDocsBasePath();
-  
   if (slug.length === 0) {
     // Try readme.md first, then fall back to index.md for backwards compatibility
-    const readmePath = path.join(docsBase, locale, 'readme.md');
+    const readmePath = path.join(process.cwd(), 'docs', locale, 'readme.md');
     if (fileExists(readmePath)) {
       return readmePath;
     }
-    return path.join(docsBase, locale, 'index.md');
+    return path.join(process.cwd(), 'docs', locale, 'index.md');
   }
   
   // For folder pages, try readme.md first (e.g., developers/readme.md)
-  const readmePath = path.join(docsBase, locale, ...slug, 'readme.md');
+  const readmePath = path.join(process.cwd(), 'docs', locale, ...slug, 'readme.md');
   if (fileExists(readmePath)) {
     return readmePath;
   }
   
   // Try directory/index.md (e.g., avatar-collections/index.md) for backwards compatibility
-  const dirPath = path.join(docsBase, locale, ...slug, 'index.md');
+  const dirPath = path.join(process.cwd(), 'docs', locale, ...slug, 'index.md');
   if (fileExists(dirPath)) {
     return dirPath;
   }
   
   // Fall back to file.md (e.g., about/vrm.md)
-  const filePath = path.join(docsBase, locale, ...slug) + '.md';
+  const filePath = path.join(process.cwd(), 'docs', locale, ...slug) + '.md';
   return filePath;
 }
