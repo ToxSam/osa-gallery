@@ -92,8 +92,11 @@ export async function downloadIPFSFile(
  * This preserves the user gesture chain and avoids Chrome security warnings.
  * 
  * The server-side API handles IPFS, GitHub, and Arweave URLs correctly.
+ * 
+ * NOTE: This function is synchronous (no async/await) to ensure the user gesture chain
+ * is preserved. The link click happens immediately without any async operations.
  */
-export async function downloadAvatar(
+export function downloadAvatar(
   avatar: { 
     id: string; 
     name: string; 
@@ -104,7 +107,7 @@ export async function downloadAvatar(
     } 
   },
   format: string | null = null
-): Promise<void> {
+): void {
   if (!avatar.modelFileUrl) {
     throw new Error('No model file available');
   }

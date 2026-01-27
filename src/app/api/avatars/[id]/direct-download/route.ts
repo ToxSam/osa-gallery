@@ -253,12 +253,20 @@ export async function GET(
                 } catch (error) {
                   console.error('Error updating download counts:', error);
                 }
+                // Use application/octet-stream for all binary model files
+                const contentType = (actualFormat === 'fbx' || actualFormat === 'glb' || actualFormat === 'voxel-fbx') 
+                  ? 'application/octet-stream' 
+                  : 'application/octet-stream';
+                const encodedFilename = encodeURIComponent(filename);
+                const contentDisposition = `attachment; filename="${filename}"; filename*=UTF-8''${encodedFilename}`;
+                
                 return new NextResponse(buffer, {
                   status: 200,
                   headers: {
-                    'Content-Type': (actualFormat === 'fbx' || actualFormat === 'glb') ? 'application/octet-stream' : 'model/vrm',
-                    'Content-Disposition': `attachment; filename="${filename}"`,
+                    'Content-Type': contentType,
+                    'Content-Disposition': contentDisposition,
                     'Cache-Control': 'public, max-age=86400',
+                    'X-Content-Type-Options': 'nosniff',
                   }
                 });
               }
@@ -293,12 +301,24 @@ export async function GET(
       }
       
       // Return the file with proper headers
+      // Use application/octet-stream for all binary model files to ensure Chrome recognizes them correctly
+      // This is safer than model/vrm which might not be recognized by all browsers
+      const contentType = (actualFormat === 'fbx' || actualFormat === 'glb' || actualFormat === 'voxel-fbx') 
+        ? 'application/octet-stream' 
+        : 'application/octet-stream'; // Use octet-stream for VRM too for maximum compatibility
+      
+      // Properly encode filename in Content-Disposition header (RFC 5987)
+      // Chrome requires this format for filenames with special characters
+      const encodedFilename = encodeURIComponent(filename);
+      const contentDisposition = `attachment; filename="${filename}"; filename*=UTF-8''${encodedFilename}`;
+      
       return new NextResponse(buffer, {
         status: 200,
         headers: {
-          'Content-Type': (actualFormat === 'fbx' || actualFormat === 'glb') ? 'application/octet-stream' : 'model/vrm',
-          'Content-Disposition': `attachment; filename="${filename}"`,
+          'Content-Type': contentType,
+          'Content-Disposition': contentDisposition,
           'Cache-Control': 'public, max-age=86400',
+          'X-Content-Type-Options': 'nosniff', // Prevent MIME type sniffing
         }
       });
     } catch (error) {

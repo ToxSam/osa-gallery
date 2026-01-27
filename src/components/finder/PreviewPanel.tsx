@@ -775,16 +775,31 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
 
   const handleDownload = async () => {
     try {
-      if (selectedFile && selectedFile.url) {
-        // For all files, fetch as blob to ensure proper download with correct filename
-        const response = await fetch(selectedFile.url);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`);
+      // For model files (VRM, FBX, GLB), route through server-side API to preserve user gesture chain
+      // This prevents Chrome security warnings
+      if (selectedFile && selectedFile.category === 'model' && avatar) {
+        // Determine format based on file ID
+        let format: string | null = null;
+        const fileId = selectedFile.id;
+        if (fileId === 'voxel_fbx' || fileId === 'voxel-fbx') {
+          format = 'voxel-fbx';
+        } else if (fileId === 'voxel_vrm' || fileId === 'voxel') {
+          format = 'voxel';
+        } else if (fileId === 'fbx') {
+          format = 'fbx';
+        } else if (fileId === 'glb') {
+          format = 'glb';
         }
-        const blob = await response.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
+        // For vrm_main and other VRM files, format is null (default)
+        
+        // Use server-side API to preserve user gesture chain
+        downloadAvatar(avatar, format);
+      } else if (selectedFile && selectedFile.url) {
+        // For thumbnails and textures, use direct download (small files, less critical)
+        // But we still need to preserve user gesture chain
+        // Create link immediately without async fetch to preserve gesture
         const link = document.createElement('a');
-        link.href = downloadUrl;
+        link.href = selectedFile.url;
         
         // Determine filename - prefer correctedFilename (with detected extension), then selectedFile.filename, fallback to extracting from URL or avatar name
         let filename = correctedFilename || selectedFile.filename;
@@ -816,11 +831,9 @@ function PreviewPanel({ avatar, selectedFile, projects }: PreviewPanelProps) {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        // Revoke URL after a short delay to ensure download starts
-        setTimeout(() => window.URL.revokeObjectURL(downloadUrl), 100);
       } else {
         // Default: download avatar
-        await downloadAvatar(avatar, null);
+        downloadAvatar(avatar, null);
       }
     } catch (error) {
       console.error('Download error:', error);

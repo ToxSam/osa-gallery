@@ -104,13 +104,13 @@ export default function AvatarDetailPage() {
     }
   }, [params.id]);
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     if (!avatar) return;
     
     try {
       // Use the centralized downloadAvatar utility which routes through server-side API
       // This preserves user gesture chain and avoids Chrome security warnings
-      await downloadAvatar(avatar, null);
+      downloadAvatar(avatar, null);
     } catch (error) {
       console.error('Download error:', error);
       alert('ダウンロードに失敗しました');

@@ -264,7 +264,7 @@ export const AvatarGallery: React.FC = () => {
     }
   }, [avatars, currentAvatar, pathname]);
 
-  const handleDownloadCurrent = useCallback(async (avatarId?: string, format?: string | null) => {
+  const handleDownloadCurrent = useCallback((avatarId?: string, format?: string | null) => {
     // Use provided avatarId or currentAvatar
     const targetAvatar = avatarId 
       ? avatars.find(a => a.id === avatarId) 
@@ -279,8 +279,8 @@ export const AvatarGallery: React.FC = () => {
     const targetFormat = format !== undefined ? format : selectedFormat;
 
     try {
-      const { downloadAvatar } = await import('@/lib/download-utils');
-      await downloadAvatar(targetAvatar, targetFormat || null);
+      const { downloadAvatar } = require('@/lib/download-utils');
+      downloadAvatar(targetAvatar, targetFormat || null);
     } catch (error) {
       console.error('Download error:', error);
       alert('Download failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
