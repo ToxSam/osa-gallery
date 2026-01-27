@@ -42,12 +42,8 @@ const nextConfig = {
   },
   output: 'standalone',
   
-  // Include docs folder in standalone build for documentation pages
+  // Note: Docs folder is copied to standalone build via scripts/copy-docs.js
   // This ensures all markdown files are available at runtime
-  // Note: Using wildcard patterns to match all resource routes
-  outputFileTracingIncludes: {
-    '/*': ['./docs/**/*'],
-  },
   
   // Configure dynamic route handling
   async rewrites() {
