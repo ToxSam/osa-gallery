@@ -1,6 +1,6 @@
 # OpenSourceAvatars.com
 
-> 🌐 **[English version available here](README.md) / 英語版はこちら**
+> 🇬🇧 **[English version available here](README.md) / 英語版はこちら**
 
 無料でオープンソースの3Dアバターを発見するための中央レジストリ
 

@@ -1,6 +1,6 @@
 # OpenSourceAvatars.com
 
-> 🌐 **日本語版はこちら / [Japanese version available here](README.ja.md)**
+> 🇯🇵 **日本語版はこちら / [Japanese version available here](README.ja.md)**
 
 The central registry for discovering free and open source 3D avatars
 
