@@ -27,6 +27,10 @@ export async function loadContent(
   if (locale === defaultLocale) {
     // For English, always use English file
     if (!fileExists(requestedPath)) {
+      // Log for debugging
+      console.error(`[loadContent] Content not found for locale=${locale}, slug=${JSON.stringify(slug)}`);
+      console.error(`[loadContent] Requested path: ${requestedPath}`);
+      console.error(`[loadContent] Current working directory: ${process.cwd()}`);
       throw new Error(`Content not found: ${requestedPath}`);
     }
     content = await parseMarkdown(requestedPath);
@@ -42,6 +46,11 @@ export async function loadContent(
       isTranslated = false;
       actualLocale = defaultLocale;
     } else {
+      // Log for debugging
+      console.error(`[loadContent] Content not found for locale=${locale}, slug=${JSON.stringify(slug)}`);
+      console.error(`[loadContent] Requested path: ${requestedPath}`);
+      console.error(`[loadContent] Fallback path: ${fallbackPath}`);
+      console.error(`[loadContent] Current working directory: ${process.cwd()}`);
       throw new Error(`Content not found: ${requestedPath} or ${fallbackPath}`);
     }
   }

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { getDocsPath } from './markdown';
+import { getDocsPath, getProjectRoot } from './markdown';
 
 export interface SearchResult {
   id: string;
@@ -43,7 +43,8 @@ function getAllMarkdownFiles(dir: string, basePath: string = '', locale: string 
  * Extract slug from file path
  */
 function getSlugFromPath(filePath: string, locale: string): string[] {
-  const docsPath = path.join(process.cwd(), 'docs', locale);
+  const projectRoot = getProjectRoot();
+  const docsPath = path.join(projectRoot, 'docs', locale);
   const relativePath = path.relative(docsPath, filePath);
   
   // Remove .md extension
@@ -71,7 +72,8 @@ function buildHref(slug: string[], locale: string): string {
  * Load all searchable content from markdown files
  */
 export async function loadSearchableContent(locale: string = 'en'): Promise<SearchResult[]> {
-  const docsDir = path.join(process.cwd(), 'docs', locale);
+  const projectRoot = getProjectRoot();
+  const docsDir = path.join(projectRoot, 'docs', locale);
   const files = getAllMarkdownFiles(docsDir, '', locale);
   
   const results: SearchResult[] = [];
