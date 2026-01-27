@@ -96,15 +96,22 @@ export async function GET(
     const searchParams = request.nextUrl.searchParams;
     const format = searchParams.get('format') || null;
     
+    // Next.js automatically decodes URL parameters, so params.id is already decoded
     // Get avatar details from GitHub storage
     const avatars = await getAvatars();
     const avatar = avatars.find((a: Avatar) => a.id === params.id);
 
     if (!avatar) {
+      // Log for debugging - this helps identify if avatar IDs don't match
+      console.error(`Avatar not found. ID: "${params.id}", Total avatars: ${avatars.length}`);
+      // Log first few avatar IDs for debugging
+      if (avatars.length > 0) {
+        console.error('Sample avatar IDs:', avatars.slice(0, 3).map(a => a.id));
+      }
       return NextResponse.json({ error: 'Avatar not found' }, { status: 404 });
     }
 
-    if (!avatar.modelFileUrl) {
+    if (!avatarToUse.modelFileUrl) {
       return NextResponse.json({ error: 'No model file available' }, { status: 400 });
     }
 

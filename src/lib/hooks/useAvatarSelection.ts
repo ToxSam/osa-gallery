@@ -49,7 +49,9 @@ export function useAvatarSelection() {
       // This preserves the user gesture chain and avoids security warnings
       const format = selectedFormat || null;
       const formatParam = format ? `?format=${format}` : '';
-      const directDownloadUrl = `/api/avatars/${avatarId}/direct-download${formatParam}`;
+      // URL encode the avatar ID in case it contains special characters like slashes
+      const encodedAvatarId = encodeURIComponent(avatarId);
+      const directDownloadUrl = `/api/avatars/${encodedAvatarId}/direct-download${formatParam}`;
       
       // Create a proper download link instead of window.open() to avoid security warnings
       const link = document.createElement('a');

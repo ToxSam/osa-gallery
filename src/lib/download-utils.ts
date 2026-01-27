@@ -112,7 +112,9 @@ export async function downloadAvatar(
   // Always use server-side download API to preserve user gesture chain
   // The server-side API handles IPFS, GitHub, and Arweave URLs correctly
   const formatParam = format ? `?format=${format}` : '';
-  const directDownloadUrl = `/api/avatars/${avatar.id}/direct-download${formatParam}`;
+  // URL encode the avatar ID in case it contains special characters like slashes
+  const encodedAvatarId = encodeURIComponent(avatar.id);
+  const directDownloadUrl = `/api/avatars/${encodedAvatarId}/direct-download${formatParam}`;
   
   // Create a temporary anchor element and click it immediately to preserve user gesture chain
   // This must happen synchronously without any async operations to maintain the gesture chain
